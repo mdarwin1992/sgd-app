@@ -1,0 +1,62 @@
+<?php
+
+namespace App\Http\Controllers\helpers;
+
+use App\Http\Controllers\Controller;
+use App\Models\Entity;
+use App\Models\EntityCounter;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
+class HelpersController extends Controller
+{
+    public static function getEntityCounterValue($entityId)
+    {
+        $counter = EntityCounter::where('entity_id', $entityId)->first();
+        return $counter ? $counter->current_count : 0;
+    }
+
+    public static function listAllCounters()
+    {
+        return EntityCounter::with('entity')->get()->map(function ($counter) {
+            return [
+                'entity_id' => $counter->entity_id,
+                'entity_name' => $counter->entity->name ?? 'Unknown',  // Asumiendo que Entity tiene un campo 'name'
+                'counter_value' => $counter->current_count
+            ];
+        });
+    }
+
+    public static function getLoggedUserEntityName()
+    {
+
+        $user = Auth::user();
+
+        $entityName = Entity::whereHas('departments.offices.user', function ($query) use ($user) {
+            $query->where('users.id', $user->id);
+        })->value('name');
+
+        return $entityName;
+    }
+
+
+    public function showCounter($entityId)
+    {
+        $counterValue = self::getEntityCounterValue($entityId);
+
+        $date = date('Ymd');
+
+        return response()->json([
+            'reference_code' => $date . $counterValue,
+            'system_code' => $counterValue,
+            'entity_id' => $entityId
+        ]);
+    }
+
+    public function listCounters()
+    {
+        $counters = self::listAllCounters();
+        return response()->json($counters);
+    }
+
+}

@@ -16,15 +16,14 @@ class RequestResponse extends Model
     protected $table = 'request_response';
 
     protected $fillable = [
-        'correspondence_transfer_id', 'response_content', 'response_email',
-        'response_document_path', 'response_status'
+        'response_content',
+        'response_email',
+        'response_document_path',
+        'document_id',
     ];
 
-    /**
-     * Obtiene la transferencia de correspondencia asociada a esta respuesta
-     */
-    public function correspondenceTransfer(): BelongsTo
+    public function document()
     {
-        return $this->belongsTo(CorrespondenceTransfer::class);
+        return $this->belongsTo(Document::class);
     }
 }

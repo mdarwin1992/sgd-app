@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Entity;
+use App\Models\Office;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
@@ -40,6 +42,10 @@ class LoginController extends Controller
             $roles = $user->getRoleNames();
             $permissions = $user->getAllPermissions()->pluck('name');
 
+            $office = Office::where('user_id', $user->id)->first(['id']);  // Busca la oficina por el ID de usuario
+
+            $officeId = $office ? $office->id : null;
+
             // Return a successful response with the token and user attributes
             return response()->json([
                 'message' => 'Login successful',
@@ -47,9 +53,12 @@ class LoginController extends Controller
                 'token_type' => 'Bearer',
                 'roles' => $roles,
                 'permissions' => $permissions,
+                'entity_id' => $user->entity_id,
+                'user_office_id' => $officeId,
                 'attributes' => $this->getUserAttributes($user), // Call function to get user attributes
             ]);
         }
+
 
         // Increment the attempt counter if authentication fails
         RateLimiter::hit($rateLimiterKey);

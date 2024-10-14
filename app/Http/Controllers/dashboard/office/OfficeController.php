@@ -16,7 +16,7 @@ class OfficeController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {
@@ -32,7 +32,7 @@ class OfficeController extends Controller
      * Store a newly created resource in storage.
      *
      * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(OfficeRequest $request)
     {
@@ -80,7 +80,7 @@ class OfficeController extends Controller
      * Display the specified resource.
      *
      * @param int $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function show($id)
     {
@@ -96,11 +96,46 @@ class OfficeController extends Controller
     }
 
     /**
+     * Display the specified resource.
+     *
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function department($id)
+    {
+        //
+        $office = Office::with(['department', 'user'])
+            ->whereHas('department', function ($query) use ($id) {
+                $query->where('id', $id);
+            })->get();
+        if (!$office) {
+            return response()->json(['message' => 'Office not found'], 404);
+        }
+        return response()->json([
+            'data' => $office,
+            'message' => 'offices successfully recovered'
+        ]);
+    }
+
+    public function officeManager($id)
+    {
+        $manager = Office::with(['department', 'user:id,name,email,phone'])->find($id);
+
+        if (!$manager) {
+            return response()->json(['message' => 'Office not found'], 404);
+        }
+        return response()->json([
+            'data' => $manager,
+            'message' => 'offices successfully recovered'
+        ]);
+    }
+
+    /**
      * Update the specified resource in storage.
      *
      * @param \Illuminate\Http\Request $request
      * @param int $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function update(Request $request, $id)
     {
@@ -154,7 +189,7 @@ class OfficeController extends Controller
      * Remove the specified resource from storage.
      *
      * @param int $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($id)
     {

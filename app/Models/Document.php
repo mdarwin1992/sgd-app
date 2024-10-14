@@ -16,28 +16,29 @@ class Document extends Model
     protected $table = 'document';
 
     protected $fillable = [
-        'reference_code', 'system_code', 'received_date', 'origin', 'sender_name',
-        'subject', 'has_attachments', 'page_count', 'file_path', 'transfer_status'
+        'reference_code',
+        'system_code',
+        'received_date',
+        'origin',
+        'sender_name',
+        'subject',
+        'has_attachments',
+        'page_count',
+        'file_path',
     ];
 
     protected $casts = [
-        'received_date' => 'date',
-        'has_attachments' => 'string',
+        'received_date' => 'datetime',
+        'has_attachments' => 'boolean',
     ];
 
-    /**
-     * Obtiene los registros de actividad asociados a este documento
-     */
-    public function documentLogs(): HasMany
+    public function reception()
     {
-        return $this->hasMany(DocumentLog::class);
+        return $this->hasOne(Reception::class);
     }
 
-    /**
-     * Obtiene las recepciones asociadas a este documento
-     */
-    public function reception(): HasMany
+    public function documentStatus()
     {
-        return $this->hasMany(Reception::class);
+        return $this->hasOne(DocumentStatus::class);
     }
 }

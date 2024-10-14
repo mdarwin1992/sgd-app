@@ -4,10 +4,10 @@ namespace App\Http\Controllers\dashboard\reception;
 
 use App\Helpers\DatabaseErrorHandler;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\department\DepartmentRequest;
 use App\Http\Requests\document\DocumentRequest;
 use App\Models\Document;
 use App\Models\DocumentLog;
+use App\Models\DocumentStatus;
 use App\Models\Reception;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
@@ -26,11 +26,14 @@ class ReceptionController extends Controller
     {
 
         // Obtener todos los registros de la tabla 'Entity' y ordenarlos por la fecha de creación
-        $document = Reception::with('document')->get();
+        $document = Document::whereHas('documentStatus', function ($query) {
+            $query->where('status', 'RECIBIDA');
+        })->with(['reception', 'documentStatus'])->get();
+
 
         // Retornar una respuesta JSON con los datos obtenidos y un mensaje de éxito
         return response()->json([
-            'document' => $document,
+            'data' => $document,
             'message' => 'Entity successfully recovered'
         ]);
     }
@@ -39,7 +42,7 @@ class ReceptionController extends Controller
      * Store a newly created resource in storage.
      *
      * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(DocumentRequest $request)
     {
@@ -49,8 +52,7 @@ class ReceptionController extends Controller
 
             // Crear un nuevo registro en la tabla 'Document' con los datos enviados en la solicitud
             $document = Document::create($request->only([
-                'reference_code', 'system_code', 'received_date', 'origin', 'sender_name',
-                'subject', 'has_attachments', 'page_count', 'file_path', 'transfer_status'
+                'reference_code', 'system_code', 'received_date', 'origin', 'sender_name', 'subject', 'has_attachments', 'page_count', 'file_path',
             ]));
 
             $documentLog = DocumentLog::create([
@@ -63,6 +65,14 @@ class ReceptionController extends Controller
                 'document_id' => $document->id,
             ]);
 
+            $DocumentStatus = DocumentStatus::create([
+                'document_id' => $document->id,
+                'status' => 'RECIBIDA',
+            ]);
+
+            $currentCount = DB::table('entity_counters')
+                ->where('entity_id', '=', $request->entity_id)
+                ->increment('current_count', 1); // Esto ya devuelve el nuevo valor del contador
 
             // Confirmar la transacción de la base de datos
             DB::commit();
@@ -103,7 +113,8 @@ class ReceptionController extends Controller
     {
         //
         // Buscar el registro de 'Document' por su ID
-        $document = Document::find($id);
+        $document = Document::with(['reception:id,document_id,created_at', 'documentStatus:id,document_id,status'])
+            ->findOrFail($id);
 
         // Verificar si el registro no existe y retornar un mensaje de error si es el caso
         if (!$document) {

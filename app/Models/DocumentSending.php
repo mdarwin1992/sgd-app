@@ -16,7 +16,7 @@ class DocumentSending extends Model
     protected $table = 'document_sending';
     protected $fillable = [
         'send_date', 'subject', 'sender', 'recipient', 'page_count',
-        'department_id', 'document_path'
+        'department_id', 'office_id', 'document_path'
     ];
 
     protected $casts = [

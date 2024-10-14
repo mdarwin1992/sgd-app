@@ -14,26 +14,19 @@ class DocumentLog extends Model
     use HasFactory;
 
     protected $table = 'document_log';
+
     protected $fillable = [
-        'document_id', 'action_type', 'user_id'
+        'document_id',
+        'action_type',
+        'user_id',
     ];
 
-    protected $casts = [
-        'action_type' => 'string',
-    ];
-
-    /**
-     * Obtiene el documento asociado a este registro
-     */
-    public function document(): BelongsTo
+    public function document()
     {
         return $this->belongsTo(Document::class);
     }
 
-    /**
-     * Obtiene el usuario que realizó la acción
-     */
-    public function user(): BelongsTo
+    public function user()
     {
         return $this->belongsTo(User::class);
     }

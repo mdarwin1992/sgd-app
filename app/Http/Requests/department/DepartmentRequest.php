@@ -27,7 +27,6 @@ class DepartmentRequest extends FormRequest
             'code' => 'required|string|max:50|unique:department,code,' . $this->route('department'),
             'name' => 'required|string|max:100',
             'entity_id' => 'required',
-            'status' => 'required|in:ACTIVO,INACTIVO',
         ];
     }
 

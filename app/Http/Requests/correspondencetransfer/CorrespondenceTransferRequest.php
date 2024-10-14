@@ -29,8 +29,7 @@ class CorrespondenceTransferRequest extends FormRequest
             'response_time' => 'required|string|max:10',
             'response_deadline' => 'required|date',
             'job_type' => 'required|string',
-            'reception_id' => 'required|exists:reception,id',
-            'response_status' => 'nullable|string|max:30',
+            'document_id' => 'required|exists:document,id',
         ];
     }
 
@@ -47,8 +46,7 @@ class CorrespondenceTransferRequest extends FormRequest
             'response_time' => 'tiempo de respuesta',
             'response_deadline' => 'fecha límite de respuesta',
             'job_type' => 'tipo de trabajo',
-            'reception_id' => 'recepción',
-            'response_status' => 'estado de respuesta',
+            'document_id' => 'documento',
         ];
     }
 }

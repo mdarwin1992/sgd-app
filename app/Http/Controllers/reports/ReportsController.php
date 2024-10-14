@@ -3,39 +3,123 @@
 namespace App\Http\Controllers\reports;
 
 use App\Http\Controllers\Controller;
-use Barryvdh\DomPDF\Facade\Pdf;
-use chillerlan\QRCode\QRCode;
-use chillerlan\QRCode\QROptions;
+use App\Models\Document;
+use App\Models\DocumentStatus;
+use App\Models\CorrespondenceTransfer;
+use App\Models\Entity;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class ReportsController extends Controller
 {
-    //
-    public function generatePDF()
+    public function documentStatusChart()
     {
+        $statuses = DocumentStatus::select('status', DB::raw('count(*) as total'))
+            ->groupBy('status')
+            ->get();
 
-        $options = new QROptions([
-            'version' => 10,
-            'outputType' => QRCode::OUTPUT_IMAGE_JPG,
-            'eccLevel' => QRCode::ECC_H,
-            'scale' => 3,
-            'imageBase64' => true,
-            'drawCircularModules' => true,
-            'circleRadius' => 0.45,
+        $labels = $statuses->pluck('status');
+        $data = $statuses->pluck('total');
+
+        return response()->json([
+            'labels' => $labels,
+            'datasets' => [
+                [
+                    'data' => $data,
+                    'backgroundColor' => ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
+                ]
+            ]
         ]);
+    }
 
-        $data = [
-            'QR' => (new QRCode($options))->render('/darboar'),
-        ];
+    public function documentsByEntityBarChart()
+    {
+        $documents = Document::select('entity.name as entity_name', DB::raw('count(*) as total'))
+            ->join('entity', 'document.entity_id', '=', 'entity.id')
+            ->groupBy('entity.id', 'entity.name')
+            ->get();
 
-        $pdf = PDF::loadView('reports.ticket.ticket', $data);
+        $labels = $documents->pluck('entity_name');
+        $data = $documents->pluck('total');
 
-        // Configurar el tamaño del papel
-        $pdf->setPaper([0, 0, 320, 260.59], 'portrait');
+        return response()->json([
+            'labels' => $labels,
+            'datasets' => [
+                [
+                    'label' => 'Documents per Entity',
+                    'data' => $data,
+                    'backgroundColor' => '#36A2EB',
+                ]
+            ]
+        ]);
+    }
 
-        // 226.77 es el equivalente a 80mm en puntos (1 pulgada = 72 puntos)
-        // 1000 es una altura arbitraria, puedes ajustarla según tus necesidades
+    public function documentProcessTimeline()
+    {
+        $processes = CorrespondenceTransfer::select(
+            'document_id',
+            'transfer_datetime as start',
+            DB::raw('DATE_ADD(transfer_datetime, INTERVAL response_time DAY) as end'),
+            'job_type as title'
+        )->get();
 
-        return $pdf->stream('ticket.pdf');
+        return response()->json($processes);
+    }
+
+    public function generateReport(Request $request)
+    {
+        $reportType = $request->input('report_type');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
+        switch ($reportType) {
+            case 'document_flow':
+                return $this->documentFlowReport($startDate, $endDate);
+            case 'response_times':
+                return $this->responseTimesReport($startDate, $endDate);
+            case 'entity_activity':
+                return $this->entityActivityReport($startDate, $endDate);
+            default:
+                return response()->json(['error' => 'Invalid report type'], 400);
+        }
+    }
+
+    private function documentFlowReport($startDate, $endDate)
+    {
+        $flow = DocumentStatus::select('status', DB::raw('count(*) as total'))
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->groupBy('status')
+            ->get();
+
+        return response()->json($flow);
+    }
+
+    private function responseTimesReport($startDate, $endDate)
+    {
+        $responseTimes = CorrespondenceTransfer::select(
+            'office.name as office_name',
+            DB::raw('AVG(DATEDIFF(response_deadline, transfer_datetime)) as avg_response_time')
+        )
+            ->join('office', 'correspondence_transfer.office_id', '=', 'office.id')
+            ->whereBetween('transfer_datetime', [$startDate, $endDate])
+            ->groupBy('office.id', 'office.name')
+            ->get();
+
+        return response()->json($responseTimes);
+    }
+
+    private function entityActivityReport($startDate, $endDate)
+    {
+        $activity = Entity::select(
+            'entity.name as entity_name',
+            DB::raw('count(document.id) as document_count')
+        )
+            ->leftJoin('document', 'entity.id', '=', 'document.entity_id')
+            ->whereBetween('document.created_at', [$startDate, $endDate])
+            ->groupBy('entity.id', 'entity.name')
+            ->get();
+
+        return response()->json($activity);
     }
 }

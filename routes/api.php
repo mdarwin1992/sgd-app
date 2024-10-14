@@ -6,9 +6,13 @@ use App\Http\Controllers\dashboard\correspondencetransfer\CorrespondenceTransfer
 use App\Http\Controllers\dashboard\department\DepartmentController;
 use App\Http\Controllers\dashboard\documentsending\DocumentSendingController;
 use App\Http\Controllers\dashboard\entity\EntityController;
+use App\Http\Controllers\dashboard\mailbox\MailboxController;
 use App\Http\Controllers\dashboard\office\OfficeController;
 use App\Http\Controllers\dashboard\reception\ReceptionController;
-use App\Http\Controllers\dashboard\requestresponse\RequestResponseController;
+use App\Http\Controllers\dashboard\report\ReportController;
+use App\Http\Controllers\dashboard\user\UserController;
+use App\Http\Controllers\helpers\FilesController;
+use App\Http\Controllers\helpers\HelpersController;
 use App\Http\Controllers\reports\ReportsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -30,7 +34,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::post('authenticate/register', [RegisterController::class, 'store']);
 Route::post('authenticate/login', [LoginController::class, 'login']);
-Route::get('/generate-ticket', [ReportsController::class, 'generatePDF']);
+
+Route::get('dashboard/qr/{id}/{iten}', [ReportsController::class, 'generateQrCode']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('authenticate/logout', [LoginController::class, 'logout']);
@@ -50,8 +55,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('dashboard/offices', [OfficeController::class, 'index'])->name('api.offices.index');
     Route::post('dashboard/office/store', [OfficeController::class, 'store'])->name('api.office.store');
     Route::get('dashboard/office/show/{id}', [OfficeController::class, 'show'])->name('api.office.show');
+    Route::get('dashboard/departments/{id}/offices', [OfficeController::class, 'department'])->name('api.office.department');
+    Route::get('dashboard/office/manager/{id}', [OfficeController::class, 'officeManager'])->name('api.office.manager');
     Route::patch('dashboard/office/update/{id}', [OfficeController::class, 'update'])->name('api.office.update');
     Route::delete('dashboard/office/destroy/{id}', [OfficeController::class, 'destroy'])->name('api.office.destroy');
+
+    Route::get('dashboard/users', [UserController::class, 'index'])->name('api.users.index');
+    Route::get('dashboard/users/list', [UserController::class, 'list'])->name('api.users.list');
 
 
     Route::get('dashboard/reception', [ReceptionController::class, 'index'])->name('api.reception.index');
@@ -66,11 +76,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('dashboard/correspondence-transfer/update/{id}', [CorrespondenceTransferController::class, 'update'])->name('api.correspondence.transfer.update');
     Route::delete('dashboard/correspondence-transfer/destroy/{id}', [CorrespondenceTransferController::class, 'destroy'])->name('api.correspondence.transfer.destroy');
 
-    Route::get('dashboard/request-response', [RequestResponseController::class, 'index'])->name('api.request.response.index');
-    Route::post('dashboard/request-response/store', [RequestResponseController::class, 'store'])->name('api.request.response.store');
-    Route::get('dashboard/request-response/show/{id}', [RequestResponseController::class, 'show'])->name('api.request.response.show');
-    Route::patch('dashboard/request-response/update/{id}', [RequestResponseController::class, 'update'])->name('api.request.response.update');
-    Route::delete('dashboard/request-response/destroy/{id}', [RequestResponseController::class, 'destroy'])->name('api.request.response.destroy');
+    Route::get('/dashboard/correspondence-transfer/office', [CorrespondenceTransferController::class, 'getCorrespondenceTransfer']);
+    Route::get('/dashboard/mailbox/office', [MailboxController::class, 'getMailbox']);
+
+    Route::get('dashboard/mailbox', [MailboxController::class, 'index'])->name('api.mailbox.index');
+    Route::post('dashboard/mailbox/store', [MailboxController::class, 'store'])->name('api.mailbox.store');
+    Route::get('dashboard/mailbox/show/{id}', [MailboxController::class, 'show'])->name('api.mailbox.show');
+    Route::patch('dashboard/mailbox/update/{id}', [MailboxController::class, 'update'])->name('api.mailbox.update');
+    Route::delete('dashboard/mailbox/destroy/{id}', [MailboxController::class, 'destroy'])->name('api.mailbox.destroy');
 
     Route::get('dashboard/document-sendings', [DocumentSendingController::class, 'index'])->name('api.document.sendings.index');
     Route::post('dashboard/document-sendings/store', [DocumentSendingController::class, 'store'])->name('api.document.sendings.index');
@@ -78,4 +91,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('dashboard/document-sendings/update/{id}', [DocumentSendingController::class, 'update'])->name('api.document.sendings.index');
     Route::delete('dashboard/document-sendings/destroy/{id}', [DocumentSendingController::class, 'destroy'])->name('api.document.sendings.index');
 
+
 });
+Route::post('/dashboard/upload', [FilesController::class, 'upload'])->name('files.upload');
+Route::post('/dashboard/response/upload', [FilesController::class, 'responseFile'])->name('files.upload');
+
+Route::get('/entity/{entityId}/counter', [HelpersController::class, 'showCounter']);
+Route::get('/entity/counters', [HelpersController::class, 'listCounters']);
+
+

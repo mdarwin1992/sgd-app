@@ -4,6 +4,7 @@ namespace App\Http\Controllers\dashboard\correspondencetransfer;
 
 use App\Helpers\DatabaseErrorHandler;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\helpers\HelpersController;
 use App\Http\Requests\correspondencetransfer\CorrespondenceTransferRequest;
 use App\Mail\DocumentLinkMail;
 use App\Models\CorrespondenceTransfer;
@@ -14,8 +15,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Http;
-use Twilio\Rest\Client;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
 
 class CorrespondenceTransferController extends Controller
 {
@@ -28,13 +29,42 @@ class CorrespondenceTransferController extends Controller
     {
         //
         // Obtener todos los registros de la tabla 'Entity' y ordenarlos por la fecha de creación
-        $transfer = $transfers = CorrespondenceTransfer::with([
+        $transfer = CorrespondenceTransfer::with([
             'office',
-            'reception.document',
-            'office.user'
+            'office.user',
+            'document',
+            'document.documentStatus' => function ($query) {
+                $query->where('status', 'PROCESANDO');
+            }
         ])->get();
 
+
         // Retornar una respuesta JSON con los datos obtenidos y un mensaje de éxito
+        return response()->json([
+            'data' => $transfer,
+            'message' => 'Correspondence transfer successfully recovered'
+        ]);
+    }
+
+    public function getCorrespondenceTransfer(Request $request)
+    {
+
+        $officeId = $request->input('office_id') ?? null;
+
+        if (is_null($officeId)) {
+            $transfer = DB::table('document')
+                ->join('correspondence_transfer', 'document.id', '=', 'correspondence_transfer.document_id')
+                ->join('office', 'correspondence_transfer.office_id', '=', 'office.id')
+                ->join('document_status', 'document.id', '=', 'document_status.document_id')
+                ->where('document_status.status', '=', 'PROCESANDO')->get();
+        } else {
+            $transfer = DB::table('document')
+                ->join('correspondence_transfer', 'document.id', '=', 'correspondence_transfer.document_id')
+                ->join('office', 'correspondence_transfer.office_id', '=', 'office.id')
+                ->join('document_status', 'document.id', '=', 'document_status.document_id')
+                ->where([['document_status.status', '=', 'PROCESANDO'], ['office_id', '=', $officeId]])->get();
+        }
+
         return response()->json([
             'data' => $transfer,
             'message' => 'Correspondence transfer successfully recovered'
@@ -55,8 +85,12 @@ class CorrespondenceTransferController extends Controller
 
             // Crear un nuevo registro en la tabla 'Correspondence Transfer' con los datos enviados en la solicitud
             $transfer = CorrespondenceTransfer::create($request->only([
-                'transfer_datetime', 'office_id', 'response_time', 'response_deadline',
-                'job_type', 'reception_id'
+                'transfer_datetime',
+                'office_id',
+                'response_time',
+                'response_deadline',
+                'job_type',
+                'document_id',
             ]));
 
             $documentLog = DocumentLog::create([
@@ -65,17 +99,38 @@ class CorrespondenceTransferController extends Controller
                 'user_id' => Auth::id()
             ]);
 
-            // Obtener el enlace del documento, correo electrónico y número de WhatsApp del request
-            $documentLink = $request->input('document_link');
-            $recipientEmail = $request->input('recipient_email');
+            // Obtener los parámetros necesarios del request
+            $id = $request->input('path');
+            $item = $request->input('file_path');
+            $recipientEmail = $request->input('email');
+            $recipientName = $request->input('name'); // Nuevo campo para el nombre del destinatario
+            $companyName = HelpersController::getLoggedUserEntityName(); // Asumiendo que el nombre de la empresa está en la configuración
 
-            // Validar que el enlace del documento, el correo electrónico y el número de WhatsApp estén presentes
-            if (empty($documentLink) || empty($recipientEmail)) {
-                throw new \InvalidArgumentException('El enlace del documento, el correo electrónico y el número de WhatsApp son requeridos.');
+            // Validar que todos los parámetros necesarios estén presentes
+            if (empty($id) || empty($item) || empty($recipientEmail) || empty($recipientName)) {
+                throw new \InvalidArgumentException('El id, item, correo electrónico y nombre del destinatario son requeridos.');
             }
 
-            Mail::to($recipientEmail)->send(new DocumentLinkMail($documentLink));
+            // Generar una URL firmada para el documento
+            $documentLink = URL::signedRoute(
+                'dashboard.show-file',
+                ['id' => $id, 'item' => $item]
+            );
 
+            // Registrar la URL generada
+            Log::info('URL del documento generada:', ['url' => $documentLink]);
+
+            // Generar una contraseña aleatoria
+            $password = $id;
+
+            // Enviar el correo electrónico con la nueva clase DocumentLinkMail
+            Mail::to($recipientEmail)->send(new DocumentLinkMail($documentLink, $password, $companyName, $recipientName));
+
+            $documentStatus = DB::table('document_status')
+                ->where('document_id', $request->input('document_id'))
+                ->update([
+                    'status' => 'PROCESANDO',
+                ]);
 
             // Confirmar la transacción de la base de datos
             DB::commit();
@@ -83,7 +138,7 @@ class CorrespondenceTransferController extends Controller
             // Retornar una respuesta JSON con los datos del nuevo registro y un mensaje de éxito
             return response()->json([
                 'data' => $transfer,
-                'message' => 'Correspondence transfer created successfully. Document link sent by email and WhatsApp.'
+                'message' => 'Transferencia de correspondencia creada exitosamente. Enlace del documento enviado por correo electrónico.'
             ], 200);
 
         } catch (\InvalidArgumentException $e) {
@@ -100,7 +155,7 @@ class CorrespondenceTransferController extends Controller
             DB::rollBack();
 
             // Manejar el error utilizando un manejador personalizado y retornar una respuesta JSON
-            return DatabaseErrorHandler::handleException($e, 'Entity', ['attributes' => $request->all()]);
+            return DatabaseErrorHandler::handleException($e, 'CorrespondenceTransfer', ['attributes' => $request->all()]);
 
         } catch (\Exception $e) {
             // Revertir la transacción en caso de cualquier otro error
@@ -128,8 +183,9 @@ class CorrespondenceTransferController extends Controller
         // Buscar el registro de 'Entity' por su ID
         $transfer = CorrespondenceTransfer::with([
             'office',
-            'reception.document',
-            'office.user'
+            'office.user',
+            'document',
+            'document.documentStatus'
         ])->findOrFail($id);
 
         // Verificar si el registro no existe y retornar un mensaje de error si es el caso

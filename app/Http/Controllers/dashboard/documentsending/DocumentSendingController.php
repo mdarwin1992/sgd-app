@@ -4,12 +4,15 @@ namespace App\Http\Controllers\dashboard\documentsending;
 
 use App\Helpers\DatabaseErrorHandler;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\helpers\HelpersController;
 use App\Http\Requests\documentsending\DocumentSendingRequest;
+use App\Mail\DocumentSendingMail;
 use App\Models\DocumentSending;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class DocumentSendingController extends Controller
 {
@@ -41,40 +44,45 @@ class DocumentSendingController extends Controller
      */
     public function store(DocumentSendingRequest $request)
     {
-        //
         try {
-            // Iniciar una transacción de base de datos
             DB::beginTransaction();
 
-            // Crear un nuevo registro en la tabla 'Document Sending' con los datos enviados en la solicitud
             $documentsending = DocumentSending::create($request->only([
                 'send_date', 'subject', 'sender', 'recipient', 'page_count',
-                'department_id', 'document_path'
+                'department_id', 'office_id', 'document_path'
             ]));
 
-            // Confirmar la transacción de la base de datos
+            try {
+                // Obtener el nombre de la empresa (ajusta esto según cómo almacenas el nombre de la empresa)
+                $companyName = HelpersController::getLoggedUserEntityName();
+
+                // Enviar correo electrónico
+                Mail::to($documentsending->recipient)->send(new DocumentSendingMail(
+                    $documentsending->subject,
+                    $documentsending->sender,
+                    $documentsending->recipient,
+                    $documentsending->page_count,
+                    $documentsending->document_path,
+                    $companyName
+                ));
+            } catch (\Exception $mailException) {
+                // Registrar el error específico del correo
+                Log::error('Error al enviar el correo: ' . $mailException->getMessage());
+            }
+
             DB::commit();
 
-            // Retornar una respuesta JSON con los datos del nuevo registro y un mensaje de éxito
             return response()->json([
                 'data' => $documentsending,
-                'message' => 'Document sending successfully'
+                'message' => 'Document sending successfully' . (isset($mailException) ? ' but email could not be sent' : ' and email sent')
             ], 200);
 
         } catch (QueryException $e) {
-            // Revertir la transacción en caso de error en la consulta SQL
             DB::rollBack();
-
-            // Manejar el error utilizando un manejador personalizado y retornar una respuesta JSON
             return DatabaseErrorHandler::handleException($e, 'DocumentSending', ['attributes' => $request->all()]);
         } catch (\Exception $e) {
-            // Revertir la transacción en caso de cualquier otro error
             DB::rollBack();
-
-            // Registrar el error en los logs
-            Log::error('Error inesperado al crear negocio: ' . $e->getMessage());
-
-            // Retornar una respuesta JSON con un mensaje de error general
+            Log::error('Error inesperado al crear documento: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Error inesperado. Contacte al administrador.'
             ], 500);
@@ -130,7 +138,7 @@ class DocumentSendingController extends Controller
             // Actualizar el registro con los datos enviados en la solicitud
             $documentsending->update($request->only([
                 'send_date', 'subject', 'sender', 'recipient', 'page_count',
-                'department_id', 'document_path'
+                'department_id', 'office_id', 'document_path'
             ]));
 
             // Confirmar la transacción de la base de datos
