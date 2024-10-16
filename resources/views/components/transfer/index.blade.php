@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Transferir Correspondencia')
+@section('title', 'Transferencias')
 
 @section('content')
     <div class="dashboard">
@@ -56,50 +56,50 @@
 
         const TransferListComponent = HTTPService.createComponent({
             data: () => ({
+                documents: [],
                 dataTable: null,
             }),
 
             methods: {
+                async fetchDocuments() {
+                    try {
+                        const token = localStorage.getItem('token');
+                        if (!token) {
+                            console.error('Token de autenticación no encontrado.');
+                            return;
+                        }
+
+                        const response = await fetch('/api/dashboard/reception', {
+                            method: 'GET',
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json',
+                            },
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+
+                        const data = await response.json();
+                        this.documents = data.data || [];
+                        this.initDataTable();
+                    } catch (error) {
+                        console.error('Error al obtener documentos:', error);
+                    }
+                },
+
                 initDataTable() {
                     if (this.dataTable) {
                         this.dataTable.destroy();
                     }
 
-                    const token = localStorage.getItem('token');
-                    if (!token) {
-                        console.error('Token de autenticación no encontrado.');
-                        return;
-                    }
-
                     this.dataTable = $('#example').DataTable({
-                        autoWidth: false,
-                        ajax: {
-                            url: '/api/dashboard/reception',
-                            type: 'GET',
-                            dataType: 'json',
-                            dataSrc: function (json) {
-                                console.log(json.data);
-                                return json.data || [];
-                            },
-                            beforeSend: function (xhr) {
-                                xhr.setRequestHeader('Authorization', "Bearer " + token);
-                            },
-                            error: function (xhr, status, error) {
-                                if (xhr.status === 401) {
-                                    console.error('No autorizado. El token puede haber expirado o ser inválido.');
-                                } else {
-                                    console.error('Error en la solicitud:', error);
-                                }
-                            }
-                        },
+                        data: this.documents,
                         columns: [
                             {
                                 data: "document_status.status",
-                                render: function (data, type, row) {
-                                    return type === "display" ?
-                                        `<span class="badge bg-primary">${data}</span>`
-                                        : data;
-                                },
+                                render: (data) => `<span class="badge bg-primary">${data}</span>`
                             },
                             {data: 'reference_code'},
                             {data: 'subject'},
@@ -107,18 +107,18 @@
                             {data: 'sender_name'},
                             {
                                 data: null,
-                                render: function (data, type, row) {
-                                    return `
+                                render: (data) => `
                             <div class="table-action">
-                                <a href="javascript:void(0);" class="action-icon"> <i class="uil-file-redo-alt"></i></a>
-                                <a href="javascript:void(0);" class="action-icon"> <i class="uil uil-comment-alt-lines font-18"></i></a>
-                            </div>`;
-                                }
+                                <a  role="button" class="action-icon export-btn" data-id="${data.id}">
+                                    <i class="fas fa-file-export"></i>
+                                </a>
+                                <a role="button" class="action-icon view-btn" data-id="${data.id}">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </div>`
                             }
                         ],
-                        rowId: "id",
                         responsive: true,
-                        select: true,
                         language: {
                             sProcessing: "Procesando...",
                             sLengthMenu: "Mostrar _MENU_ registros",
@@ -139,41 +139,52 @@
                                 sSortAscending: ": Activar para ordenar la columna de manera ascendente",
                                 sSortDescending: ": Activar para ordenar la columna de manera descendente",
                             },
+                        },
+                    });
+
+                    this.handleTableEvents();
+                },
+
+                handleTableEvents() {
+                    $('#example').on('click', '.export-btn', (event) => {
+                        const documentId = $(event.currentTarget).data('id');
+                        const document = this.documents.find(doc => doc.id === documentId);
+                        if (document) {
+                            this.exportDocument(document);
+                            window.location.href = `/dashboard/transferir-correspondencias/${documentId}`;
+                        } else {
+                            console.error('Documento no encontrado:', documentId);
+                        }
+                    });
+
+                    $('#example').on('click', '.view-btn', (event) => {
+                        const documentId = $(event.currentTarget).data('id');
+                        const document = this.documents.find(doc => doc.id === documentId);
+                        if (document) {
+                            this.viewDocument(document);
+                        } else {
+                            console.error('Documento no encontrado:', documentId);
                         }
                     });
                 },
 
-                handleTableEvents() {
-                    $('#example').on('click', '.action-icon', (event) => {
-                        event.preventDefault();
-                        const $icon = $(event.currentTarget).find('i');
-                        const action = $icon.hasClass('uil-comment-alt-lines') ? 'comment' : 'edit';
-                        const rowData = this.dataTable.row($(event.currentTarget).closest('tr')).data();
+                exportDocument(document) {
+                    console.log('Exportando documento:', document.reference_code);
+                    // Implementa la lógica de exportación aquí
+                },
 
-                        switch (action) {
-                            case 'comment':
-                                console.log('Abrir comentarios para:', rowData.id);
-                                // Implement logic for opening comments modal
-                                break;
-                            case 'edit':
-                                window.location.href = `/dashboard/transferir-correspondencias/${rowData.id}`;
-                                break;
-                        }
-                    });
+                viewDocument(document) {
+                    console.log('Viendo documento:', document.reference_code);
+                    // Implementa la lógica de visualización aquí
                 }
             },
 
-            elements: {
-                businessTable: '#example',
-            },
-
             created() {
-                // DataTables will handle data fetching
+                this.fetchDocuments();
             },
 
             render() {
-                this.initDataTable();
-                this.handleTableEvents();
+                // La tabla se inicializa en fetchDocuments() -> initDataTable()
             }
         });
 
@@ -181,6 +192,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             TransferListComponent.init();
         });
+
 
     </script>
 @endsection

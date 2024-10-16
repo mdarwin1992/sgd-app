@@ -39,6 +39,14 @@ class HelpersController extends Controller
         return $entityName;
     }
 
+    public static function getEntityData($entityId)
+    {
+
+        $entity = Entity::where('id', $entityId)->first();
+
+        return $entity;
+    }
+
 
     public function showCounter($entityId)
     {

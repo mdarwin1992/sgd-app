@@ -86,10 +86,9 @@ Route::get('/dashboard/ticket/qr/{id}/{iten}', function () {
     return view('viewer.qr');
 });
 
-Route::get('/dashboard/reports', function () {
-    return view('reports.index');
+Route::get('/dashboard/reportes', function () {
+    return view('reports.reports.index');
 });
-
 
 
 Route::get('/dashboard/show-file/{id}/{item}', function ($id, $item) {

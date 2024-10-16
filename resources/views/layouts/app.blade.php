@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta content="A fully featured admin theme which can be used to build CRM, CMS, etc." name="description"/>
     <meta content="Coderthemes" name="author"/>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <link rel="shortcut icon" href="{{ asset ('assets/images/favicon.ico')}}">
 
@@ -19,6 +20,12 @@
 
     <!-- Icons css -->
     <link href="{{ asset ('assets/css/icons.min.css')}}" rel="stylesheet" type="text/css"/>
+
+    <!-- Datatables css -->
+    <link href="{{ asset ('assets/vendor/datatables.net-bs5/css/dataTables.bootstrap5.min.css')}}" rel="stylesheet"
+          type="text/css"/>
+    <link href="{{ asset ('assets/vendor/datatables.net-responsive-bs5/css/responsive.bootstrap5.min.css')}}"
+          rel="stylesheet" type="text/css"/>
 
     <!-- SimpleMDE css -->
     <style>
@@ -112,12 +119,21 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.css">
-<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
+
+<!-- Datatables js -->
+<script src="{{asset('assets/vendor/datatables.net/js/jquery.dataTables.min.js')}}"></script>
+<script src="{{asset('assets/vendor/datatables.net-bs5/js/dataTables.bootstrap5.min.js')}}"></script>
+<script src="{{asset('assets/vendor/datatables.net-responsive/js/dataTables.responsive.min.js')}}"></script>
+<script src="{{asset('assets/vendor/datatables.net-responsive-bs5/js/responsive.bootstrap5.min.js')}}"></script>
 
 <!-- JS Libraies -->
 <script src="{{asset('assets/vendor/jquery-validation/dist/jquery.validate.min.js')}}"></script>
 <script src="{{asset('assets/vendor/jquery-validation/dist/additional-methods.min.js')}}"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/locales/es.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.css" rel="stylesheet">
 
 <script type="module" src="{{ asset ('services/RouterSif/RouteService.js')}}"></script>
 @yield('scripts')

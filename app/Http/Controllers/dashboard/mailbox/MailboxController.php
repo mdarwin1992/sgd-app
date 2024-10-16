@@ -48,9 +48,11 @@ class MailboxController extends Controller
 
     public function getMailbox(Request $request)
     {
-        $officeId = $request->input('office_id') ?? null;
+        $user = Auth::user();
+        $roles = $user->getRoleNames(); // Devuelve una colección de roles
 
-        if (is_null($officeId)) {
+
+        if ($roles[0] == 'EMPRESA') {
 
             $requestResponses = DB::table('document')
                 ->join('correspondence_transfer', 'document.id', '=', 'correspondence_transfer.document_id')
@@ -59,12 +61,12 @@ class MailboxController extends Controller
                 ->where('document_status.status', '=', 'CONTESTADO')->get();
 
         } else {
+            $officeId = $request->input('office_id');
             $requestResponses = DB::table('document')
                 ->join('correspondence_transfer', 'document.id', '=', 'correspondence_transfer.document_id')
                 ->join('office', 'correspondence_transfer.office_id', '=', 'office.id')
                 ->join('document_status', 'document.id', '=', 'document_status.document_id')
                 ->where([['document_status.status', '=', 'CONTESTADO'], ['office_id', '=', $officeId]])->get();
-
         }
         return response()->json([
             'data' => $requestResponses,

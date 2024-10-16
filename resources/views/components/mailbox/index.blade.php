@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Buzon de Correspondencia')
+@section('title', 'Buzon de solicitudes')
 
 @section('content')
     <div class="dashboard">
@@ -155,7 +155,7 @@
                         },
                         columns: [
                             {
-                                data: "document.document_status.status",
+                                data: "status",
                                 render: function (data, type, row) {
                                     return type === "display" ?
                                         `<span class="badge bg-success">CONTESTADO</span>`

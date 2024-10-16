@@ -6,7 +6,7 @@ export const routes = [// Ruta para mostrar archivo con visor
     },
     // Ruta para visualizar ticket con visor
     {
-        path: '/dashboard/reports', component: 'reports.index', name: 'Visor del documento', meta: {
+        path: '/dashboard/reportes', component: 'reports.index', name: 'Visor del documento', meta: {
             requiresAuth: false
         }
     },

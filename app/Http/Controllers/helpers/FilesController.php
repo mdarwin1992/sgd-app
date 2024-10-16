@@ -32,10 +32,14 @@ class FilesController extends Controller
             $path = 'public/upload/' . $dir;
             $filePath = Storage::putFileAs($path, $file, $filename);
 
+            Storage::putFileAs('/public/upload/' . $dir . '/', $file, $filename);
+            $agent = 'storage/upload/' . $dir . '/' . $filename;
+            $file->move('storage/upload/' . $dir . '/', $filename);
+
             // Respuesta exitosa
             return response()->json([
                 'message' => 'Se ha almacenado correctamente el archivo',
-                'data' => $filePath
+                'data' => $agent
             ], Response::HTTP_OK);
 
         } catch (ValidationException $e) {
@@ -75,10 +79,14 @@ class FilesController extends Controller
             $path = 'public/upload/' . $referenceCode . '/respuesta';
             $filePath = Storage::putFileAs($path, $file, $filename);
 
+            Storage::putFileAs('/public/upload/' . $referenceCode . '/respuesta', $file, $filename);
+            $agent = 'storage/upload/' . $referenceCode . '/respuesta' . $filename;
+            $file->move('storage/upload/' . $referenceCode . '/respuesta', $filename);
+
             // Respuesta exitosa
             return response()->json([
                 'message' => 'Se ha almacenado correctamente el archivo',
-                'data' => $filePath
+                'data' => $agent
             ], Response::HTTP_OK);
 
         } catch (ValidationException $e) {

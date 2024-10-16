@@ -101,7 +101,13 @@
                 </div>
             </li>
             <li class="side-nav-title">Reportes</li>
-
+            <li class="side-nav-item" id="rutas">
+                <a href="/dashboard/reportes" class="side-nav-link visible" data-roles="ADMINISTRADOR,EMPRESA,USUARIO"
+                   data-permissions="api.reception.index">
+                    <i class="fas fa-flag-alt"></i>
+                    <span> Reportes </span>
+                </a>
+            </li>
         </ul>
         <!--- End Sidemenu -->
 

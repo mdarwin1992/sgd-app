@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Transferir Correspondencia')
+@section('title', 'Transferir correspondencia recibida')
 
 @section('content')
     <div class="dashboard">

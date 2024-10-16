@@ -13,6 +13,8 @@ use App\Http\Controllers\dashboard\report\ReportController;
 use App\Http\Controllers\dashboard\user\UserController;
 use App\Http\Controllers\helpers\FilesController;
 use App\Http\Controllers\helpers\HelpersController;
+use App\Http\Controllers\reports\CalendarReportController;
+use App\Http\Controllers\reports\GeneralReportControllers;
 use App\Http\Controllers\reports\ReportsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -99,4 +101,15 @@ Route::post('/dashboard/response/upload', [FilesController::class, 'responseFile
 Route::get('/entity/{entityId}/counter', [HelpersController::class, 'showCounter']);
 Route::get('/entity/counters', [HelpersController::class, 'listCounters']);
 
+Route::get('/reports/projections-vs-actuals', [ReportsController::class, 'getProjectionsVsActuals']);
+
+Route::get('/reports/document-process-timeline', [CalendarReportController::class, 'getDocumentProcessTimeline']);
+Route::post('/reports/generate', [GeneralReportControllers::class, 'generateReport']);
+
+// New routes for report generation
+Route::get('/reports/generate', [GeneralReportControllers::class, 'generatePDF']);
+Route::get('/departments', [GeneralReportControllers::class, 'getDepartments']);
+Route::get('/offices', [GeneralReportControllers::class, 'getOffices']);
+
+Route::post('/reports/generate-pdf', [GeneralReportControllers::class, 'generatePdfReport']);
 
