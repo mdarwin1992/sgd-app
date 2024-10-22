@@ -56,10 +56,12 @@
                                             </div>
                                         </div>
                                         <div class="d-flex justify-content-end mt-4">
-                                            <a href="/dashboard/business" class="btn btn-primary btn-tool me-2">
+                                            <a href="/dashboard/oficinas"
+                                               class="btn btn-primary  rounded-pill btn-tool me-2">
                                                 <i class="fas fa-times me-1"></i> Cancelar
                                             </a>
-                                            <button type="submit" class="btn btn-success" id="submitButton">
+                                            <button type="submit" class="btn btn-success rounded-pill "
+                                                    id="submitButton">
                                                 <i class="fas fa-check me-1"></i> Guardar
                                             </button>
                                         </div>

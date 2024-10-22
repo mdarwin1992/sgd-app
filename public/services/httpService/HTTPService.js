@@ -154,7 +154,7 @@ const HTTPService = (() => {
 
     return Object.freeze({
         //baseURL: isProduction ? 'https://apptransportessinbarreras.transportessinbarreras.com' : 'http://127.0.0.1:8000',
-        baseURL: isProduction ? 'https://api.example.com' : 'http://127.0.0.1:8000',
+        baseURL: isProduction ? 'http://www.sgd.local' : 'http://127.0.0.1:8000',
         getToken,
         initializeSanctum,
         upload, ...httpMethodsMap,

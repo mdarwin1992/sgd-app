@@ -22,22 +22,22 @@
                                         <div class="col-sm-7">
                                             <div class="text-sm-end">
                                                 <a href="departamento/crear"
-                                                   class="btn btn-primary text-white me-0 btn-sm"><i
-                                                        class="icon-download"></i> Crear Departamento</a>
+                                                   class="btn btn-primary rounded-pill text-white me-0 btn-sm"><i
+                                                        class="icon-download "></i> Crear Departamento</a>
                                             </div>
                                         </div><!-- end col-->
                                     </div>
 
                                     <div class="table-responsive">
                                         <table id="departmentsTable"
-                                               class="table table-striped dt-responsive nowrap w-100 table-size">
+                                               class="table table-striped dt-responsive nowrap w-100">
                                             <thead>
                                             <tr>
                                                 <th>Código</th>
                                                 <th>Nombre</th>
                                                 <th>Entidad</th>
                                                 <th>Estado</th>
-                                                <th>Acciones</th>
+                                                <th width="5%">Acciones</th>
                                             </tr>
                                             </thead>
                                             <tbody>

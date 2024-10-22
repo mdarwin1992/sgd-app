@@ -10,9 +10,12 @@ use App\Http\Controllers\dashboard\mailbox\MailboxController;
 use App\Http\Controllers\dashboard\office\OfficeController;
 use App\Http\Controllers\dashboard\reception\ReceptionController;
 use App\Http\Controllers\dashboard\report\ReportController;
+use App\Http\Controllers\dashboard\retenciondocumental\RetencionDocumentalController;
 use App\Http\Controllers\dashboard\user\UserController;
+use App\Http\Controllers\helpers\CounterController;
 use App\Http\Controllers\helpers\FilesController;
 use App\Http\Controllers\helpers\HelpersController;
+use App\Http\Controllers\notificaciones\NotificationController;
 use App\Http\Controllers\reports\CalendarReportController;
 use App\Http\Controllers\reports\GeneralReportControllers;
 use App\Http\Controllers\reports\ReportsController;
@@ -88,11 +91,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('dashboard/mailbox/destroy/{id}', [MailboxController::class, 'destroy'])->name('api.mailbox.destroy');
 
     Route::get('dashboard/document-sendings', [DocumentSendingController::class, 'index'])->name('api.document.sendings.index');
-    Route::post('dashboard/document-sendings/store', [DocumentSendingController::class, 'store'])->name('api.document.sendings.index');
-    Route::get('dashboard/document-sendings/{id}', [DocumentSendingController::class, 'show'])->name('api.document.sendings.index');
-    Route::patch('dashboard/document-sendings/update/{id}', [DocumentSendingController::class, 'update'])->name('api.document.sendings.index');
-    Route::delete('dashboard/document-sendings/destroy/{id}', [DocumentSendingController::class, 'destroy'])->name('api.document.sendings.index');
+    Route::post('dashboard/document-sendings/store', [DocumentSendingController::class, 'store'])->name('api.document.sendings.store');
+    Route::get('dashboard/document-sendings/{id}', [DocumentSendingController::class, 'show'])->name('api.document.sendings.show');
+    Route::patch('dashboard/document-sendings/update/{id}', [DocumentSendingController::class, 'update'])->name('api.document.sendings.update');
+    Route::delete('dashboard/document-sendings/destroy/{id}', [DocumentSendingController::class, 'destroy'])->name('api.document.sendings.destroy');
 
+    Route::get('dashboard/retencion-documental', [RetencionDocumentalController::class, 'index'])->name('api.retencion-documental.index');
+    Route::post('dashboard/retencion-documental/store', [RetencionDocumentalController::class, 'store'])->name('api.retencion-documental.store');
+    Route::get('dashboard/retencion-documental/{id}', [RetencionDocumentalController::class, 'show'])->name('api.retencion-documental.show');
+    Route::patch('dashboard/retencion-documental/update/{id}', [RetencionDocumentalController::class, 'update'])->name('api.retencion-documental.update');
+    Route::delete('dashboard/retencion-documental/destroy/{id}', [RetencionDocumentalController::class, 'destroy'])->name('api.retencion-documental.destroy');
+    Route::post('dashboard/series/store/series', [RetencionDocumentalController::class, 'series'])->name('api.retencion-documental.series');
+    Route::get('dashboard/series/{id}', [RetencionDocumentalController::class, 'loadSeries'])->name('api.retencion-documental.series');
 
 });
 Route::post('/dashboard/upload', [FilesController::class, 'upload'])->name('files.upload');
@@ -113,3 +123,8 @@ Route::get('/offices', [GeneralReportControllers::class, 'getOffices']);
 
 Route::post('/reports/generate-pdf', [GeneralReportControllers::class, 'generatePdfReport']);
 
+Route::get('/notifications/{id}', [NotificationController::class, 'getUnreadNotifications']);
+Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+
+Route::get('/get-all-counters/{id}', [CounterController::class, 'getAllCounters']);
+Route::post('/serie/counters/{id}', [CounterController::class, 'incrementOrCreate']);

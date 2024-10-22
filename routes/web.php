@@ -82,6 +82,10 @@ Route::get('/dashboard/enviar', function () {
     return view('components.sendings.create');
 });
 
+Route::get('/dashboard/tabla-de-retencion-documental', function () {
+    return view('components.trd.create');
+});
+
 Route::get('/dashboard/ticket/qr/{id}/{iten}', function () {
     return view('viewer.qr');
 });

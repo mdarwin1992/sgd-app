@@ -73,6 +73,15 @@
                     <span> Enviar </span>
                 </a>
             </li>
+            <li class="side-nav-title">Archivo Central</li>
+            <li class="side-nav-item" id="rutas">
+                <a href="/dashboard/archivo-central" class="side-nav-link visible"
+                   data-roles="ADMINISTRADOR,EMPRESA,USUARIO"
+                   data-permissions="api.document.sendings.index">
+                    <i class="fas fa-paper-plane"></i>
+                    <span> Archivo Central </span>
+                </a>
+            </li>
             <li class="side-nav-title">Configuracion</li>
             <li class="side-nav-item" id="rutas">
                 <a href="/dashboard/usuarios" class="side-nav-link visible" data-roles="ADMINISTRADOR,EMPRESA,USUARIO"
@@ -96,6 +105,10 @@
                         <li id="rutas">
                             <a data-roles="ADMINISTRADOR,EMPRESA,USUARIO" data-permissions="api.offices.index"
                                href="/dashboard/oficinas">Oficinas</a>
+                        </li>
+                        <li id="rutas">
+                            <a data-roles="ADMINISTRADOR,EMPRESA,USUARIO"
+                               href="/dashboard/tabla-de-retencion-documental">TRD</a>
                         </li>
                     </ul>
                 </div>

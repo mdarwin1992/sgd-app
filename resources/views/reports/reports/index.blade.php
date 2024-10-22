@@ -11,7 +11,10 @@
                         <div class="card-body pt-0">
                             <div class="row mt-4">
                                 <div class="col-md-12">
-                                    <h2>Generar Reporte Personalizado</h2>
+                                    <h4 class="header-title"> Reporte general ventañilla unica</h4>
+                                    <h5 class="text-muted fw-normal mt-0 mb-3 text-truncate" title="Campaign Sent">
+                                        Resumen de todas las solicitudes recibidas y procesadas, incluyendo su estado y tiempos de respuesta. Evalúa la eficiencia del servicio.
+                                    </h5>
                                     <form id="reportForm">
                                         <div class="row">
                                             <div class="col-md-4 mb-3">
@@ -32,7 +35,7 @@
                                             </div>
                                         </div>
                                         <div class="row">
-                                            <div class="col-md-3 mb-3">
+                                            <div class="col-md-4 mb-3">
                                                 <label for="filterType" class="form-label">Tipo de Filtro</label>
                                                 <select class="form-control" id="filterType" name="filter_type"
                                                         required>
@@ -42,23 +45,23 @@
 
                                                 </select>
                                             </div>
-                                            <div class="col-md-2 mb-3 year-field" style="display: none;">
+                                            <div class="col-md-4 mb-3 year-field" style="display: none;">
                                                 <label for="year" class="form-label">Año</label>
                                                 <input type="number" class="form-control" id="year" name="year"
                                                        min="2000" max="2099">
                                             </div>
-                                            <div class="col-md-2 mb-3 date-range-field" style="display: none;">
+                                            <div class="col-md-4 mb-3 date-range-field" style="display: none;">
                                                 <label for="startDate" class="form-label">Fecha de Inicio</label>
                                                 <input type="date" class="form-control" id="startDate"
                                                        name="start_date">
                                             </div>
-                                            <div class="col-md-2 mb-3 date-range-field" style="display: none;">
+                                            <div class="col-md-4 mb-3 date-range-field" style="display: none;">
                                                 <label for="endDate" class="form-label">Fecha de Fin</label>
                                                 <input type="date" class="form-control" id="endDate" name="end_date">
                                             </div>
                                         </div>
                                         <div class="row">
-                                            <div class="col-md-3 mb-3">
+                                            <div class="col-md-4 mb-3">
                                                 <label for="status" class="form-label">Estado (opcional)</label>
                                                 <select class="form-control" id="status_id" name="status_id">
                                                     <option value="">Todos</option>
@@ -68,30 +71,32 @@
                                                     <option value="ARCHIVADO">Archivado</option>
                                                 </select>
                                             </div>
-                                            <div class="col-md-3 mb-3">
+                                            <div class="col-md-4 mb-3">
                                                 <label for="department_id" class="form-label">Departamento
                                                     (opcional)</label>
                                                 <select class="form-control" id="department_id" name="department_id">
                                                     <option value="">Todos</option>
                                                 </select>
                                             </div>
-                                            <div class="col-md-3 mb-3">
+                                            <div class="col-md-4 mb-3">
                                                 <label for="office_id" class="form-label">Oficina (opcional)</label>
                                                 <select class="form-control" id="office_id" name="office_id">
                                                     <option value="">Todas</option>
                                                 </select>
                                             </div>
                                         </div>
-                                        <div class="d-flex justify-content-end mt-4">
-                                            <a href="/dashboard" class="btn btn-primary btn-tool me-2">
+                                        <div class="d-flex justify-content-end">
+                                            <button class="btn btn-warning rounded-pill btn-tool me-2" id="generatePdfBtn">Generate PDF</button>
+                                            <a href="/dashboard" class="btn btn-primary rounded-pill btn-tool me-2">
                                                 <i class="fas fa-times me-1"></i> Cancelar
                                             </a>
-                                            <button type="submit" class="btn btn-success" id="submitButton">
+                                            <button type="submit" class="btn btn-success rounded-pill"
+                                                    id="submitButton">
                                                 <i class="fas fa-check me-1"></i> Generar Reporte
                                             </button>
                                         </div>
                                     </form>
-                                    <button id="generatePdfBtn">Generate PDF</button>
+
 
                                     <div id="customReportResult" class="mt-3"></div>
                                 </div>

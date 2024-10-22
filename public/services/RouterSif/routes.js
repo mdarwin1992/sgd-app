@@ -3,14 +3,12 @@ export const routes = [// Ruta para mostrar archivo con visor
         path: '/dashboard/show-file/:id/:id', component: 'viewer.file', name: 'Visor del documento', meta: {
             requiresAuth: false
         }
-    },
-    // Ruta para visualizar ticket con visor
+    }, // Ruta para visualizar ticket con visor
     {
         path: '/dashboard/reportes', component: 'reports.index', name: 'Visor del documento', meta: {
             requiresAuth: false
         }
-    },
-    // Ruta para visualizar ticket con visor
+    }, // Ruta para visualizar ticket con visor
     {
         path: '/dashboard/ticket/:id/:id', component: 'viewer.file', name: 'Visor del documento', meta: {
             requiresAuth: false
@@ -119,5 +117,15 @@ export const routes = [// Ruta para mostrar archivo con visor
             requiresAuth: true,
             roles: ['USUARIO', 'ADMINISTRADOR', 'EMPRESA'],
             permissions: ['api.document.sendings.index']
+        }
+    }, // Ruta para enviar un documento
+    {
+        path: '/dashboard/tabla-de-retencion-documental',
+        component: 'components.trd.create',
+        name: 'Crear Empresa',
+        meta: {
+            requiresAuth: false,
+            //roles: ['USUARIO', 'ADMINISTRADOR', 'EMPRESA'],
+            //permissions: ['api.document.sendings.index']
         }
     }];

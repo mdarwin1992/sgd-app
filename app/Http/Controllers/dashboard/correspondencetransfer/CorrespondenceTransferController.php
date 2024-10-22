@@ -51,19 +51,17 @@ class CorrespondenceTransferController extends Controller
 
         $officeId = $request->input('office_id') ?? null;
 
+        $transferQuery = DB::table('document')
+            ->join('correspondence_transfer', 'document.id', '=', 'correspondence_transfer.document_id')
+            ->join('office', 'correspondence_transfer.office_id', '=', 'office.id')
+            ->join('document_status', 'document.id', '=', 'document_status.document_id')
+            ->where('document_status.status', '=', 'PROCESANDO');
+
         if (is_null($officeId)) {
-            $transfer = DB::table('document')
-                ->join('correspondence_transfer', 'document.id', '=', 'correspondence_transfer.document_id')
-                ->join('office', 'correspondence_transfer.office_id', '=', 'office.id')
-                ->join('document_status', 'document.id', '=', 'document_status.document_id')
-                ->where('document_status.status', '=', 'PROCESANDO')->get();
-        } else {
-            $transfer = DB::table('document')
-                ->join('correspondence_transfer', 'document.id', '=', 'correspondence_transfer.document_id')
-                ->join('office', 'correspondence_transfer.office_id', '=', 'office.id')
-                ->join('document_status', 'document.id', '=', 'document_status.document_id')
-                ->where([['document_status.status', '=', 'PROCESANDO'], ['office_id', '=', $officeId]])->get();
+            $transferQuery->where([['document_status.status', '=', 'PROCESANDO'], ['office_id', '=', $officeId]]);
         }
+
+        $transfer = $transferQuery->get();
 
         return response()->json([
             'data' => $transfer,

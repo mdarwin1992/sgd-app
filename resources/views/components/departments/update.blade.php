@@ -5,57 +5,56 @@
 @section('content')
     <div class="dashboard">
         <div data-permissions="api.department.update">
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-body">
-                                <h4 class="header-title">Actualizar Departamento</h4>
-                                <p class="text-muted font-14">
-                                    Modifique la información del departamento y guarde los cambios.
-                                </p>
+            <div class="row  pt-3">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="header-title">Actualizar Departamento</h4>
+                            <p class="text-muted font-14">
+                                Modifique la información del departamento y guarde los cambios.
+                            </p>
 
-                                <form id="updateDepartmentForm" class="needs-validation" novalidate>
-                                    <input type="hidden" id="departmentId" name="id">
-                                    <div class="row">
-                                        <div class="col-md-2 mb-3">
-                                            <label for="code" class="form-label">Código</label>
-                                            <input type="text" class="form-control" id="code" name="code" required>
-                                            <div class="invalid-feedback">
-                                                Por favor, ingrese un código válido.
-                                            </div>
-                                        </div>
-                                        <div class="col-md-5 mb-3">
-                                            <label for="name" class="form-label">Nombre</label>
-                                            <input type="text" class="form-control" id="name" name="name" required>
-                                            <div class="invalid-feedback">
-                                                Por favor, ingrese un nombre válido.
-                                            </div>
-                                        </div>
-                                        <div class="col-md-5 mb-3">
-                                            <label for="entity" class="form-label">Entidad</label>
-                                            <select class="form-control" id="entity" name="entity_id" required>
-                                                <option value="">Seleccione una entidad</option>
-                                            </select>
-                                            <div class="invalid-feedback">
-                                                Por favor, seleccione una entidad.
-                                            </div>
+                            <form id="updateDepartmentForm" class="needs-validation" novalidate>
+                                <input type="hidden" id="departmentId" name="id">
+                                <div class="row">
+                                    <div class="col-md-2 mb-3">
+                                        <label for="code" class="form-label">Código</label>
+                                        <input type="text" class="form-control" id="code" name="code" required>
+                                        <div class="invalid-feedback">
+                                            Por favor, ingrese un código válido.
                                         </div>
                                     </div>
-                                    <div class="d-flex justify-content-end mt-4">
-                                        <a href="/dashboard/business" class="btn btn-primary btn-tool me-2">
-                                            <i class="fas fa-times me-1"></i> Cancelar
-                                        </a>
-                                        <button type="submit" class="btn btn-success" id="submitButton">
-                                            <i class="fas fa-check me-1"></i> Guardar
-                                        </button>
+                                    <div class="col-md-5 mb-3">
+                                        <label for="name" class="form-label">Nombre</label>
+                                        <input type="text" class="form-control" id="name" name="name" required>
+                                        <div class="invalid-feedback">
+                                            Por favor, ingrese un nombre válido.
+                                        </div>
                                     </div>
-                                </form>
-                            </div> <!-- end card-body -->
-                        </div> <!-- end card -->
-                    </div> <!-- end col -->
-                </div> <!-- end row -->
-            </div>
+                                    <div class="col-md-5 mb-3">
+                                        <label for="entity" class="form-label">Entidad</label>
+                                        <select class="form-control" id="entity" name="entity_id" required>
+                                            <option value="">Seleccione una entidad</option>
+                                        </select>
+                                        <div class="invalid-feedback">
+                                            Por favor, seleccione una entidad.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-end mt-4">
+                                    <a href="/dashboard/departamentos"
+                                       class="btn btn-primary rounded-pill  btn-tool me-2">
+                                        <i class="fas fa-times me-1"></i> Cancelar
+                                    </a>
+                                    <button type="submit" class="btn btn-success rounded-pill" id="submitButton">
+                                        <i class="fas fa-check me-1"></i> Guardar
+                                    </button>
+                                </div>
+                            </form>
+                        </div> <!-- end card-body -->
+                    </div> <!-- end card -->
+                </div> <!-- end col -->
+            </div> <!-- end row -->
         </div>
     </div>
 @endsection
