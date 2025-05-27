@@ -110,6 +110,10 @@ class Helpers {
         return valor === 0 ? 'DOCUMENTO ENTREGADO' : 'DOCUMENTO NO ENTREGADO';
     }
 
+    static verifyDeliveryStyle(valor) {
+        return valor === 0 ? 'badge-outline-success' : 'badge-outline-warning';
+    }
+
 }
 
 export default Helpers;

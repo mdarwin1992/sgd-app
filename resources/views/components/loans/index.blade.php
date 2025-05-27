@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Inicio')
+@section('title', 'Prestamos documental')
 
 @section('content')
     <div class="dashboard">
@@ -16,45 +16,48 @@
                             <div class="row mb-2">
                                 <div class="col-sm-5">
                                     <a href="/dashboard/prestamos-documental/archivo-central"
-                                        class="btn btn-light mb-2 me-1"><i class="mdi mdi-plus-circle me-2"></i>Prestamo
-                                        docuemntos
-                                        archivo central</a>
+                                        class="btn btn-outline-primary rounded-pill mb-2 me-1"><i
+                                            class="mdi mdi-plus-circle me-2"></i>Docuemntos archivo central</a>
                                     <a href="/dashboard/prestamos-documental/archivo-historico"
-                                        class="btn btn-light mb-2"><i class="mdi mdi-plus-circle me-2"></i> Docuemntos
+                                        class="btn btn-outline-info  rounded-pill mb-2"><i
+                                            class="mdi mdi-plus-circle me-2"></i> Docuemntos
                                         archivo histórico</a>
                                 </div>
                                 <div class="col-sm-7">
                                     <div class="text-sm-end">
-                                        <button type="button" class="btn btn-light mb-2 me-1">Regresar Doc A.C.
+                                        <button type="button" class="btn btn-outline-success rounded-pill mb-2 me-1"
+                                            data-bs-toggle="modal" data-bs-target="#standard-modal">Regresar Doc A.C. -
                                             A.H</button>
-                                        <button type="button" class="btn btn-light mb-2">Regresar Doc A.H.
-                                            A.C</button>
                                     </div>
                                 </div><!-- end col-->
                             </div>
-                            <div class="row justify-content-end mb-3">
-                                <form class="col-auto">
-                                    <div class="row g-3 align-items-end">
-                                        <div class="col-auto">
-                                            <label for="startDate" class="visually-hidden">Fecha de Inicio:</label>
-                                            <input type="date" id="startDate" class="form-control">
-                                        </div>
-                                        <div class="col-auto">
-                                            <label for="endDate" class="visually-hidden">Fecha de Fin:</label>
-                                            <input type="date" id="endDate" class="form-control">
-                                        </div>
-                                        <div class="col-auto">
-                                            <label for="orderNumber" class="visually-hidden">Número de Orden:</label>
-                                            <input type="text" id="orderNumber" class="form-control"
-                                                placeholder="Número de Orden">
-                                        </div>
-                                        <div class="col-auto">
-                                            <button type="button" id="filterButton"
-                                                class="btn btn-primary mb-3">Filtrar</button>
-                                        </div>
+                            <div class="row mb-2">
+                                <div class="col-xl-12">
+                                    <div class="text-xl-end mt-xl-0 mt-1">
+                                        <form class="row g-3">
+                                            <div class="col-auto">
+                                                <label for="startDate" class="visually-hidden">Fecha de Inicio:</label>
+                                                <input type="date" id="startDate" class="form-control">
+                                            </div>
+                                            <div class="col-auto">
+                                                <label for="endDate" class="visually-hidden">Fecha de Fin:</label>
+                                                <input type="date" id="endDate" class="form-control">
+                                            </div>
+                                            <div class="col-auto">
+                                                <label for="orderNumber" class="visually-hidden">Número de
+                                                    Orden:</label>
+                                                <input type="text" id="orderNumber" class="form-control"
+                                                    placeholder="Número de Orden">
+                                            </div>
+                                            <div class="col-auto">
+                                                <button type="button" id="filterButton"
+                                                    class="btn btn-outline-primary mb-3">Filtrar</button>
+                                            </div>
+                                        </form>
                                     </div>
-                                </form>
+                                </div>
                             </div>
+
 
                             <div class="row">
                                 <div class="table-responsive">
@@ -68,7 +71,7 @@
                                                 <th>Nombre del prestador</th>
                                                 <th>Referencia documental</th>
                                                 <th>Tipo de documento</th>
-                                                <th>Estado</th>
+                                                <th style="width: 5%">Estado</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -132,31 +135,29 @@
     </div><!-- /.modal -->
 
     <!-- Standard modal -->
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#standard-modal">Standard
-        Modal</button>
     <div id="standard-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="standard-modalLabel"
         aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="standard-modalLabel">Return Document</h4>
+                    <h4 class="modal-title" id="standard-modalLabel">Regresar documento prestado</h4>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
                 </div>
                 <div class="modal-body">
                     <form id="AddForm">
                         <div class="mb-3">
-                            <label for="order_number" class="form-label">Order Number</label>
+                            <label for="order_number" class="form-label">Número de orden</label>
                             <select class="form-select js-example-basic-single" name="order_number" id="order_number"
                                 required>
-                                <option selected>Open this select menu</option>
+                                <option selected>Abrir este menú de selección</option>
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label for="document_conditions" class="form-label">Document Conditions</label>
-                            <textarea class="form-control" id="document_conditions" name="document_conditions" required></textarea>
+                            <label for="document_conditions" class="form-label">Condiciones del documento</label>
+                            <textarea class="form-control" id="document_conditions" name="document_conditions"></textarea>
                         </div>
                         <div class="mb-3">
-                            <label for="comments" class="form-label">Comments</label>
+                            <label for="comments" class="form-label">Comentarios</label>
                             <textarea class="form-control" id="comments" name="comments"></textarea>
                         </div>
                 </div>
@@ -259,7 +260,7 @@
                             return `
                             <div class="table-action">
                                 <a href="javascript:void(0);" class="action-icon edit-icon" data-loan="${row.order_number}">
-                                    <h5><span class="badge badge-outline-success"><i class="far fa-file-pdf"></i> ${Helpers.verifyDelivery(row.state)} </span></h5>
+                                    <h5><span class="badge ${Helpers.verifyDeliveryStyle(row.state)}"><i class="far fa-file-pdf"></i> ${Helpers.verifyDelivery(row.state)} </span></h5>
                                 </a>
                             </div>
                         `;

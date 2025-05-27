@@ -16,7 +16,16 @@
                                         Complete el formulario para registrar una nueva prestamos documentales del archivo
                                         central.
                                     </h5>
-
+                                    <div class="row mb-2">
+                                        <div class="col-xl-12">
+                                            <div class="text-xl-end mt-xl-0 mt-1">
+                                                <a role="button" href="/dashboard/prestamos-documental"
+                                                    class="btn btn-sm btn btn-outline-info rounded-pill">
+                                                    <i class="fas fa-undo-alt me-1"></i>Regresar
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div class="table-responsive">
                                         <table id="centralArchive"
                                             class="table table-striped table-sm table-centered dt-responsive nowrap w-100">
