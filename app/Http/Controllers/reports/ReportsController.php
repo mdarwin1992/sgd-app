@@ -331,29 +331,29 @@ class ReportsController extends Controller
     public function getArchiveAndDocumentRecords(): JsonResponse
     {
         try {
-            // Retrieve Retention records with their associated Series
-            $retentions = Retention::with('series')->get();
+            // Retrieve all Retention records with their associated Series, ordered by creation date descending
+            $retentions = Retention::with('series')->orderBy('created_at', 'desc')->get();
 
-            // Retrieve CentralArchive records with associated Entity, Office, Series, and Subseries
-            $centralArchives = CentralArchive::with('entity', 'office', 'series', 'subseries')->get();
+            // Retrieve all CentralArchive records with associated Entity, Office, Series, and Subseries, ordered by creation date descending
+            $centralArchives = CentralArchive::with('entity', 'office', 'series', 'subseries')->orderBy('created_at', 'desc')->get();
 
-            // Retrieve HistoricFile records with associated Entity, Office, Series, and Subseries
-            $historicFiles = HistoricFile::with('entity', 'office', 'series', 'subseries')->get();
+            // Retrieve all HistoricFile records with associated Entity, Office, Series, and Subseries, ordered by creation date descending
+            $historicFiles = HistoricFile::with('entity', 'office', 'series', 'subseries')->orderBy('created_at', 'desc')->get();
 
-            // Retrieve DocumentSending records with associated Department and Office
-            $documentSendings = DocumentSending::with('department', 'office')->get();
+            // Retrieve all DocumentSending records with associated Department and Office, ordered by creation date descending
+            $documentSendings = DocumentSending::with('department', 'office')->orderBy('created_at', 'desc')->get();
 
-            // Retrieve CorrespondenceTransfer records with associated Document and Office
-            $correspondenceTransfers = CorrespondenceTransfer::with('document', 'office')->get();
+            // Retrieve all CorrespondenceTransfer records with associated Document and Office, ordered by creation date descending
+            $correspondenceTransfers = CorrespondenceTransfer::with('document', 'office')->orderBy('created_at', 'desc')->get();
 
-            // Retrieve Reception records with associated Document
-            $receptions = Reception::with('document')->get();
+            // Retrieve all Reception records with associated Document, ordered by creation date descending
+            $receptions = Reception::with('document')->orderBy('created_at', 'desc')->get();
 
-            // Retrieve RequestResponse records with associated Document
-            $requestResponses = RequestResponse::with('document')->get();
+            // Retrieve all RequestResponse records with associated Document, ordered by creation date descending
+            $requestResponses = RequestResponse::with('document')->orderBy('created_at', 'desc')->get();
 
-            // Retrieve DocumentLoan records with associated Office, Entity, and User
-            $documentLoans = DocumentLoan::with('office', 'entity', 'user', 'centralArchiveLoans.centralArchive', 'historicalArchiveLoans.historicFile')->get();
+            // Retrieve all DocumentLoan records with associated Office, Entity, and User, ordered by creation date descending
+            $documentLoans = DocumentLoan::with('office', 'entity', 'user', 'centralArchiveLoans.centralArchive', 'historicalArchiveLoans.historicFile')->orderBy('created_at', 'desc')->get();
 
             return response()->json([
                 'retentions' => $retentions,
@@ -372,10 +372,12 @@ class ReportsController extends Controller
         }
     }
 
+
+
     public function getArchiveAndDocumentRecordsCalendar(Request $request): JsonResponse
     {
         try {
-            $date = $request->input('date');
+            $date = date('Y-m-d', strtotime($request->input('date')));
 
             // Retrieve CentralArchive records with associated Entity, Office, Series, and Subseries
             $centralArchives = CentralArchive::with('entity', 'office', 'series', 'subseries')
@@ -413,7 +415,6 @@ class ReportsController extends Controller
                 ->get();
 
             return response()->json([
-                //'retentions' => $retentions,
                 'central_archives' => $centralArchives,
                 'historic_files' => $historicFiles,
                 'document_sendings' => $documentSendings,

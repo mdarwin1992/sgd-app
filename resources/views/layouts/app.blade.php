@@ -146,7 +146,8 @@
     <script src="{{ asset('assets/vendor/jquery-validation/dist/jquery.validate.min.js') }}"></script>
     <script src="{{ asset('assets/vendor/jquery-validation/dist/additional-methods.min.js') }}"></script>
     <script src="{{ asset('assets/vendor/apexcharts/apexcharts.min.js') }}"></script>
-    <script src="{{ asset('assets/vendor/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script>
+    <script src="{{ asset('assets/vendor/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}" charset="UTF-8">
+    </script>
     <script>
         $(document).ready(function() {
             $('.js-example-basic-multiple').select2();

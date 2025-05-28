@@ -8,22 +8,6 @@
             <div class="row">
                 <div class="col-12">
                     <div class="page-title-box">
-                        <div class="page-title-right">
-                            <form class="d-flex">
-                                <div class="input-group">
-                                    <input type="text" class="form-control form-control-light" id="dash-daterange">
-                                    <span class="input-group-text bg-primary border-primary text-white">
-                                        <i class="mdi mdi-calendar-range font-13"></i>
-                                    </span>
-                                </div>
-                                <a href="javascript: void(0);" class="btn btn-primary ms-2">
-                                    <i class="mdi mdi-autorenew"></i>
-                                </a>
-                                <a href="javascript: void(0);" class="btn btn-primary ms-1">
-                                    <i class="mdi mdi-filter-variant"></i>
-                                </a>
-                            </form>
-                        </div>
                         <h4 class="page-title">Dashboard</h4>
                     </div>
                 </div>
@@ -162,7 +146,7 @@
                 <div class="col-xl-7">
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
-                            <h4 class="header-title">Your Calendar</h4>
+                            <h4 class="header-title">Tu calendario</h4>
                             <div class="dropdown">
                                 <a href="#" class="dropdown-toggle arrow-none card-drop" data-bs-toggle="dropdown"
                                     aria-expanded="false">
@@ -205,6 +189,9 @@
 @endsection
 
 @section('scripts')
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/locales/bootstrap-datepicker.es.min.js">
+    </script>
+
     <script type="module">
         import HTTPService from '/services/httpService/HTTPService.js';
 
@@ -415,10 +402,6 @@
                 if (activeLoansElement) activeLoansElement.textContent = data.activeLoans;
                 if (returnedLoansElement) returnedLoansElement.textContent = data.returnedLoans;
                 if (productivityElement) productivityElement.textContent = data.productivityPercentage;
-
-                /* if (gaugeChart) {
-                    gaugeChart.updateNeedle(data.productivityPercentage);
-                } */
             };
 
 
@@ -506,7 +489,7 @@
 
                     renderRecentActivities(response);
                     console.log(response);
-                    
+
                 } catch (error) {
                     console.error('Error al obtener las actividades recientes:', error);
                 }
@@ -638,9 +621,28 @@
 
                 // Inicializa el datepicker y vincula el evento de cambio de fecha
                 $(document).ready(function() {
+                    $.fn.datepicker.dates['es'] = {
+                        days: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes',
+                            'Sábado'
+                        ],
+                        daysShort: ['Dom', 'Lun', 'Mar', 'Mié', 'Juv', 'Vie', 'Sáb'],
+                        daysMin: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá'],
+                        months: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio',
+                            'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+                        ],
+                        monthsShort: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep',
+                            'Oct', 'Nov', 'Dic'
+                        ],
+                        today: 'Hoy',
+                        clear: 'Limpiar',
+                        format: 'dd/mm/yy',
+                        titleFormat: "MM yyyy",
+                        weekStart: 1
+                    };
                     $('.calendar-widget').datepicker({
                         format: 'yyyy-mm-dd',
-                        todayHighlight: true
+                        todayHighlight: true,
+                        language: 'es' // Configura el idioma del datepicker a español
                     }).on('changeDate', function(e) {
                         const selectedDate = e.format();
                         getRecentActivitiesCalendar(selectedDate);
