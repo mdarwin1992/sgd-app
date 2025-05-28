@@ -15,11 +15,17 @@ class Notification extends Model
         'user_id',
         'correspondence_transfer_id',
         'read',
+        'data',
     ];
 
     // Dentro del modelo Notification
     public function correspondenceTransfer()
     {
         return $this->belongsTo(CorrespondenceTransfer::class, 'correspondence_transfer_id'); // Asegúrate de usar el nombre correcto del campo
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id'); // Asegúrate de usar el nombre correcto del campo
     }
 }

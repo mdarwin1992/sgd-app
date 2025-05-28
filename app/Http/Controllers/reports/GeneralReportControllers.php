@@ -8,17 +8,21 @@ use App\Models\Office;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class GeneralReportControllers extends Controller
 {
     public function generateReport(Request $request)
     {
+        // Log the incoming request data for debugging
+        Log::info('Request Data:', $request->all());
+
         $request->validate([
             'report_type' => 'required|string',
             'filter_type' => 'required|string',
             'start_date' => 'required_if:filter_type,date_range|date',
             'end_date' => 'required_if:filter_type,date_range|date|after_or_equal:start_date',
-            'year' => 'nullable:filter_type,year|integer|min:2000|max:2099',
+            'selected_year' => 'nullable|integer|min:2000|max:2099',
             'status_id' => 'nullable|string',
             'department_id' => 'nullable|exists:department,id',
             'office_id' => 'nullable|exists:office,id',
@@ -28,47 +32,22 @@ class GeneralReportControllers extends Controller
         $filterType = $request->input('filter_type');
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
-        $year = $request->input('year');
+        $selectedYear = $request->input('selected_year');
         $statusId = $request->input('status_id');
         $departmentId = $request->input('department_id');
         $officeId = $request->input('office_id');
 
-        $query = DB::table('document')
-            ->select(
-                'document.reference_code',
-                'document.received_date',
-                'document.sender_name',
-                'document.subject',
-                'document.file_path',
-                'document_status.status'
-            )
-            ->join('document_status', 'document.id', '=', 'document_status.document_id')
-            ->orderBy('document.received_date', 'desc');
+        $query = (object) [
+            'filterType' => $filterType,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+            'selectedYear' => $selectedYear,
+            'statusId' => $statusId,
+            'departmentId' => $departmentId,
+            'officeId' => $officeId,
+        ];
 
-        // Aplicar filtros de fecha
-        if ($filterType === 'date_range') {
-            $query->whereBetween('document.received_date', [$startDate, $endDate]);
-        } elseif ($filterType === 'year') {
-            $query->whereYear('document.received_date', $year);
-        }
-
-        // Aplicar filtros opcionales
-        if ($statusId) {
-            $query->where('document_status.status', $statusId);
-        }
-
-        if ($departmentId) {
-            $query->join('correspondence_transfer', 'document.id', '=', 'correspondence_transfer.document_id')
-                ->join('office', 'correspondence_transfer.office_id', '=', 'office.id')
-                ->where('office.department_id', $departmentId);
-        }
-
-        if ($officeId) {
-            $query->join('correspondence_transfer', 'document.id', '=', 'correspondence_transfer.document_id')
-                ->where('correspondence_transfer.office_id', $officeId);
-        }
-
-        // Generar reporte según el tipo seleccionado
+        // Generate report based on the selected type
         switch ($reportType) {
             case 'resumen_general':
                 return $this->generateGeneralSummary($query);
@@ -88,22 +67,37 @@ class GeneralReportControllers extends Controller
                 return $this->generateRequestResponseReport($query);
             case 'envio_documento':
                 return $this->generateDocumentSendingReport($query);
+            case 'prestamos_activos':
+                return $this->generateActiveLoansReport($query);
+            case 'prestamos_vencidos':
+                return $this->generateOverdueLoansReport($query);
+            case 'prestamos_por_fecha':
+                return $this->generateLoansByDateReport($query);
+            case 'prestamos_por_oficina':
+                return $this->generateLoansByOfficeReport($query);
+            case 'prestamos_por_usuario':
+                return $this->generateLoansByUserReport($query);
+            case 'devoluciones':
+                return $this->generateReturnsReport($query);
             default:
                 return response()->json(['error' => 'Tipo de reporte no válido'], 400);
         }
     }
 
+
     private function generateGeneralSummary($query)
     {
-        $totalDocuments = $query->count();
-        $statusCounts = $query->groupBy('document_status.status')
-            ->select('document_status.status', DB::raw('count(*) as count'))
+        $totalDocuments = DB::table('document')->count();
+        $statusCounts = DB::table('document_status')
+            ->select('status', DB::raw('count(*) as count'))
+            ->groupBy('status')
             ->pluck('count', 'status')
             ->toArray();
 
-        $latestDocuments = $query->limit(5)
-            ->select('document_status.status', DB::raw('count(*) as count'))
-            ->groupBy('document_status.status')
+        $latestDocuments = DB::table('document')
+            ->limit(5)
+            ->select('reference_code', 'received_date', 'sender_name', 'subject')
+            ->orderBy('received_date', 'desc')
             ->get()
             ->toArray();
 
@@ -119,7 +113,29 @@ class GeneralReportControllers extends Controller
 
     private function generateDocumentStatusReport($query)
     {
-        $statusReport = $query->get();
+        $statusReport = DB::table('document')
+            ->select(
+                'document.reference_code',
+                'document.received_date',
+                'document.sender_name',
+                'document.subject',
+                'document.file_path',
+                'document_status.status'
+            )
+            ->join('document_status', 'document.id', '=', 'document_status.document_id')
+            ->orderBy('document.received_date', 'desc');
+
+        if ($query->filterType === 'date_range') {
+            $statusReport->whereBetween('document.received_date', [$query->startDate, $query->endDate]);
+        } elseif ($query->filterType === 'year') {
+            $statusReport->whereYear('document.received_date', $query->selectedYear);
+        }
+
+        if ($query->statusId) {
+            $statusReport->where('document_status.status', $query->statusId);
+        }
+
+        $statusReport = $statusReport->get();
 
         return response()->json([
             'report_type' => 'Estado de Documentos',
@@ -130,6 +146,7 @@ class GeneralReportControllers extends Controller
                     $doc->received_date,
                     $doc->sender_name,
                     $doc->subject,
+                    $doc->file_path,
                     $doc->status
                 ];
             })
@@ -138,7 +155,7 @@ class GeneralReportControllers extends Controller
 
     private function generateDocumentFlowReport($query)
     {
-        $flowReport = $query
+        $flowReport = DB::table('document')
             ->leftJoin('reception', 'document.id', '=', 'reception.document_id')
             ->leftJoin('correspondence_transfer', 'document.id', '=', 'correspondence_transfer.document_id')
             ->leftJoin('request_response', 'document.id', '=', 'request_response.document_id')
@@ -153,7 +170,16 @@ class GeneralReportControllers extends Controller
                 'request_response.created_at as response_date',
                 'document_status.status'
             )
-            ->get();
+            ->join('document_status', 'document.id', '=', 'document_status.document_id')
+            ->orderBy('document.received_date', 'desc');
+
+        if ($query->filterType === 'date_range') {
+            $flowReport->whereBetween('document.received_date', [$query->startDate, $query->endDate]);
+        } elseif ($query->filterType === 'year') {
+            $flowReport->whereYear('document.received_date', $query->selectedYear);
+        }
+
+        $flowReport = $flowReport->get();
 
         return response()->json([
             'report_type' => 'Flujo de Documentos',
@@ -176,7 +202,7 @@ class GeneralReportControllers extends Controller
 
     private function generateResponseTimeReport($query)
     {
-        $responseTimeReport = $query
+        $responseTimeReport = DB::table('document')
             ->leftJoin('correspondence_transfer', 'document.id', '=', 'correspondence_transfer.document_id')
             ->leftJoin('request_response', 'document.id', '=', 'request_response.document_id')
             ->select(
@@ -190,7 +216,15 @@ class GeneralReportControllers extends Controller
                 DB::raw('DATEDIFF(request_response.created_at, correspondence_transfer.response_deadline) as days_difference')
             )
             ->whereNotNull('request_response.created_at')
-            ->get();
+            ->orderBy('document.received_date', 'desc');
+
+        if ($query->filterType === 'date_range') {
+            $responseTimeReport->whereBetween('document.received_date', [$query->startDate, $query->endDate]);
+        } elseif ($query->filterType === 'year') {
+            $responseTimeReport->whereYear('document.received_date', $query->selectedYear);
+        }
+
+        $responseTimeReport = $responseTimeReport->get();
 
         return response()->json([
             'report_type' => 'Tiempos de Respuesta',
@@ -212,7 +246,7 @@ class GeneralReportControllers extends Controller
 
     private function generateCorrespondenceTransferReport($query)
     {
-        $transferReport = $query
+        $transferReport = DB::table('document')
             ->join('correspondence_transfer', 'document.id', '=', 'correspondence_transfer.document_id')
             ->join('office', 'correspondence_transfer.office_id', '=', 'office.id')
             ->select(
@@ -225,7 +259,23 @@ class GeneralReportControllers extends Controller
                 'office.name as office_name',
                 'correspondence_transfer.response_deadline'
             )
-            ->get();
+            ->orderBy('document.received_date', 'desc');
+
+        if ($query->filterType === 'date_range') {
+            $transferReport->whereBetween('document.received_date', [$query->startDate, $query->endDate]);
+        } elseif ($query->filterType === 'year') {
+            $transferReport->whereYear('document.received_date', $query->selectedYear);
+        }
+
+        if ($query->departmentId) {
+            $transferReport->where('office.department_id', $query->departmentId);
+        }
+
+        if ($query->officeId) {
+            $transferReport->where('correspondence_transfer.office_id', $query->officeId);
+        }
+
+        $transferReport = $transferReport->get();
 
         return response()->json([
             'report_type' => 'Transferencias de Correspondencia',
@@ -247,7 +297,7 @@ class GeneralReportControllers extends Controller
 
     private function generateEntityActivityReport($query)
     {
-        $activityReport = $query
+        $activityReport = DB::table('document')
             ->join('correspondence_transfer', 'document.id', '=', 'correspondence_transfer.document_id')
             ->join('office', 'correspondence_transfer.office_id', '=', 'office.id')
             ->join('department', 'office.department_id', '=', 'department.id')
@@ -258,8 +308,23 @@ class GeneralReportControllers extends Controller
                 DB::raw('GROUP_CONCAT(CONCAT_WS("|", document.reference_code, document.received_date, document.sender_name, document.subject, document.file_path) SEPARATOR "||") as document_details')
             )
             ->groupBy('department.name', 'office.name')
-            ->orderBy('document.received_date', 'desc')
-            ->get();
+            ->orderBy('document.received_date', 'desc');
+
+        if ($query->filterType === 'date_range') {
+            $activityReport->whereBetween('document.received_date', [$query->startDate, $query->endDate]);
+        } elseif ($query->filterType === 'year') {
+            $activityReport->whereYear('document.received_date', $query->selectedYear);
+        }
+
+        if ($query->departmentId) {
+            $activityReport->where('department.id', $query->departmentId);
+        }
+
+        if ($query->officeId) {
+            $activityReport->where('office.id', $query->officeId);
+        }
+
+        $activityReport = $activityReport->get();
 
         return response()->json([
             'report_type' => 'Actividad de Entidad',
@@ -288,7 +353,7 @@ class GeneralReportControllers extends Controller
 
     private function generateReceptionReport($query)
     {
-        $receptionReport = $query
+        $receptionReport = DB::table('document')
             ->join('reception', 'document.id', '=', 'reception.document_id')
             ->select(
                 'document.reference_code',
@@ -298,7 +363,15 @@ class GeneralReportControllers extends Controller
                 'document.file_path',
                 'reception.created_at as reception_date'
             )
-            ->get();
+            ->orderBy('document.received_date', 'desc');
+
+        if ($query->filterType === 'date_range') {
+            $receptionReport->whereBetween('document.received_date', [$query->startDate, $query->endDate]);
+        } elseif ($query->filterType === 'year') {
+            $receptionReport->whereYear('document.received_date', $query->selectedYear);
+        }
+
+        $receptionReport = $receptionReport->get();
 
         return response()->json([
             'report_type' => 'Recepción de Documentos',
@@ -318,7 +391,7 @@ class GeneralReportControllers extends Controller
 
     private function generateRequestResponseReport($query)
     {
-        $responseReport = $query
+        $responseReport = DB::table('document')
             ->join('request_response', 'document.id', '=', 'request_response.document_id')
             ->select(
                 'document.reference_code',
@@ -329,7 +402,15 @@ class GeneralReportControllers extends Controller
                 'request_response.created_at as response_date',
                 'request_response.response_content'
             )
-            ->get();
+            ->orderBy('document.received_date', 'desc');
+
+        if ($query->filterType === 'date_range') {
+            $responseReport->whereBetween('document.received_date', [$query->startDate, $query->endDate]);
+        } elseif ($query->filterType === 'year') {
+            $responseReport->whereYear('document.received_date', $query->selectedYear);
+        }
+
+        $responseReport = $responseReport->get();
 
         return response()->json([
             'report_type' => 'Respuestas a Solicitudes',
@@ -382,6 +463,349 @@ class GeneralReportControllers extends Controller
         ]);
     }
 
+    private function generateActiveLoansReport($query)
+    {
+        $activeLoansReport = DB::table('document_loans')
+            ->select(
+                'document_loans.registration_date',
+                'document_loans.order_number',
+                'document_loans.identification',
+                'document_loans.names',
+                'office.name as office_name',
+                'document_loans.return_date',
+                'document_loans.type_of_document_borrowed',
+                'entity.name as entity_name',
+                'users.name as user_name',
+                'document_loans.state'
+            )
+            ->join('office', 'document_loans.office_id', '=', 'office.id')
+            ->join('entity', 'document_loans.entity_id', '=', 'entity.id')
+            ->join('users', 'document_loans.user_id', '=', 'users.id')
+            ->where('document_loans.state', 1); // 1 means loaned
+
+        if ($query->filterType === 'date_range') {
+            $activeLoansReport->whereBetween('document_loans.registration_date', [$query->startDate, $query->endDate]);
+        } elseif ($query->filterType === 'year') {
+            $activeLoansReport->whereYear('document_loans.registration_date', $query->selectedYear);
+        }
+
+        if ($query->departmentId) {
+            $activeLoansReport->where('office.department_id', $query->departmentId);
+        }
+
+        if ($query->officeId) {
+            $activeLoansReport->where('document_loans.office_id', $query->officeId);
+        }
+
+        $activeLoansReport = $activeLoansReport->get();
+
+        return response()->json([
+            'report_type' => 'Préstamos Activos',
+            'headers' => ['Fecha de Registro', 'Número de Orden', 'Identificación', 'Nombres', 'Oficina', 'Fecha de Devolución', 'Tipo de Documento', 'Entidad', 'Usuario', 'Estado'],
+            'data' => $activeLoansReport->map(function ($loan) {
+                $documentType = $loan->type_of_document_borrowed == 1 ? 'Archivo Central' : ($loan->type_of_document_borrowed == 2 ? 'Activo Histórico' : 'Desconocido');
+                $loanState = $loan->state == 1 ? 'Documento Prestado' : 'Documento Retornado';
+                return [
+                    $loan->registration_date,
+                    $loan->order_number,
+                    $loan->identification,
+                    $loan->names,
+                    $loan->office_name,
+                    $loan->return_date,
+                    $documentType,
+                    $loan->entity_name,
+                    $loan->user_name,
+                    $loanState
+                ];
+            })
+        ]);
+    }
+
+    private function generateOverdueLoansReport($query)
+    {
+        $overdueLoansReport = DB::table('document_loans')
+            ->select(
+                'document_loans.registration_date',
+                'document_loans.order_number',
+                'document_loans.identification',
+                'document_loans.names',
+                'office.name as office_name',
+                'document_loans.return_date',
+                'document_loans.type_of_document_borrowed',
+                'entity.name as entity_name',
+                'users.name as user_name',
+                'document_loans.state'
+            )
+            ->join('office', 'document_loans.office_id', '=', 'office.id')
+            ->join('entity', 'document_loans.entity_id', '=', 'entity.id')
+            ->join('users', 'document_loans.user_id', '=', 'users.id')
+            ->where('document_loans.state', 1) // 1 means loaned
+            ->where('document_loans.return_date', '<', now());
+
+        if ($query->filterType === 'date_range') {
+            $overdueLoansReport->whereBetween('document_loans.registration_date', [$query->startDate, $query->endDate]);
+        } elseif ($query->filterType === 'year') {
+            $overdueLoansReport->whereYear('document_loans.registration_date', $query->selectedYear);
+        }
+
+        if ($query->departmentId) {
+            $overdueLoansReport->where('office.department_id', $query->departmentId);
+        }
+
+        if ($query->officeId) {
+            $overdueLoansReport->where('document_loans.office_id', $query->officeId);
+        }
+
+        $overdueLoansReport = $overdueLoansReport->get();
+
+        return response()->json([
+            'report_type' => 'Préstamos Vencidos',
+            'headers' => ['Fecha de Registro', 'Número de Orden', 'Identificación', 'Nombres', 'Oficina', 'Fecha de Devolución', 'Tipo de Documento', 'Entidad', 'Usuario', 'Estado'],
+            'data' => $overdueLoansReport->map(function ($loan) {
+                $documentType = $loan->type_of_document_borrowed == 1 ? 'Archivo Central' : ($loan->type_of_document_borrowed == 2 ? 'Activo Histórico' : 'Desconocido');
+                $loanState = $loan->state == 1 ? 'Documento Prestado' : 'Documento Retornado';
+                return [
+                    $loan->registration_date,
+                    $loan->order_number,
+                    $loan->identification,
+                    $loan->names,
+                    $loan->office_name,
+                    $loan->return_date,
+                    $documentType,
+                    $loan->entity_name,
+                    $loan->user_name,
+                    $loanState
+                ];
+            })
+        ]);
+    }
+
+    private function generateLoansByDateReport($query)
+    {
+        $loansByDateReport = DB::table('document_loans')
+            ->select(
+                'document_loans.registration_date',
+                'document_loans.order_number',
+                'document_loans.identification',
+                'document_loans.names',
+                'office.name as office_name',
+                'document_loans.return_date',
+                'document_loans.type_of_document_borrowed',
+                'entity.name as entity_name',
+                'users.name as user_name',
+                'document_loans.state'
+            )
+            ->join('office', 'document_loans.office_id', '=', 'office.id')
+            ->join('entity', 'document_loans.entity_id', '=', 'entity.id')
+            ->join('users', 'document_loans.user_id', '=', 'users.id');
+
+        if ($query->filterType === 'date_range') {
+            $loansByDateReport->whereBetween('document_loans.registration_date', [$query->startDate, $query->endDate]);
+        } elseif ($query->filterType === 'year') {
+            $loansByDateReport->whereYear('document_loans.registration_date', $query->selectedYear);
+        }
+
+        if ($query->departmentId) {
+            $loansByDateReport->where('office.department_id', $query->departmentId);
+        }
+
+        if ($query->officeId) {
+            $loansByDateReport->where('document_loans.office_id', $query->officeId);
+        }
+
+        $loansByDateReport = $loansByDateReport->get();
+
+        return response()->json([
+            'report_type' => 'Préstamos por Fecha',
+            'headers' => ['Fecha de Registro', 'Número de Orden', 'Identificación', 'Nombres', 'Oficina', 'Fecha de Devolución', 'Tipo de Documento', 'Entidad', 'Usuario', 'Estado'],
+            'data' => $loansByDateReport->map(function ($loan) {
+                $documentType = $loan->type_of_document_borrowed == 1 ? 'Archivo Central' : ($loan->type_of_document_borrowed == 2 ? 'Activo Histórico' : 'Desconocido');
+                $loanState = $loan->state == 1 ? 'Documento Prestado' : 'Documento Retornado';
+                return [
+                    $loan->registration_date,
+                    $loan->order_number,
+                    $loan->identification,
+                    $loan->names,
+                    $loan->office_name,
+                    $loan->return_date,
+                    $documentType,
+                    $loan->entity_name,
+                    $loan->user_name,
+                    $loanState
+                ];
+            })
+        ]);
+    }
+
+    private function generateLoansByOfficeReport($query)
+    {
+        $loansByOfficeReport = DB::table('document_loans')
+            ->select(
+                'office.name as office_name',
+                DB::raw('COUNT(*) as loan_count'),
+                DB::raw('GROUP_CONCAT(CONCAT_WS("|", document_loans.registration_date, document_loans.order_number, document_loans.identification, document_loans.names, document_loans.return_date, document_loans.type_of_document_borrowed, entity.name, users.name, document_loans.state) SEPARATOR "||") as loan_details')
+            )
+            ->join('office', 'document_loans.office_id', '=', 'office.id')
+            ->join('entity', 'document_loans.entity_id', '=', 'entity.id')
+            ->join('users', 'document_loans.user_id', '=', 'users.id')
+            ->groupBy('office.name');
+
+        if ($query->filterType === 'date_range') {
+            $loansByOfficeReport->whereBetween('document_loans.registration_date', [$query->startDate, $query->endDate]);
+        } elseif ($query->filterType === 'year') {
+            $loansByOfficeReport->whereYear('document_loans.registration_date', $query->selectedYear);
+        }
+
+        if ($query->departmentId) {
+            $loansByOfficeReport->where('office.department_id', $query->departmentId);
+        }
+
+        if ($query->officeId) {
+            $loansByOfficeReport->where('document_loans.office_id', $query->officeId);
+        }
+
+        $loansByOfficeReport = $loansByOfficeReport->get();
+
+        return response()->json([
+            'report_type' => 'Préstamos por Oficina',
+            'headers' => ['Oficina', 'Cantidad de Préstamos', 'Detalles de Préstamos'],
+            'data' => $loansByOfficeReport->map(function ($loan) {
+                $loanDetails = collect(explode('||', $loan->loan_details))->map(function ($detail) {
+                    $parts = explode('|', $detail);
+                    $documentType = $parts[5] == 1 ? 'Archivo Central' : ($parts[5] == 2 ? 'Activo Histórico' : 'Desconocido');
+                    $loanState = $parts[8] == 1 ? 'Documento Prestado' : 'Documento Retornado';
+                    return [
+                        'registration_date' => $parts[0] ?? '',
+                        'order_number' => $parts[1] ?? '',
+                        'identification' => $parts[2] ?? '',
+                        'names' => $parts[3] ?? '',
+                        'return_date' => $parts[4] ?? '',
+                        'type_of_document_borrowed' => $documentType,
+                        'entity_name' => $parts[6] ?? '',
+                        'user_name' => $parts[7] ?? '',
+                        'state' => $loanState,
+                    ];
+                })->toArray();
+
+                return [
+                    $loan->office_name,
+                    $loan->loan_count,
+                    $loanDetails
+                ];
+            })
+        ]);
+    }
+
+    private function generateLoansByUserReport($query)
+    {
+        $loansByUserReport = DB::table('document_loans')
+            ->select(
+                'users.name as user_name',
+                DB::raw('COUNT(*) as loan_count'),
+                DB::raw('GROUP_CONCAT(CONCAT_WS("|", document_loans.registration_date, document_loans.order_number, document_loans.identification, document_loans.names, document_loans.return_date, document_loans.type_of_document_borrowed, entity.name, office.name, document_loans.state) SEPARATOR "||") as loan_details')
+            )
+            ->join('office', 'document_loans.office_id', '=', 'office.id')
+            ->join('entity', 'document_loans.entity_id', '=', 'entity.id')
+            ->join('users', 'document_loans.user_id', '=', 'users.id')
+            ->groupBy('users.name');
+
+        if ($query->filterType === 'date_range') {
+            $loansByUserReport->whereBetween('document_loans.registration_date', [$query->startDate, $query->endDate]);
+        } elseif ($query->filterType === 'year') {
+            $loansByUserReport->whereYear('document_loans.registration_date', $query->selectedYear);
+        }
+
+        if ($query->departmentId) {
+            $loansByUserReport->where('office.department_id', $query->departmentId);
+        }
+
+        if ($query->officeId) {
+            $loansByUserReport->where('document_loans.office_id', $query->officeId);
+        }
+
+        $loansByUserReport = $loansByUserReport->get();
+
+        return response()->json([
+            'report_type' => 'Préstamos por Usuario',
+            'headers' => ['Usuario', 'Cantidad de Préstamos', 'Detalles de Préstamos'],
+            'data' => $loansByUserReport->map(function ($loan) {
+                $loanDetails = collect(explode('||', $loan->loan_details))->map(function ($detail) {
+                    $parts = explode('|', $detail);
+                    $documentType = $parts[5] == 1 ? 'Archivo Central' : ($parts[5] == 2 ? 'Activo Histórico' : 'Desconocido');
+                    $loanState = $parts[8] == 1 ? 'Documento Prestado' : 'Documento Retornado';
+                    return [
+                        'registration_date' => $parts[0] ?? '',
+                        'order_number' => $parts[1] ?? '',
+                        'identification' => $parts[2] ?? '',
+                        'names' => $parts[3] ?? '',
+                        'return_date' => $parts[4] ?? '',
+                        'type_of_document_borrowed' => $documentType,
+                        'entity_name' => $parts[6] ?? '',
+                        'office_name' => $parts[7] ?? '',
+                        'state' => $loanState,
+                    ];
+                })->toArray();
+
+                return [
+                    $loan->user_name,
+                    $loan->loan_count,
+                    $loanDetails
+                ];
+            })
+        ]);
+    }
+
+    private function generateReturnsReport($query)
+    {
+        $returnsReport = DB::table('document_returns')
+            ->select(
+                'document_returns.document_loan_order_number',
+                'document_returns.return_date',
+                'document_returns.document_conditions',
+                'document_returns.comments',
+                'document_loans.identification',
+                'document_loans.names',
+                'office.name as office_name',
+                'document_loans.type_of_document_borrowed'
+            )
+            ->join('document_loans', 'document_returns.document_loan_order_number', '=', 'document_loans.order_number')
+            ->join('office', 'document_loans.office_id', '=', 'office.id');
+
+        if ($query->filterType === 'date_range') {
+            $returnsReport->whereBetween('document_returns.return_date', [$query->startDate, $query->endDate]);
+        } elseif ($query->filterType === 'year') {
+            $returnsReport->whereYear('document_returns.return_date', $query->selectedYear);
+        }
+
+        if ($query->departmentId) {
+            $returnsReport->where('office.department_id', $query->departmentId);
+        }
+
+        if ($query->officeId) {
+            $returnsReport->where('document_loans.office_id', $query->officeId);
+        }
+
+        $returnsReport = $returnsReport->get();
+
+        return response()->json([
+            'report_type' => 'Devoluciones',
+            'headers' => ['Número de Orden', 'Fecha de Devolución', 'Condiciones del Documento', 'Comentarios', 'Identificación', 'Nombres', 'Oficina', 'Tipo de Documento'],
+            'data' => $returnsReport->map(function ($return) {
+                $documentType = $return->type_of_document_borrowed == 1 ? 'Archivo Central' : ($return->type_of_document_borrowed == 2 ? 'Activo Histórico' : 'Desconocido');
+                return [
+                    $return->document_loan_order_number,
+                    $return->return_date,
+                    $return->document_conditions,
+                    $return->comments,
+                    $return->identification,
+                    $return->names,
+                    $return->office_name,
+                    $documentType
+                ];
+            })
+        ]);
+    }
+
     public function generatePdfReport(Request $request)
     {
         $request->validate([
@@ -389,7 +813,7 @@ class GeneralReportControllers extends Controller
             'filter_type' => 'required|string',
             'start_date' => 'required_if:filter_type,date_range|date',
             'end_date' => 'required_if:filter_type,date_range|date|after_or_equal:start_date',
-            'year' => 'nullable:filter_type,year|integer|min:2000|max:2099',
+            'year' => 'nullable|integer|min:2000|max:2099',
             'status_id' => 'nullable|string',
             'department_id' => 'nullable|exists:department,id',
             'office_id' => 'nullable|exists:office,id',
@@ -425,5 +849,4 @@ class GeneralReportControllers extends Controller
         // Return the PDF for direct viewing in the browser
         return $pdf->stream($fileName);
     }
-
 }

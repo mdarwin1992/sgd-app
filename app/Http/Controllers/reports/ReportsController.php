@@ -2,22 +2,26 @@
 
 namespace App\Http\Controllers\reports;
 
-use App\Http\Controllers\Controller;
-use App\Http\Controllers\helpers\HelpersController;
-use App\Models\CentralArchive;
-use App\Models\Document;
-use App\Models\DocumentStatus;
-use App\Models\CorrespondenceTransfer;
-use App\Models\DocumentLoan;
-use App\Models\Reception;
-use App\Models\RequestResponse;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Endroid\QrCode\QrCode;
-use Endroid\QrCode\Writer\PngWriter;
 use Exception;
-use Illuminate\Http\JsonResponse;
 use Carbon\Carbon;
+use App\Models\Document;
+use Barryvdh\DomPDF\PDF;
+use App\Models\Reception;
+use App\Models\Retention;
+use Endroid\QrCode\QrCode;
+use App\Models\DocumentLoan;
+use App\Models\HistoricFile;
+use Illuminate\Http\Request;
+use App\Models\CentralArchive;
+use App\Models\DocumentStatus;
+use App\Models\DocumentSending;
+use App\Models\RequestResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use Endroid\QrCode\Writer\PngWriter;
+use App\Models\CorrespondenceTransfer;
+use App\Http\Controllers\helpers\HelpersController;
 
 class ReportsController extends Controller
 {
@@ -155,21 +159,26 @@ class ReportsController extends Controller
         $transferCount = CorrespondenceTransfer::distinct('document_id')->count();
         $responseCount = RequestResponse::distinct('document_id')->count();
 
-        // Calcular total de tareas
-        $totalTaskCount = $receptionCount + $transferCount + $responseCount;
+        // Estadísticas de préstamos de documentos
+        $loansCount = DocumentLoan::count();
+        $activeLoansCount = DocumentLoan::where('state', 1)->count();
+        $returnedLoansCount = DocumentLoan::where('state', 0)->count();
+
+        // Calcular total de tareas (incluyendo préstamos como una tarea más)
+        $totalTaskCount = $receptionCount + $transferCount + $responseCount + $loansCount;
 
         // Obtener conteos de estado
         $statusCounts = DocumentStatus::selectRaw('
         SUM(CASE WHEN status = "RECIBIDA" THEN 1 ELSE 0 END) as received_count,
         SUM(CASE WHEN status = "PROCESANDO" THEN 1 ELSE 0 END) as processing_count,
-        SUM(CASE WHEN status = "CONTESTADO" THEN 1 ELSE 0 END) as completed_count
-    ')
+        SUM(CASE WHEN status = "CONTESTADO" THEN 1 ELSE 0 END) as completed_count')
             ->join('document', 'document.id', '=', 'document_status.document_id')
             ->first();
 
-        // Calcular tasa de productividad
+        // Calcular tasa de productividad (considerando préstamos devueltos como tareas completadas)
+        $completedTasks = $statusCounts->completed_count + $returnedLoansCount;
         $productivityRate = $totalTaskCount > 0
-            ? ($statusCounts->completed_count / $totalTaskCount) * 100
+            ? ($completedTasks / $totalTaskCount) * 100
             : 0;
 
         return response()->json([
@@ -177,6 +186,9 @@ class ReportsController extends Controller
             'receptionCount' => $receptionCount,
             'transferCount' => $transferCount,
             'responseCount' => $responseCount,
+            'totalLoans' => $loansCount,
+            'activeLoans' => $activeLoansCount,
+            'returnedLoans' => $returnedLoansCount,
             'totalTasks' => $totalTaskCount,
             'receivedDocuments' => $statusCounts->received_count,
             'processingTransfers' => $statusCounts->processing_count,
@@ -313,5 +325,107 @@ class ReportsController extends Controller
 
         // Descargar el PDF
         return $pdf->stream('receipt_' . $orderNumber . '.pdf');
+    }
+
+
+    public function getArchiveAndDocumentRecords(): JsonResponse
+    {
+        try {
+            // Retrieve Retention records with their associated Series
+            $retentions = Retention::with('series')->get();
+
+            // Retrieve CentralArchive records with associated Entity, Office, Series, and Subseries
+            $centralArchives = CentralArchive::with('entity', 'office', 'series', 'subseries')->get();
+
+            // Retrieve HistoricFile records with associated Entity, Office, Series, and Subseries
+            $historicFiles = HistoricFile::with('entity', 'office', 'series', 'subseries')->get();
+
+            // Retrieve DocumentSending records with associated Department and Office
+            $documentSendings = DocumentSending::with('department', 'office')->get();
+
+            // Retrieve CorrespondenceTransfer records with associated Document and Office
+            $correspondenceTransfers = CorrespondenceTransfer::with('document', 'office')->get();
+
+            // Retrieve Reception records with associated Document
+            $receptions = Reception::with('document')->get();
+
+            // Retrieve RequestResponse records with associated Document
+            $requestResponses = RequestResponse::with('document')->get();
+
+            // Retrieve DocumentLoan records with associated Office, Entity, and User
+            $documentLoans = DocumentLoan::with('office', 'entity', 'user', 'centralArchiveLoans.centralArchive', 'historicalArchiveLoans.historicFile')->get();
+
+            return response()->json([
+                'retentions' => $retentions,
+                'central_archives' => $centralArchives,
+                'historic_files' => $historicFiles,
+                'document_sendings' => $documentSendings,
+                'correspondence_transfers' => $correspondenceTransfers,
+                'receptions' => $receptions,
+                'request_responses' => $requestResponses,
+                'document_loans' => $documentLoans,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Could not retrieve records: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getArchiveAndDocumentRecordsCalendar(Request $request): JsonResponse
+    {
+        try {
+            $date = $request->input('date');
+
+            // Retrieve CentralArchive records with associated Entity, Office, Series, and Subseries
+            $centralArchives = CentralArchive::with('entity', 'office', 'series', 'subseries')
+                ->whereDate('created_at', $date)
+                ->get();
+
+            // Retrieve HistoricFile records with associated Entity, Office, Series, and Subseries
+            $historicFiles = HistoricFile::with('entity', 'office', 'series', 'subseries')
+                ->whereDate('created_at', $date)
+                ->get();
+
+            // Retrieve DocumentSending records with associated Department and Office
+            $documentSendings = DocumentSending::with('department', 'office')
+                ->whereDate('created_at', $date)
+                ->get();
+
+            // Retrieve CorrespondenceTransfer records with associated Document and Office
+            $correspondenceTransfers = CorrespondenceTransfer::with('document', 'office')
+                ->whereDate('created_at', $date)
+                ->get();
+
+            // Retrieve Reception records with associated Document
+            $receptions = Reception::with('document')
+                ->whereDate('created_at', $date)
+                ->get();
+
+            // Retrieve RequestResponse records with associated Document
+            $requestResponses = RequestResponse::with('document')
+                ->whereDate('created_at', $date)
+                ->get();
+
+            // Retrieve DocumentLoan records with associated Office, Entity, and User
+            $documentLoans = DocumentLoan::with('office', 'entity', 'user', 'centralArchiveLoans.centralArchive', 'historicalArchiveLoans.historicFile')
+                ->whereDate('created_at', $date)
+                ->get();
+
+            return response()->json([
+                //'retentions' => $retentions,
+                'central_archives' => $centralArchives,
+                'historic_files' => $historicFiles,
+                'document_sendings' => $documentSendings,
+                'correspondence_transfers' => $correspondenceTransfers,
+                'receptions' => $receptions,
+                'request_responses' => $requestResponses,
+                'document_loans' => $documentLoans,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Could not retrieve records: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

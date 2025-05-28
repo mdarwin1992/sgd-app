@@ -66,6 +66,7 @@
                                         <thead>
                                             <tr>
                                                 <th>Fecha de registro</th>
+                                                <th>Fecha de Entrega</th>
                                                 <th>Nor Orden</th>
                                                 <th>Nor Documento</th>
                                                 <th>Nombre del prestador</th>
@@ -208,6 +209,9 @@
                         render: function(data) {
                             return new Date(data).toLocaleDateString(); // Formatea la fecha para mostrarla
                         }
+                    },
+                    {
+                        data: 'return_date',
                     },
                     {
                         data: 'order_number'

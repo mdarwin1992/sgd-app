@@ -52,7 +52,7 @@ const HTTPService = (() => {
     // Construir los headers de la petición
     const getHeaders = () => ({
         [CONTENT_TYPE]: 'application/json',
-        [ACCEPT]: 'application/json', ...(getToken() && {[AUTHORIZATION]: `${BEARER} ${getToken()}`}),
+        [ACCEPT]: 'application/json', ...(getToken() && { [AUTHORIZATION]: `${BEARER} ${getToken()}` }),
         [X_XSRF_TOKEN]: getXSRFToken()
     });
 
@@ -63,7 +63,7 @@ const HTTPService = (() => {
 
     const enqueueRequest = (method, path, data) => {
         return new Promise((resolve, reject) => {
-            queue.push({method, path, data, resolve, reject});
+            queue.push({ method, path, data, resolve, reject });
             processQueue();
         });
     };
@@ -72,7 +72,7 @@ const HTTPService = (() => {
         if (runningRequests >= maxConcurrent || queue.length === 0) return;
 
         runningRequests++;
-        const {method, path, data, resolve, reject} = queue.shift();
+        const { method, path, data, resolve, reject } = queue.shift();
 
         request(method, path, data)
             .then(resolve)
@@ -86,7 +86,7 @@ const HTTPService = (() => {
     // Manejo de errores mejorado
     const handleError = (error, method, path, data) => {
         console.error('Error en la petición HTTP:', error);
-        console.error('Detalles de la solicitud:', {method, path, data});
+        console.error('Detalles de la solicitud:', { method, path, data });
         throw new Error(error.message === 'Failed to fetch' ? 'Error de red o CORS' : `Error HTTP: ${error.message}`);
     };
 
@@ -94,7 +94,7 @@ const HTTPService = (() => {
     const request = async (method, path, data = null) => {
         const options = {
             method, headers: getHeaders(), credentials: 'include', // Necesario para Sanctum
-            ...(data && {body: JSON.stringify(data)})
+            ...(data && { body: JSON.stringify(data) })
         };
 
         try {

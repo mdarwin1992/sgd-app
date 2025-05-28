@@ -48,7 +48,7 @@ class LoginController extends Controller
 
             // Retrieve user office
             $office = Office::where('user_id', $user->id)->first(['id']);
-            $officeId = $office ? $office->id : null;
+            $officeId = $office ? $office->id : $user->id;
 
             // Retrieve user attributes (assuming the getUserAttributes method is defined in the controller)
             $attributes = $this->getUserAttributes($user);

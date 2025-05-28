@@ -358,7 +358,9 @@
                     office_id,
                     central_archive_id,
                     return_date,
-                    type_of_document_borrowed
+                    type_of_document_borrowed,
+                    entity_id = Helpers.getStoredValue('entity_id'),
+                    user_id = Helpers.getStoredValue('user_office_id'),
                 });
 
                 Helpers.getMessage('Prestamo documental creada exitosamente', '/dashboard/prestamos-documental');

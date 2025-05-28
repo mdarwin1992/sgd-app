@@ -22,7 +22,9 @@ class DocumentLoan extends Model
         'names',
         'office_id',
         'return_date',
-        'type_of_document_borrowed'
+        'type_of_document_borrowed',
+        'entity_id',
+        'user_id',
     ];
 
 
@@ -44,5 +46,15 @@ class DocumentLoan extends Model
     public function documentReturn()
     {
         return $this->hasOne(DocumentReturn::class, 'document_loan_order_number', 'order_number');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function entity()
+    {
+        return $this->belongsTo(Entity::class, 'entity_id');
     }
 }

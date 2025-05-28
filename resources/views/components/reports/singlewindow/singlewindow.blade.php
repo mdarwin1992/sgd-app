@@ -11,50 +11,54 @@
                         <div class="card-body pt-0">
                             <div class="row mt-4">
                                 <div class="col-md-12">
-                                    <h4 class="header-title"> Reporte general ventañilla unica</h4>
+                                    <h4 class="header-title">Reportes de Documentos y Préstamos</h4>
                                     <h5 class="text-muted fw-normal mt-0 mb-3 text-truncate" title="Campaign Sent">
-                                        Resumen de todas las solicitudes recibidas y procesadas, incluyendo su estado y
-                                        tiempos de respuesta. Evalúa la eficiencia del servicio.
+                                        Resumen de todas las solicitudes recibidas, procesadas y préstamos de documentos.
                                     </h5>
                                     <form id="reportForm">
                                         <div class="row">
                                             <div class="col-md-4 mb-3">
                                                 <label for="reportType" class="form-label">Tipo de Reporte</label>
-                                                <select class="form-control" id="reportType" name="report_type"
-                                                        required>
+                                                <select class="form-control" id="reportType" name="report_type" required>
                                                     <option value="">Seleccione...</option>
-                                                    <option value="resumen_general">RESUMEN GENERAL</option>
-                                                    <option value="flujo_documentos">RECEPCIÓN</option>
-                                                    <option value="tiempos_respuesta">TRANSFERENCIA</option>
-                                                    <option value="transferencias_correspondencia">BUZON</option>
-                                                    <option value="actividad_entidad">ENVÍO DE DOCUMENTO</option>
-                                                    <option value="recepcion">FLUJO DE DOCUMENTOS</option>
-                                                    <option value="respuesta_solicitud">TIEMPOS DE RESPUESTA</option>
-                                                    <option value="envio_documento">ESTADO DE DOCUMENTOS</option>
-                                                    <option value="estado_documentos">ESTADOS DEL DOCUMENTO</option>
+                                                    <optgroup label="Documentos">
+                                                        <option value="resumen_general">RESUMEN GENERAL</option>
+                                                        <option value="flujo_documentos">RECEPCIÓN</option>
+                                                        <option value="tiempos_respuesta">TRANSFERENCIA</option>
+                                                        <option value="transferencias_correspondencia">BUZON</option>
+                                                        <option value="actividad_entidad">ENVÍO DE DOCUMENTO</option>
+                                                        <option value="recepcion">FLUJO DE DOCUMENTOS</option>
+                                                        <option value="respuesta_solicitud">TIEMPOS DE RESPUESTA</option>
+                                                        <option value="estado_documentos">ESTADOS DEL DOCUMENTO</option>
+                                                    </optgroup>
+                                                    <optgroup label="Préstamos">
+                                                        <option value="prestamos_activos">PRÉSTAMOS ACTIVOS</option>
+                                                        <option value="prestamos_vencidos">PRÉSTAMOS VENCIDOS</option>
+                                                        <option value="prestamos_por_fecha">PRÉSTAMOS POR FECHA</option>
+                                                        <option value="prestamos_por_oficina">PRÉSTAMOS POR OFICINA</option>
+                                                        <option value="prestamos_por_usuario">PRÉSTAMOS POR USUARIO</option>
+                                                        <option value="devoluciones">DEVOLUCIONES</option>
+                                                    </optgroup>
                                                 </select>
                                             </div>
                                         </div>
                                         <div class="row">
                                             <div class="col-md-4 mb-3">
                                                 <label for="filterType" class="form-label">Tipo de Filtro</label>
-                                                <select class="form-control" id="filterType" name="filter_type"
-                                                        required>
+                                                <select class="form-control" id="filterType" name="filter_type" required>
                                                     <option value="">Seleccione...</option>
                                                     <option value="date_range">RANGO DE FECHAS</option>
-                                                    <option value="year">AÑO</option>
-
+                                                    {{--  <option value="year">AÑO</option> --}}
                                                 </select>
                                             </div>
                                             <div class="col-md-4 mb-3 year-field" style="display: none;">
                                                 <label for="year" class="form-label">Año</label>
-                                                <input type="number" class="form-control" id="year" name="year"
-                                                       min="2000" max="2099">
+                                                <input type="number" class="form-control" id="year"
+                                                    name="selected_year" min="2000" max="2099">
                                             </div>
                                             <div class="col-md-4 mb-3 date-range-field" style="display: none;">
                                                 <label for="startDate" class="form-label">Fecha de Inicio</label>
-                                                <input type="date" class="form-control" id="startDate"
-                                                       name="start_date">
+                                                <input type="date" class="form-control" id="startDate" name="start_date">
                                             </div>
                                             <div class="col-md-4 mb-3 date-range-field" style="display: none;">
                                                 <label for="endDate" class="form-label">Fecha de Fin</label>
@@ -66,10 +70,10 @@
                                                 <label for="status" class="form-label">Estado (opcional)</label>
                                                 <select class="form-control" id="status_id" name="status_id">
                                                     <option value="">Todos</option>
-                                                    <option value="RECIBIDA">Recibida</option>
-                                                    <option value="PROCESANDO">Procesando</option>
-                                                    <option value="CONTESTADO">Contestado</option>
-                                                    <option value="ARCHIVADO">Archivado</option>
+                                                    <option value="recibida">Recibida</option>
+                                                    <option value="procesando">Procesando</option>
+                                                    <option value="contestado">Contestado</option>
+                                                    <option value="archivado">Archivado</option>
                                                 </select>
                                             </div>
                                             <div class="col-md-4 mb-3">
@@ -88,18 +92,17 @@
                                         </div>
                                         <div class="d-flex justify-content-end">
                                             <button class="btn btn-warning rounded-pill btn-tool me-2"
-                                                    id="generatePdfBtn">Generate PDF
+                                                id="generatePdfBtn">Generate PDF
                                             </button>
                                             <a href="/dashboard" class="btn btn-primary rounded-pill btn-tool me-2">
                                                 <i class="fas fa-times me-1"></i> Cancelar
                                             </a>
                                             <button type="submit" class="btn btn-success rounded-pill"
-                                                    id="submitButton">
+                                                id="submitButton">
                                                 <i class="fas fa-check me-1"></i> Generar Reporte
                                             </button>
                                         </div>
                                     </form>
-
 
                                     <div id="customReportResult" class="mt-3"></div>
                                 </div>
@@ -110,6 +113,66 @@
             </div>
         </div>
     </div>
+@endsection
+
+@section('styles')
+    <style>
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        .table {
+            width: 100%;
+            margin-bottom: 1rem;
+            color: #212529;
+        }
+
+        .table th,
+        .table td {
+            padding: 0.75rem;
+            vertical-align: top;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .table thead th {
+            vertical-align: bottom;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .table tbody+tbody {
+            border-top: 2px solid #dee2e6;
+        }
+
+        .table-sm th,
+        .table-sm td {
+            padding: 0.3rem;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .modal-body {
+            position: relative;
+            padding: 1rem;
+        }
+
+        .loading-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+        }
+
+        .btn-tool {
+            margin-right: 0.5rem;
+        }
+    </style>
 @endsection
 
 @section('scripts')
@@ -129,7 +192,36 @@
                 officeSelect: document.getElementById('office_id'),
                 reportForm: '#reportForm',
                 customReportResult: document.getElementById('customReportResult'),
-                generatePdfBtn: document.getElementById('generatePdfBtn')
+                generatePdfBtn: document.getElementById('generatePdfBtn'),
+                reportType: document.getElementById('reportType')
+            };
+
+            // Función para determinar el color del badge según el valor (con outline)
+            const getBadgeColor = (value) => {
+                if (!value) return 'outline-secondary';
+
+                const lowerValue = value.toString().toLowerCase();
+
+                // Para Tipo de Documento
+                if (lowerValue.includes('oficio')) return 'outline-primary';
+                if (lowerValue.includes('memorandum') || lowerValue.includes('memorándum'))
+                    return 'outline-info';
+                if (lowerValue.includes('circular')) return 'outline-warning';
+                if (lowerValue.includes('resolución')) return 'outline-success';
+                if (lowerValue.includes('nota')) return 'outline-dark';
+
+                // Para Estado
+                if (lowerValue.includes('pendiente')) return 'outline-warning';
+                if (lowerValue.includes('aprobado') || lowerValue.includes('completado') || lowerValue.includes(
+                        'finalizado')) return 'outline-success';
+                if (lowerValue.includes('rechazado') || lowerValue.includes('cancelado') || lowerValue.includes(
+                        'anulado')) return 'outline-danger';
+                if (lowerValue.includes('en proceso') || lowerValue.includes('revisión')) return 'outline-info';
+                if (lowerValue.includes('archivado')) return 'outline-secondary';
+                if (lowerValue.includes('urgente')) return 'outline-danger';
+
+                // Valor por defecto
+                return 'badge-outline-primary';
             };
 
             // Private methods
@@ -149,7 +241,8 @@
 
             const fetchOffices = async (departmentId) => {
                 try {
-                    const data = await HTTPService.get(`/api/dashboard/office/show/offices/${departmentId}`);
+                    const data = await HTTPService.get(
+                        `/api/dashboard/office/show/offices/${departmentId}`);
                     elements.officeSelect.innerHTML = '<option value="">Todas</option>';
                     data.forEach(office => {
                         const option = document.createElement('option');
@@ -162,7 +255,7 @@
                 }
             };
 
-            const generateReport = async () => {
+            const generateReport = async (event) => {
                 event.preventDefault();
 
                 if (isSubmitting) {
@@ -170,24 +263,30 @@
                 }
 
                 isSubmitting = true;
+                elements.customReportResult.innerHTML =
+                    '<div class="loading-indicator">Generando reporte...</div>';
 
                 const form = document.querySelector(elements.reportForm);
                 const formData = new FormData(form);
                 const formDataObject = Object.fromEntries(formData);
 
                 try {
-                    const response = await HTTPService.post('/api/single-window/reports/generate', formDataObject);
-                    console.log(response)
+                    let endpoint = '/api/single-window/reports/generate';
 
+                    // Cambiar el endpoint según el tipo de reporte
+                    if (formDataObject.report_type.startsWith('prestamos_')) {
+                        endpoint = '/api/reports/loans/generate';
+                    }
+
+                    const response = await HTTPService.post(endpoint, formDataObject);
                     displayReportResult(response);
                 } catch (error) {
                     console.error('Error:', error);
-                    elements.customReportResult.innerHTML = `<p class="text-danger">Error al generar el reporte: ${error.message}</p>`;
+                    elements.customReportResult.innerHTML =
+                        `<p class="text-danger">Error al generar el reporte: ${error.message}</p>`;
                 } finally {
                     isSubmitting = false;
                 }
-
-
             };
 
             const generatePdf = async () => {
@@ -196,28 +295,35 @@
                 }
 
                 isSubmitting = true;
+                elements.customReportResult.innerHTML =
+                    '<div class="loading-indicator">Generando PDF...</div>';
 
                 const form = document.querySelector(elements.reportForm);
                 const formData = new FormData(form);
                 const formDataObject = Object.fromEntries(formData);
 
                 try {
-                    const response = await HTTPService.postPdf('/api/single-window/reports/generate-pdf', formDataObject, {
-                        responseType: 'blob' // Indica que esperamos una respuesta binaria
+                    let endpoint = '/api/single-window/reports/generate-pdf';
+
+                    // Cambiar el endpoint según el tipo de reporte
+                    if (formDataObject.report_type.startsWith('prestamos_')) {
+                        endpoint = '/api/reports/loans/generate-pdf';
+                    }
+
+                    const response = await HTTPService.postPdf(endpoint, formDataObject, {
+                        responseType: 'blob'
                     });
 
-                    // Crear un Blob con la respuesta
-                    const blob = new Blob([response], {type: 'application/pdf'});
-
-                    // Crear una URL del blob
+                    const blob = new Blob([response], {
+                        type: 'application/pdf'
+                    });
                     const url = URL.createObjectURL(blob);
-
-                    // Abrir el PDF en una nueva pestaña
                     const newTab = window.open(url, '_blank');
 
-                    // Si el navegador bloquea la apertura de la pestaña, mostrar una alerta
                     if (!newTab || newTab.closed || typeof newTab.closed === 'undefined') {
-                        alert('La nueva pestaña fue bloqueada. Permite las ventanas emergentes para ver el PDF.');
+                        alert(
+                            'La nueva pestaña fue bloqueada. Permite las ventanas emergentes para ver el PDF.'
+                        );
                     }
                 } catch (error) {
                     console.error('Error:', error);
@@ -231,131 +337,6 @@
                 }
             };
 
-            /* const createTable = (headers, data) => {
-                 const table = document.createElement('table');
-                 table.className = 'table table-striped dt-responsive nowrap w-100';
-
-                 const thead = document.createElement('thead');
-                 const headerRow = document.createElement('tr');
-                 headers.forEach(header => {
-                     const th = document.createElement('th');
-                     th.textContent = header;
-                     headerRow.appendChild(th);
-                 });
-                 thead.appendChild(headerRow);
-                 table.appendChild(thead);
-
-                 const tbody = document.createElement('tbody');
-                 data.forEach(row => {
-                     const tr = document.createElement('tr');
-                     row.forEach((cell, index) => {
-                         const td = document.createElement('td');
-                         if (index === 3 && Array.isArray(cell)) { // Detalles de Documentos
-                             const detailsTable = createDetailsTable(cell);
-                             td.appendChild(detailsTable);
-                         } else {
-                             td.textContent = cell;
-                         }
-                         tr.appendChild(td);
-                     });
-                     tbody.appendChild(tr);
-                 });
-                 table.appendChild(tbody);
-
-                 return table;
-             };
-
-             const createDetailsTable = (details) => {
-                 const table = document.createElement('table');
-                 table.className = 'table table-sm';
-
-                 const thead = document.createElement('thead');
-                 const headerRow = document.createElement('tr');
-                 ['Código', 'Fecha Recibido', 'Remitente', 'Asunto'].forEach(header => {
-                     const th = document.createElement('th');
-                     th.textContent = header;
-                     headerRow.appendChild(th);
-                 });
-                 thead.appendChild(headerRow);
-                 table.appendChild(thead);
-
-                 const tbody = document.createElement('tbody');
-                 details.forEach(doc => {
-                     const tr = document.createElement('tr');
-                     ['reference_code', 'received_date', 'sender_name', 'subject'].forEach(key => {
-                         const td = document.createElement('td');
-                         td.textContent = doc[key] || 'N/A';
-                         tr.appendChild(td);
-                     });
-                     tbody.appendChild(tr);
-                 });
-                 table.appendChild(tbody);
-
-                 return table;
-             };
-
-             const displayGeneralSummary = (data) => {
-                 const summaryTable = document.createElement('table');
-                 summaryTable.className = 'table table-bordered';
-
-                 for (const [key, value] of Object.entries(data)) {
-                     const row = summaryTable.insertRow();
-                     const keyCell = row.insertCell(0);
-                     keyCell.textContent = key;
-                     keyCell.style.fontWeight = 'bold';
-
-                     const valueCell = row.insertCell(1);
-                     if (key === "Documentos por estado" || key === "Ultimos documentos") {
-                         const subTable = document.createElement('table');
-                         subTable.className = 'table table-sm';
-
-                         if (Array.isArray(value)) {
-                             // Para "Ultimos documentos"
-                             value.forEach(item => {
-                                 const subRow = subTable.insertRow();
-                                 subRow.insertCell(0).textContent = item.status;
-                                 subRow.insertCell(1).textContent = item.count;
-                             });
-                         } else {
-                             // Para "Documentos por estado"
-                             for (const [subKey, subValue] of Object.entries(value)) {
-                                 const subRow = subTable.insertRow();
-                                 subRow.insertCell(0).textContent = subKey;
-                                 subRow.insertCell(1).textContent = subValue;
-                             }
-                         }
-                         valueCell.appendChild(subTable);
-                     } else {
-                         valueCell.textContent = value !== null && value !== undefined ? value : 'No disponible';
-                     }
-                 }
-
-                 elements.customReportResult.appendChild(summaryTable);
-             };
-
-             const displayReportResult = (data) => {
-                 elements.customReportResult.innerHTML = '<h3>Resultado del Reporte:</h3>';
-                 if (data.error) {
-                     elements.customReportResult.innerHTML += `<p class="text-danger">${data.error}</p>`;
-                     if (data.trace) {
-                         console.error('Error trace:', data.trace);
-                     }
-                 } else if (data.data) {
-                     elements.customReportResult.innerHTML += `<h4>${data.report_type}</h4>`;
-                     if (Array.isArray(data.data)) {
-                         const table = createTable(data.headers, data.data);
-                         elements.customReportResult.appendChild(table);
-                     } else if (typeof data.data === 'object') {
-                         displayGeneralSummary(data.data);
-                     } else {
-                         elements.customReportResult.innerHTML += '<p>No se pudo generar el reporte. Formato de datos inesperado.</p>';
-                     }
-                 } else {
-                     elements.customReportResult.innerHTML += '<p>No se recibieron datos para el reporte.</p>';
-                 }
-             };*/
-
-            // Crear una única instancia de la modal
             const createPdfModal = () => {
                 const modal = document.createElement('div');
                 modal.className = 'modal fade';
@@ -366,43 +347,40 @@
                 modal.setAttribute('aria-hidden', 'true');
 
                 modal.innerHTML = `
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="pdfModalLabel">Ver PDF</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <iframe id="pdfIframe" width="100%" height="500px" frameborder="0"></iframe>
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="pdfModalLabel">Ver PDF</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <iframe id="pdfIframe" width="100%" height="500px" frameborder="0"></iframe>
+                    </div>
                 </div>
             </div>
-        </div>
-    `;
+        `;
 
                 document.body.appendChild(modal);
                 return modal;
             };
 
-// Crear la instancia de la modal una vez
             const pdfModal = createPdfModal();
 
-// Función para mostrar la modal con un PDF específico
             const showPdfModal = (pdfUrl) => {
                 const iframe = document.getElementById('pdfIframe');
                 iframe.src = pdfUrl;
                 $(pdfModal).modal('show');
             };
 
-// Función para cerrar la modal
             const closePdfModal = () => {
                 $(pdfModal).modal('hide');
             };
 
             const createTable = (headers, data) => {
                 const table = document.createElement('table');
-                table.className = 'table table-striped dt-responsive nowrap w-100';
+                table.className = 'table table-striped table-bordered dt-responsive nowrap w-100';
 
                 const thead = document.createElement('thead');
                 const headerRow = document.createElement('tr');
@@ -419,17 +397,28 @@
                     const tr = document.createElement('tr');
                     row.forEach((cell, index) => {
                         const td = document.createElement('td');
-                        if (index === 3 && Array.isArray(cell)) { // Detalles de Documentos
+
+                        // Aplicar badge para columnas de Tipo o Estado
+                        const headerText = headers[index].toLowerCase();
+                        if (headerText.includes('tipo') || headerText.includes('estado') ||
+                            headerText.includes('status') || headerText.includes('state')) {
+                            const badge = document.createElement('span');
+                            const colorClass = getBadgeColor(cell);
+                            badge.className = `badge ${colorClass}`;
+                            badge.textContent = cell || 'N/A';
+                            td.appendChild(badge);
+                        } else if (index === 3 && Array.isArray(cell)) {
                             const detailsTable = createDetailsTable(cell);
                             td.appendChild(detailsTable);
-                        } else if (typeof cell === 'string' && cell.toLowerCase().endsWith('.pdf')) {
+                        } else if (typeof cell === 'string' && cell.toLowerCase().endsWith(
+                                '.pdf')) {
                             const button = document.createElement('button');
                             button.textContent = 'Ver';
                             button.className = 'btn btn-sm btn-outline-primary';
                             button.onclick = () => showPdfModal(cell);
                             td.appendChild(button);
                         } else {
-                            td.textContent = cell;
+                            td.textContent = cell || 'N/A';
                         }
                         tr.appendChild(td);
                     });
@@ -446,7 +435,7 @@
 
                 const thead = document.createElement('thead');
                 const headerRow = document.createElement('tr');
-                ['Código', 'Fecha Recibido', 'Remitente', 'Asunto'].forEach(header => {
+                ['Código', 'Fecha Recibido', 'Remitente', 'Asunto', 'Estado'].forEach(header => {
                     const th = document.createElement('th');
                     th.textContent = header;
                     headerRow.appendChild(th);
@@ -457,19 +446,80 @@
                 const tbody = document.createElement('tbody');
                 details.forEach(doc => {
                     const tr = document.createElement('tr');
-                    ['reference_code', 'received_date', 'sender_name', 'subject'].forEach(key => {
-                        const td = document.createElement('td');
-                        if (key === 'subject' && doc[key].toLowerCase().endsWith('.pdf')) {
-                            const button = document.createElement('button');
-                            button.textContent = 'Ver';
-                            button.className = 'btn btn-sm btn-outline-primary';
-                            button.onclick = () => showPdfModal(doc[key]);
-                            td.appendChild(button);
-                        } else {
-                            td.textContent = doc[key] || 'N/A';
-                        }
-                        tr.appendChild(td);
-                    });
+                    ['reference_code', 'received_date', 'sender_name', 'subject', 'status'].forEach(
+                        key => {
+                            const td = document.createElement('td');
+                            if (key === 'subject' && doc[key] && doc[key].toLowerCase().endsWith(
+                                    '.pdf')) {
+                                const button = document.createElement('button');
+                                button.textContent = 'Ver';
+                                button.className = 'btn btn-sm btn-outline-primary';
+                                button.onclick = () => showPdfModal(doc[key]);
+                                td.appendChild(button);
+                            } else if ((key === 'status' || key === 'state') && doc[key]) {
+                                const badge = document.createElement('span');
+                                const colorClass = getBadgeColor(doc[key]);
+                                badge.className = `badge ${colorClass}`;
+                                badge.textContent = doc[key] || 'N/A';
+                                td.appendChild(badge);
+                            } else {
+                                td.textContent = doc[key] || 'N/A';
+                            }
+                            tr.appendChild(td);
+                        });
+                    tbody.appendChild(tr);
+                });
+                table.appendChild(tbody);
+
+                return table;
+            };
+
+            const createLoanDetailsTable = (details) => {
+                const table = document.createElement('table');
+                table.className = 'table table-sm';
+
+                const thead = document.createElement('thead');
+                const headerRow = document.createElement('tr');
+                ['Tipo', 'Código', 'Descripción', 'Estado'].forEach(header => {
+                    const th = document.createElement('th');
+                    th.textContent = header;
+                    headerRow.appendChild(th);
+                });
+                thead.appendChild(headerRow);
+                table.appendChild(thead);
+
+                const tbody = document.createElement('tbody');
+                details.forEach(item => {
+                    const tr = document.createElement('tr');
+
+                    // Tipo de documento
+                    const typeTd = document.createElement('td');
+                    const typeBadge = document.createElement('span');
+                    const typeColorClass = getBadgeColor(item.type);
+                    typeBadge.className = `badge ${typeColorClass}`;
+                    typeBadge.textContent = item.type || 'N/A';
+                    typeTd.appendChild(typeBadge);
+                    tr.appendChild(typeTd);
+
+                    // Código
+                    const codeTd = document.createElement('td');
+                    codeTd.textContent = item.code || 'N/A';
+                    tr.appendChild(codeTd);
+
+                    // Descripción
+                    const descTd = document.createElement('td');
+                    descTd.textContent = item.description || 'N/A';
+                    tr.appendChild(descTd);
+
+                    // Estado
+                    const statusTd = document.createElement('td');
+                    const statusBadge = document.createElement('span');
+                    const statusColorClass = getBadgeColor(item.status);
+                    statusBadge.className = `badge ${statusColorClass}`;
+                    statusBadge.textContent = item.status || 'N/A';
+                    statusTd.appendChild(statusBadge);
+                    tr.appendChild(statusTd);
+
                     tbody.appendChild(tr);
                 });
                 table.appendChild(tbody);
@@ -488,22 +538,37 @@
                     keyCell.style.fontWeight = 'bold';
 
                     const valueCell = row.insertCell(1);
-                    if (key === "Documentos por estado" || key === "Ultimos documentos") {
+                    if (key === "Documentos por estado" || key === "Ultimos documentos" ||
+                        key === "Préstamos por estado" || key === "Últimos préstamos") {
                         const subTable = document.createElement('table');
                         subTable.className = 'table table-sm';
 
                         if (Array.isArray(value)) {
-                            // Para "Ultimos documentos"
                             value.forEach(item => {
                                 const subRow = subTable.insertRow();
-                                subRow.insertCell(0).textContent = item.status;
-                                subRow.insertCell(1).textContent = item.count;
+
+                                // Celda de estado con badge
+                                const statusCell = subRow.insertCell(0);
+                                const statusBadge = document.createElement('span');
+                                const statusColorClass = getBadgeColor(item.status || item.estado);
+                                statusBadge.className = `badge ${statusColorClass}`;
+                                statusBadge.textContent = item.status || item.estado || 'N/A';
+                                statusCell.appendChild(statusBadge);
+
+                                subRow.insertCell(1).textContent = item.count || item.cantidad || 'N/A';
                             });
                         } else {
-                            // Para "Documentos por estado"
                             for (const [subKey, subValue] of Object.entries(value)) {
                                 const subRow = subTable.insertRow();
-                                subRow.insertCell(0).textContent = subKey;
+
+                                // Celda de estado con badge
+                                const statusCell = subRow.insertCell(0);
+                                const statusBadge = document.createElement('span');
+                                const statusColorClass = getBadgeColor(subKey);
+                                statusBadge.className = `badge ${statusColorClass}`;
+                                statusBadge.textContent = subKey;
+                                statusCell.appendChild(statusBadge);
+
                                 subRow.insertCell(1).textContent = subValue;
                             }
                         }
@@ -514,8 +579,25 @@
                         button.className = 'btn btn-sm btn-outline-primary';
                         button.onclick = () => showPdfModal(value);
                         valueCell.appendChild(button);
+                    } else if (key === "Documentos prestados" || key === "Historial de préstamos") {
+                        const loanTable = createLoanDetailsTable(value);
+                        valueCell.appendChild(loanTable);
                     } else {
-                        valueCell.textContent = value !== null && value !== undefined ? value : 'No disponible';
+                        // Aplicar badge si el valor parece ser un estado
+                        if (typeof value === 'string' && (
+                                value.toLowerCase().includes('pendiente') ||
+                                value.toLowerCase().includes('aprobado') ||
+                                value.toLowerCase().includes('rechazado') ||
+                                value.toLowerCase().includes('completado'))) {
+                            const badge = document.createElement('span');
+                            const colorClass = getBadgeColor(value);
+                            badge.className = `badge ${colorClass}`;
+                            badge.textContent = value;
+                            valueCell.appendChild(badge);
+                        } else {
+                            valueCell.textContent = value !== null && value !== undefined ? value :
+                                'No disponible';
+                        }
                     }
                 }
 
@@ -530,43 +612,34 @@
                         console.error('Error trace:', data.trace);
                     }
                 } else if (data.data) {
-                    elements.customReportResult.innerHTML += `<h4>${data.report_type}</h4>`;
+                    elements.customReportResult.innerHTML +=
+                        `<h4>${data.report_type || data.tipo_reporte}</h4>`;
                     if (Array.isArray(data.data)) {
-                        const table = createTable(data.headers, data.data);
+                        const table = createTable(data.headers || data.encabezados, data.data);
                         elements.customReportResult.appendChild(table);
                     } else if (typeof data.data === 'object') {
                         displayGeneralSummary(data.data);
                     } else {
-                        elements.customReportResult.innerHTML += '<p>No se pudo generar el reporte. Formato de datos inesperado.</p>';
+                        elements.customReportResult.innerHTML +=
+                            '<p>No se pudo generar el reporte. Formato de datos inesperado.</p>';
                     }
                 } else {
                     elements.customReportResult.innerHTML += '<p>No se recibieron datos para el reporte.</p>';
                 }
             };
 
-// Agregar un botón para cerrar la modal manualmente si es necesario
-            const addCloseModalButton = () => {
-                const closeButton = document.createElement('button');
-                closeButton.textContent = 'Cerrar PDF';
-                closeButton.className = 'btn btn-secondary mt-3';
-                closeButton.onclick = closePdfModal;
-                elements.customReportResult.appendChild(closeButton);
-            };
-
-// Llamar a esta función después de displayReportResult si se desea agregar el botón de cierre
-// addCloseModalButton();
-
             // Initialize when DOM is ready
             $(document).ready(() => {
                 fetchDepartments();
-                // Set up event listeners
-                elements.filterType.addEventListener('change', function () {
+
+                elements.filterType.addEventListener('change', function() {
                     const isYearFilter = this.value === 'year';
                     elements.yearField.style.display = isYearFilter ? 'block' : 'none';
-                    elements.dateRangeFields.forEach(field => field.style.display = isYearFilter ? 'none' : 'block');
+                    elements.dateRangeFields.forEach(field => field.style.display = isYearFilter ?
+                        'none' : 'block');
                 });
 
-                elements.departmentSelect.addEventListener('change', function () {
+                elements.departmentSelect.addEventListener('change', function() {
                     if (this.value) {
                         fetchOffices(this.value);
                     } else {
@@ -575,25 +648,13 @@
                 });
 
                 document.querySelector(elements.reportForm).addEventListener('submit', generateReport);
-
-
-                elements.generatePdfBtn.addEventListener('click', function () {
-                    generatePdf();
-                });
+                elements.generatePdfBtn.addEventListener('click', generatePdf);
             });
 
-            // Create public API
-            const publicApi = {
+            return {
                 generateReport,
-                generatePdf,
+                generatePdf
             };
-
-            // Expose to window object for inline event handlers
-            window.ReportComponent = publicApi;
-
-            // Return public API for module imports
-            return publicApi;
         })();
-
     </script>
 @endsection

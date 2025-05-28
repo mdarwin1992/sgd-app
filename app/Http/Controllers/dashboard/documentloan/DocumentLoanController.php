@@ -64,6 +64,8 @@ class DocumentLoanController extends Controller
                 'office_id' => $request->office_id,
                 'return_date' => $request->return_date,
                 'type_of_document_borrowed' => $request->type_of_document_borrowed,
+                'entity_id' => $request->entity_id,
+                'user_id' => $request->user_id,
             ]);
 
             if ($request->type_of_document_borrowed == 1) {

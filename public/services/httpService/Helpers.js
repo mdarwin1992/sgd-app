@@ -69,6 +69,10 @@ class Helpers {
             return localStorage.getItem('token');
         }
 
+        static getStoredValue(key) {
+            return localStorage.getItem(key);
+        }
+
         /**
          * Verifica si el usuario está autenticado.
          * @return {boolean} - Devuelve true si hay un token.

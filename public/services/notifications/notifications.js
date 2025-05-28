@@ -1,48 +1,40 @@
 class NotificationHandler {
     constructor() {
         this.elements = {
-            // Selectores para los elementos principales
             notificationContainer: '.px-3[data-simplebar]',
             clearAllBtn: '.text-dark.text-decoration-underline',
             viewAllBtn: '.dropdown-item.text-center.text-primary',
-            notificationIcon: '.ri-notification-3-line' // Selector para el icono de la campana
+            notificationIcon: '.ri-notification-3-line'
         };
 
-        // Obtener referencias a los elementos del DOM
         this.notificationContainer = document.querySelector(this.elements.notificationContainer);
         this.clearAllBtn = document.querySelector(this.elements.clearAllBtn);
         this.viewAllBtn = document.querySelector(this.elements.viewAllBtn);
         this.notificationIcon = document.querySelector(this.elements.notificationIcon);
 
-        // Verificar si se encontró el contenedor de notificaciones
         if (!this.notificationContainer) {
             console.error('Notification container not found');
             return;
         }
 
-        // Obtener datos de usuario y token
         this.userId = this.getUserId();
         this.token = this.getToken();
-        this.refreshInterval = 30000; // Intervalo de actualización: 30 segundos
+        this.refreshInterval = 30000;
         this.refreshTimer = null;
 
-        // Inicializar los eventos y el auto-refresh
         this.initEventListeners();
         this.startAutoRefresh();
     }
 
-    // Obtener ID de usuario del localStorage
     getUserId() {
         const attributes = JSON.parse(localStorage.getItem('attributes'));
         return attributes ? attributes.id : null;
     }
 
-    // Obtener token del localStorage
     getToken() {
         return localStorage.getItem('token');
     }
 
-    // Inicializar los event listeners
     initEventListeners() {
         if (this.clearAllBtn) {
             this.clearAllBtn.addEventListener('click', () => this.clearAllNotifications());
@@ -52,13 +44,11 @@ class NotificationHandler {
         }
     }
 
-    // Iniciar la actualización automática
     startAutoRefresh() {
-        this.fetchNotifications(); // Obtención inicial
+        this.fetchNotifications();
         this.refreshTimer = setInterval(() => this.fetchNotifications(), this.refreshInterval);
     }
 
-    // Detener la actualización automática
     stopAutoRefresh() {
         if (this.refreshTimer) {
             clearInterval(this.refreshTimer);
@@ -66,15 +56,12 @@ class NotificationHandler {
         }
     }
 
-    // Actualizar el estado del badge
     updateNotificationBadge(hasUnread) {
-        // Remover badge existente si hay
         const existingBadge = this.notificationIcon.parentElement.querySelector('.noti-icon-badge');
         if (existingBadge) {
             existingBadge.remove();
         }
 
-        // Agregar nuevo badge si hay notificaciones sin leer
         if (hasUnread) {
             const badge = document.createElement('span');
             badge.className = 'noti-icon-badge';
@@ -82,7 +69,6 @@ class NotificationHandler {
         }
     }
 
-    // Obtener notificaciones del servidor
     async fetchNotifications() {
         if (!this.userId || !this.token) {
             console.error('User ID or token not found');
@@ -94,7 +80,8 @@ class NotificationHandler {
         try {
             const response = await fetch(`/api/notifications/unread/${this.userId}`, {
                 headers: {
-                    'Authorization': `Bearer ${this.token}`, 'Content-Type': 'application/json'
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
                 }
             });
 
@@ -110,7 +97,6 @@ class NotificationHandler {
             const notifications = await response.json();
             this.displayNotifications(notifications);
 
-            // Actualizar el badge basado en si hay notificaciones sin leer
             const hasUnreadNotifications = notifications.some(notif => notif.read === 0);
             this.updateNotificationBadge(hasUnreadNotifications);
 
@@ -120,7 +106,6 @@ class NotificationHandler {
         }
     }
 
-    // Manejar errores de fetch
     handleFetchError(error) {
         if (error instanceof TypeError) {
             this.displayError('The server response was not in the expected format. Please try again later.');
@@ -131,7 +116,6 @@ class NotificationHandler {
         }
     }
 
-    // Mostrar las notificaciones en el contenedor
     displayNotifications(notifications) {
         this.notificationContainer.innerHTML = '';
         if (notifications.length === 0) {
@@ -143,6 +127,8 @@ class NotificationHandler {
         let currentDate = '';
 
         notifications.forEach(notification => {
+            // Parsear los datos JSON de la notificación
+            const notificationData = JSON.parse(notification.data);
             const notificationDate = new Date(notification.created_at);
             const formattedDate = this.formatDateInSpanish(notificationDate);
 
@@ -154,60 +140,68 @@ class NotificationHandler {
                 this.notificationContainer.appendChild(dateHeader);
             }
 
-            const notificationElement = this.createNotificationElement(notification);
+            const notificationElement = this.createNotificationElement(notification, notificationData);
             this.notificationContainer.appendChild(notificationElement);
         });
     }
 
-    // Crear elemento de notificación individual
-    createNotificationElement(notification) {
+    createNotificationElement(notification, notificationData) {
         const element = document.createElement('a');
         element.href = 'javascript:void(0);';
         element.className = 'dropdown-item p-0 notify-item card unread-noti shadow-none mb-2';
 
-        const title = notification.correspondence_transfer?.document?.subject || 'Sin título';
-        const jobType = notification.correspondence_transfer?.job_type || 'Sin tipo';
-        const sender = notification.correspondence_transfer?.document?.sender_name || 'Sin remitente';
+        // Usar los datos parseados para construir la notificación
+        const title = notificationData.title || 'Sin título';
+        const message = notificationData.message || '';
+        const additionalInfo = this.getAdditionalInfo(notificationData);
 
         element.innerHTML = `
-          <div class="card-body">
-            <span class="float-end noti-close-btn text-muted"><i class="mdi mdi-close"></i></span>
-            <div class="d-flex align-items-center">
-              <div class="flex-shrink-0">
-                <div class="notify-icon bg-primary">
-                  <i class="mdi mdi-comment-account-outline"></i>
+            <div class="card-body">
+                <span class="float-end noti-close-btn text-muted"><i class="mdi mdi-close"></i></span>
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="notify-icon bg-primary">
+                            <i class="mdi mdi-comment-account-outline"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 text-truncate ms-2">
+                        <h5 class="noti-item-title fw-semibold font-14">
+                            ${title}
+                            <small class="fw-normal text-muted ms-1">${this.timeAgoInSpanish(new Date(notification.created_at))}</small>
+                        </h5>
+                        <small class="noti-item-subtitle text-muted">
+                            ${message}
+                        </small>
+                        ${additionalInfo ? `<small class="noti-item-details text-muted d-block mt-1">${additionalInfo}</small>` : ''}
+                    </div>
                 </div>
-              </div>
-              <div class="flex-grow-1 text-truncate ms-2">
-                <h5 class="noti-item-title fw-semibold font-14">
-                  ${title}
-                  <small class="fw-normal text-muted ms-1">${this.timeAgoInSpanish(new Date(notification.created_at))}</small>
-                </h5>
-                <small class="noti-item-subtitle text-muted">
-                  ${jobType} - ${sender}
-                </small>
-              </div>
             </div>
-          </div>
         `;
 
-        // Agregar event listeners
         element.querySelector('.noti-close-btn').addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
             this.markAsRead(notification.id);
         });
 
-        element.addEventListener('click', () => this.handleNotificationClick(notification));
+        element.addEventListener('click', () => this.handleNotificationClick(notification, notificationData));
 
         return element;
     }
 
-    // Marcar notificación como leída
+    getAdditionalInfo(notificationData) {
+        // Extraer información adicional basada en el tipo de notificación
+        if (notificationData.document_loan_id) {
+            return `Préstamo #${notificationData.document_loan_id} · Orden: ${notificationData.order_number}`;
+        }
+        return '';
+    }
+
     async markAsRead(notificationId) {
         try {
             const response = await fetch(`/api/notifications/${notificationId}/mark-as-read`, {
-                method: 'POST', headers: {
+                method: 'POST',
+                headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                     'Authorization': `Bearer ${this.token}`
@@ -222,7 +216,6 @@ class NotificationHandler {
         }
     }
 
-    // Formatear fecha en español
     formatDateInSpanish(date) {
         const options = {
             weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
@@ -230,13 +223,13 @@ class NotificationHandler {
         return date.toLocaleDateString('es-ES', options);
     }
 
-    // Verificar si la fecha es hoy
     isToday(date) {
         const today = new Date();
-        return date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear();
+        return date.getDate() === today.getDate() &&
+            date.getMonth() === today.getMonth() &&
+            date.getFullYear() === today.getFullYear();
     }
 
-    // Formatear tiempo relativo en español
     timeAgoInSpanish(date) {
         const seconds = Math.floor((new Date() - date) / 1000);
         let interval = seconds / 31536000;
@@ -274,31 +267,32 @@ class NotificationHandler {
         return `hace ${secs} ${secs === 1 ? 'segundo' : 'segundos'}`;
     }
 
-    // Mostrar mensaje de error
     displayError(message) {
         this.notificationContainer.innerHTML = `<p class="text-danger p-3">Error: ${message}</p>`;
     }
 
-    // Implementar limpiar todas las notificaciones
     clearAllNotifications() {
         console.log('Clear all notifications');
-        // Implementar la lógica para limpiar todas las notificaciones
+        // Implementar lógica para limpiar todas las notificaciones
     }
 
-    // Implementar ver todas las notificaciones
     viewAllNotifications() {
         console.log('View all notifications');
-        // Implementar la lógica para ver todas las notificaciones
+        // Implementar lógica para ver todas las notificaciones
     }
 
-    // Manejar clic en notificación
-    handleNotificationClick(notification) {
-        console.log('Notification clicked:', notification);
+    handleNotificationClick(notification, notificationData) {
+        console.log('Notification clicked:', notification, notificationData);
         this.markAsRead(notification.id);
+
+        // Aquí puedes agregar lógica específica basada en el tipo de notificación
+        if (notificationData.document_loan_id) {
+            // Redirigir o mostrar detalles del préstamo de documento
+            console.log('Mostrando detalles del préstamo:', notificationData.document_loan_id);
+        }
     }
 }
 
-// Inicializar el manejador de notificaciones cuando el DOM esté cargado
 document.addEventListener('DOMContentLoaded', () => {
     new NotificationHandler();
 });

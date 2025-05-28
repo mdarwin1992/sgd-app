@@ -2,10 +2,14 @@
 
 namespace App\Providers;
 
+use App\Models\DocumentLoan;
+use Illuminate\Support\Facades\Event;
+use App\Models\CorrespondenceTransfer;
 use Illuminate\Auth\Events\Registered;
+use App\Observers\DocumentLoanObserver;
+use App\Observers\CorrespondenceTransferObserver;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Event;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -28,6 +32,8 @@ class EventServiceProvider extends ServiceProvider
     public function boot()
     {
         //
+        DocumentLoan::observe(DocumentLoanObserver::class);
+        CorrespondenceTransfer::observe(CorrespondenceTransferObserver::class);
     }
 
     /**

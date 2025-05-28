@@ -15,8 +15,14 @@ class DocumentSending extends Model
 
     protected $table = 'document_sending';
     protected $fillable = [
-        'send_date', 'subject', 'sender', 'recipient', 'page_count',
-        'department_id', 'office_id', 'document_path'
+        'send_date',
+        'subject',
+        'sender',
+        'recipient',
+        'page_count',
+        'department_id',
+        'office_id',
+        'document_path'
     ];
 
     protected $casts = [
@@ -29,5 +35,10 @@ class DocumentSending extends Model
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class);
+    }
+
+    public function office(): BelongsTo
+    {
+        return $this->belongsTo(Office::class);
     }
 }

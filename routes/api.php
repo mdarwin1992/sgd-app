@@ -184,13 +184,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/dashboard/central-archive/upload', [FilesController::class, 'CentralArchiveFile'])->name('files.upload.centralarchivefile');
     Route::post('/dashboard/historical-file/upload', [FilesController::class, 'HistoricalFile'])->name('files.upload.historicalarchive');
 
-    // Report routes
-    Route::get('/reports/projections-vs-actuals', [ReportsController::class, 'getProjectionsVsActuals']);
-    Route::get('/reports/document-process-timeline', [CalendarReportController::class, 'getDocumentProcessTimeline']);
-
-
     Route::post('/single-window/reports/generate', [GeneralReportControllers::class, 'generateReport'])->name('single.window.reports.generate');
     Route::post('/single-window/reports/generate-pdf', [GeneralReportControllers::class, 'generatePdfReport'])->name('single.window.reports.pdf');
+    Route::post('/reports/loans/generate', [GeneralReportControllers::class, 'generateReport']);
+    Route::post('/reports/loans/generate-pdf', [GeneralReportControllers::class, 'generatePdfReport']);
+
 
     // Notification routes
     Route::get('/notifications/unread/{userId}', [NotificationController::class, 'getUnreadNotifications']);
@@ -202,6 +200,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // General Stats route
     Route::get('/document-statistics', [ReportsController::class, 'getDocumentStatistics']);
+    Route::get('/reports/recent-activities', [ReportsController::class, 'getArchiveAndDocumentRecords']);
+    Route::post('/reports/recent-activities-calendar', [ReportsController::class, 'getArchiveAndDocumentRecordsCalendar']);
+    // Report routes
+    Route::get('/reports/projections-vs-actuals', [ReportsController::class, 'getProjectionsVsActuals']);
+    Route::get('/reports/document-process-timeline', [CalendarReportController::class, 'getDocumentProcessTimeline']);
 });
 
 

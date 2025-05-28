@@ -12,7 +12,7 @@ class NotificationController extends Controller
     {
         $notifications = Notification::where('user_id', $userId)
             ->where('read', false)
-            ->with('correspondenceTransfer.document')
+            //->with('correspondenceTransfer.document') // Assuming this relation is correctly set up
             ->orderBy('created_at', 'desc')
             ->get();
 
