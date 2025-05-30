@@ -21,7 +21,7 @@
                                         <div class="col-sm-7">
                                             <div class="text-sm-end">
                                                 <a role="button" href="/dashboard/usuario/crear"
-                                                   class="btn btn-primary rounded-pill btn-sm text-white me-2">
+                                                    class="btn btn-primary rounded-pill btn-sm text-white me-2">
                                                     <i class="mdi mdi-plus"></i> Crear Usuario
                                                 </a>
                                             </div>
@@ -30,16 +30,16 @@
 
                                     <div class="table-responsive">
                                         <table id="usersTable"
-                                               class="table table-striped table-sm table-centered dt-responsive nowrap w-100">
+                                            class="table table-striped table-sm table-centered dt-responsive nowrap w-100">
                                             <thead>
-                                            <tr>
-                                                <th>Nombre</th>
-                                                <th>Email</th>
-                                                <th>Teléfono</th>
-                                                <th>Roles</th>
-                                                <th>Permisos</th>
-                                                <th width="10%">Acciones</th>
-                                            </tr>
+                                                <tr>
+                                                    <th>Nombre</th>
+                                                    <th>Email</th>
+                                                    <th>Teléfono</th>
+                                                    <th>Roles</th>
+                                                    <th>Permisos</th>
+                                                    <th width="10%">Acciones</th>
+                                                </tr>
                                             </thead>
                                             <tbody>
                                             </tbody>
@@ -83,12 +83,13 @@
 
                 dataTable = new DataTable('#usersTable', {
                     data: users,
-                    columns: [
-                        {
+                    columns: [{
                             data: 'name',
                             render: (data) => data.toUpperCase()
                         },
-                        {data: 'email'},
+                        {
+                            data: 'email'
+                        },
                         {
                             data: 'phone',
                             render: (data) => data || 'N/A'
@@ -103,14 +104,14 @@
                         },
                         {
                             data: null,
-                            render: function (data, type, row) {
+                            render: function(data, type, row) {
                                 return `
-                            <div class="table-action">
-                                <a href="javascript:void(0);" class="action-icon edit-icon" data-id="${row.id}"> <i class="uil uil-edit"></i></a>
-                                <a href="javascript:void(0);" class="action-icon delete-icon" data-id="${row.id}"> <i class="uil uil-trash-alt"></i></a>
-                                <a href="javascript:void(0);" class="action-icon permissions-icon" data-id="${row.id}"> <i class="fas fa-lock-alt"></i></a>
-                            </div>
-                        `;
+                                    <div class="table-action">
+                                        <a href="javascript:void(0);" class="action-icon edit-icon" data-id="${row.id}"> <i class="uil uil-edit"></i></a>
+                                        <a href="javascript:void(0);" class="action-icon delete-icon" data-id="${row.id}"> <i class="uil uil-trash-alt"></i></a>
+                                        <a href="javascript:void(0);" class="action-icon permissions-icon" data-id="${row.id}"> <i class="fas fa-lock-alt"></i></a>
+                                    </div>
+                                `;
                             }
                         }
                     ],
@@ -166,19 +167,22 @@
             };
 
             const handleTableEvents = () => {
-                $(document).on('click', '.edit-icon', function () {
+                $(document).on('click', '.edit-icon', function() {
                     const userId = $(this).data('id');
                     //console.log(userId)
                     window.location.href = `/dashboard/usuarios/actualizar/${userId}`;
                 });
 
-                $(document).on('click', '.delete-icon', function () {
+                $(document).on('click', '.delete-icon', function() {
                     const userId = $(this).data('id');
 
                 });
 
-                $(document).on('click', '.permissions-icon', function () {
+                $(document).on('click', '.permissions-icon', function() {
                     const userId = $(this).data('id');
+                    console.log(`Permisos del usuario con ID: ${userId}`);
+
+
 
                 });
             };

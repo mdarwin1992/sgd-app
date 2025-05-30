@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Traits\HasRoles;
+use Spatie\Permission\Traits\HasPermissions;
 
 class User extends Authenticatable
 {

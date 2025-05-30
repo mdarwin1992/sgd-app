@@ -351,6 +351,10 @@
             let return_date = document.getElementById("return_date").value;
             let type_of_document_borrowed = document.getElementById("type_of_document_borrowed").value;
 
+            const userData = HTTPService.getUserData();
+            let entity_id = userData.entity_id;
+            let user_id = userData.user_office_id
+
             try {
                 const response = await HTTPService.post('/api/dashboard/document-loan', {
                     identification,
@@ -359,8 +363,8 @@
                     central_archive_id,
                     return_date,
                     type_of_document_borrowed,
-                    entity_id = Helpers.getStoredValue('entity_id'),
-                    user_id = Helpers.getStoredValue('user_office_id'),
+                    entity_id,
+                    user_id
                 });
 
                 Helpers.getMessage('Prestamo documental creada exitosamente', '/dashboard/prestamos-documental');

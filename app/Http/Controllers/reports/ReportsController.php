@@ -2,26 +2,26 @@
 
 namespace App\Http\Controllers\reports;
 
-use Exception;
-use Carbon\Carbon;
-use App\Models\Document;
-use Barryvdh\DomPDF\PDF;
-use App\Models\Reception;
-use App\Models\Retention;
-use Endroid\QrCode\QrCode;
-use App\Models\DocumentLoan;
-use App\Models\HistoricFile;
-use Illuminate\Http\Request;
-use App\Models\CentralArchive;
-use App\Models\DocumentStatus;
-use App\Models\DocumentSending;
-use App\Models\RequestResponse;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use Endroid\QrCode\Writer\PngWriter;
-use App\Models\CorrespondenceTransfer;
 use App\Http\Controllers\helpers\HelpersController;
+use App\Models\CentralArchive;
+use App\Models\CorrespondenceTransfer;
+use App\Models\Document;
+use App\Models\DocumentLoan;
+use App\Models\DocumentSending;
+use App\Models\DocumentStatus;
+use App\Models\HistoricFile;
+use App\Models\Reception;
+use App\Models\RequestResponse;
+use App\Models\Retention;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
+use Exception;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ReportsController extends Controller
 {

@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="dashboard">
-        <div data-permissions="dashboard.page" class="visible">
+        <div data-permissions="lending.index" class="visible">
             <div class="row pt-3">
                 <div class="col-12">
                     <div class="card">

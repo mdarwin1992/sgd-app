@@ -17,13 +17,10 @@ class RolesAndPermissionsSeeder extends Seeder
     public function run()
     {
         // Roles principales
-        //$business = Role::create(['name' => 'EMPRESA']);
-        //$administrator = Role::create(['name' => 'ADMINISTRADOR']);
-        //$reader = Role::create(['name' => 'USUARIO']);
+        $business = Role::create(['name' => 'EMPRESA']);
+        $administrator = Role::create(['name' => 'ADMINISTRADOR']);
+        $reader = Role::create(['name' => 'USUARIO']);
 
-        $business = 'EMPRESA';
-        $administrator = 'ADMINISTRADOR';
-        $reader = 'USUARIO';
 
         // Acceso al panel principal
         Permission::create(['name' => 'dashboard.page', 'description' => 'Acceder al panel principal'])->syncRoles([$administrator, $reader, $business]);
@@ -92,21 +89,21 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::create(['name' => 'sendings.destroy', 'description' => 'Eliminar registro de documento enviado'])->syncRoles([$administrator, $business]);
 
         // Gestión de Archivo Central
-        Permission::create(['name' => 'centralfile.index', 'description' => 'Visualizar contenido del archivo central'])->syncRoles([$administrator, $business, $reader]);
-        Permission::create(['name' => 'centralfile.create', 'description' => 'Registrar nuevo documento en archivo central'])->syncRoles([$administrator, $business, $reader]);
-        Permission::create(['name' => 'centralfile.show', 'description' => 'Consultar documento del archivo central'])->syncRoles([$administrator, $business, $reader]);
-        Permission::create(['name' => 'centralfile.update', 'description' => 'Modificar documento del archivo central'])->syncRoles([$administrator, $business, $reader]);
-        Permission::create(['name' => 'centralfile.destroy', 'description' => 'Eliminar documento del archivo central'])->syncRoles([$administrator, $business, $reader]);
+        Permission::create(['name' => 'centralfile.index', 'description' => 'Visualizar contenido del archivo central'])->syncRoles([$administrator, $business]);
+        Permission::create(['name' => 'centralfile.create', 'description' => 'Registrar nuevo documento en archivo central'])->syncRoles([$administrator, $business]);
+        Permission::create(['name' => 'centralfile.show', 'description' => 'Consultar documento del archivo central'])->syncRoles([$administrator, $business]);
+        Permission::create(['name' => 'centralfile.update', 'description' => 'Modificar documento del archivo central'])->syncRoles([$administrator, $business]);
+        Permission::create(['name' => 'centralfile.destroy', 'description' => 'Eliminar documento del archivo central'])->syncRoles([$administrator, $business]);
 
         // Consultas del Archivo Central
-        Permission::create(['name' => 'query.consultation', 'description' => 'Realizar consultas generales del archivo central'])->syncRoles([$administrator, $business, $reader]);
-        Permission::create(['name' => 'query.findDocument', 'description' => 'Buscar documentos específicos en archivo central'])->syncRoles([$administrator, $business, $reader]);
-        Permission::create(['name' => 'query.searchByBox', 'description' => 'Buscar documentos por número de caja'])->syncRoles([$administrator, $business, $reader]);
-        Permission::create(['name' => 'query.searchBySerial', 'description' => 'Buscar documentos por número de serie'])->syncRoles([$administrator, $business, $reader]);
-        Permission::create(['name' => 'query.searchByYear', 'description' => 'Buscar documentos por año'])->syncRoles([$administrator, $business, $reader]);
+        Permission::create(['name' => 'query.consultation', 'description' => 'Realizar consultas generales del archivo central'])->syncRoles([$administrator, $business]);
+        Permission::create(['name' => 'query.findDocument', 'description' => 'Buscar documentos específicos en archivo central'])->syncRoles([$administrator, $business]);
+        Permission::create(['name' => 'query.searchByBox', 'description' => 'Buscar documentos por número de caja'])->syncRoles([$administrator, $business]);
+        Permission::create(['name' => 'query.searchBySerial', 'description' => 'Buscar documentos por número de serie'])->syncRoles([$administrator, $business]);
+        Permission::create(['name' => 'query.searchByYear', 'description' => 'Buscar documentos por año'])->syncRoles([$administrator, $business]);
 
         // Reportes
-        Permission::create(['name' => 'reports.singlewindow', 'description' => 'Generar reportes de ventanilla única'])->syncRoles([$administrator, $business, $reader]);
+        Permission::create(['name' => 'reports.singlewindow', 'description' => 'Generar reportes de ventanilla única'])->syncRoles([$administrator, $business]);
 
         // Gestión de Usuarios
         Permission::create(['name' => 'users.index', 'description' => 'Visualizar listado de usuarios'])->syncRoles([$administrator, $business]);
@@ -116,17 +113,29 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::create(['name' => 'users.destroy', 'description' => 'Eliminar registro de usuario'])->syncRoles([$administrator, $business]);
 
         // Gestión de Archivo Histórico
-        Permission::create(['name' => 'historic.index', 'description' => 'Ver listado de documentos en el archivo histórico'])->syncRoles([$administrator, $business, $reader]);
-        Permission::create(['name' => 'historic.create', 'description' => 'Agregar nuevo documento al archivo histórico'])->syncRoles([$administrator, $business, $reader]);
-        Permission::create(['name' => 'historic.show', 'description' => 'Ver detalles de un documento del archivo histórico'])->syncRoles([$administrator, $business, $reader]);
-        Permission::create(['name' => 'historic.update', 'description' => 'Editar información de un documento del archivo histórico'])->syncRoles([$administrator, $business, $reader]);
-        Permission::create(['name' => 'historic.destroy', 'description' => 'Eliminar un documento del archivo histórico'])->syncRoles([$administrator, $business, $reader]);
+        Permission::create(['name' => 'historic.index', 'description' => 'Ver listado de documentos en el archivo histórico'])->syncRoles([$administrator, $business]);
+        Permission::create(['name' => 'historic.create', 'description' => 'Agregar nuevo documento al archivo histórico'])->syncRoles([$administrator, $business]);
+        Permission::create(['name' => 'historic.show', 'description' => 'Ver detalles de un documento del archivo histórico'])->syncRoles([$administrator, $business]);
+        Permission::create(['name' => 'historic.update', 'description' => 'Editar información de un documento del archivo histórico'])->syncRoles([$administrator, $business]);
+        Permission::create(['name' => 'historic.destroy', 'description' => 'Eliminar un documento del archivo histórico'])->syncRoles([$administrator, $business]);
 
         // Gestión para Préstamo de documento
-        Permission::create(['name' => 'lending.index', 'description' => 'Ver listado de préstamos de documentos'])->syncRoles([$administrator, $business, $reader]);
-        Permission::create(['name' => 'lending.create', 'description' => 'Registrar nuevo préstamo de documento'])->syncRoles([$administrator, $business, $reader]);
-        Permission::create(['name' => 'lending.show', 'description' => 'Ver detalles de un préstamo de documento'])->syncRoles([$administrator, $business, $reader]);
-        Permission::create(['name' => 'lending.update', 'description' => 'Modificar información de un préstamo de documento'])->syncRoles([$administrator, $business, $reader]);
-        Permission::create(['name' => 'lending.destroy', 'description' => 'Cancelar/eliminar un préstamo de documento'])->syncRoles([$administrator, $business, $reader]);
+        Permission::create(['name' => 'lending.index', 'description' => 'Ver listado de préstamos de documentos'])->syncRoles([$administrator, $business]);
+        Permission::create(['name' => 'lending.create', 'description' => 'Registrar nuevo préstamo de documento'])->syncRoles([$administrator, $business]);
+        Permission::create(['name' => 'lending.show', 'description' => 'Ver detalles de un préstamo de documento'])->syncRoles([$administrator, $business]);
+        Permission::create(['name' => 'lending.update', 'description' => 'Modificar información de un préstamo de documento'])->syncRoles([$administrator, $business]);
+        Permission::create(['name' => 'lending.destroy', 'description' => 'Cancelar/eliminar un préstamo de documento'])->syncRoles([$administrator, $business]);
+
+        // Gestión de Permisos y Roles
+        Permission::create(['name' => 'roles.index', 'description' => 'Ver listado de roles'])->syncRoles([$administrator]);
+        Permission::create(['name' => 'roles.create', 'description' => 'Crear nuevos roles'])->syncRoles([$administrator]);
+        Permission::create(['name' => 'roles.show', 'description' => 'Ver detalles de un rol'])->syncRoles([$administrator]);
+        Permission::create(['name' => 'roles.update', 'description' => 'Modificar roles'])->syncRoles([$administrator]);
+        Permission::create(['name' => 'roles.destroy', 'description' => 'Eliminar roles'])->syncRoles([$administrator]);
+        Permission::create(['name' => 'permissions.index', 'description' => 'Ver listado de permisos'])->syncRoles([$administrator]);
+        Permission::create(['name' => 'permissions.create', 'description' => 'Crear nuevos permisos'])->syncRoles([$administrator]);
+        Permission::create(['name' => 'permissions.show', 'description' => 'Ver detalles de un permiso'])->syncRoles([$administrator]);
+        Permission::create(['name' => 'permissions.update', 'description' => 'Modificar permisos'])->syncRoles([$administrator]);
+        Permission::create(['name' => 'permissions.destroy', 'description' => 'Eliminar permisos'])->syncRoles([$administrator]);
     }
 }

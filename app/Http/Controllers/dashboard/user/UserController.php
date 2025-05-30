@@ -5,11 +5,12 @@ namespace App\Http\Controllers\dashboard\user;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
@@ -273,7 +274,7 @@ class UserController extends Controller
 
             return response()->json($permissions, 200);
         } catch (\Exception $e) {
-            \Log::error('Error al obtener permisos del usuario: ' . $e->getMessage());
+            Log::error('Error al obtener permisos del usuario: ' . $e->getMessage());
             return response()->json(['error' => 'No se pudieron obtener los permisos del usuario'], 500);
         }
     }

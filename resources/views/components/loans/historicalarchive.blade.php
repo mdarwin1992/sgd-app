@@ -345,12 +345,18 @@
 
         // Guardar datos del cliente
         async function save() {
+
+            const userData = HTTPService.getUserData();
+
             let identification = document.getElementById("identification").value;
             let names = document.getElementById("names").value;
             let office_id = document.getElementById("office_id").value;
             let historic_file_id = document.getElementById("historic_file_id").value;
             let return_date = document.getElementById("return_date").value;
             let type_of_document_borrowed = document.getElementById("type_of_document_borrowed").value;
+
+            let entity_id = userData.entity_id;
+            let user_id = userData.user_office_id
 
             try {
                 const response = await HTTPService.post('/api/dashboard/document-loan', {
@@ -359,7 +365,9 @@
                     office_id,
                     historic_file_id,
                     return_date,
-                    type_of_document_borrowed
+                    type_of_document_borrowed,
+                    entity_id,
+                    user_id
                 });
 
                 Helpers.getMessage('Prestamo documental creada exitosamente', '/dashboard/prestamos-documental');

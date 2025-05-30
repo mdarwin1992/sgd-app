@@ -201,12 +201,18 @@ Route::get('/dashboard/show-response/{id}/{item}', function ($id, $item) {
 // Ruta para prestamos documentales
 Route::get('/dashboard/prestamos-documental', function () {
     return view('components.loans.index');
-})->name('loans.index');
+})->name('lending.index');
 
 Route::get('/dashboard/prestamos-documental/archivo-central', function () {
     return view('components.loans.centralarchive');
-})->name('loans.historicalarchive');
+})->name('lending.create');
 
 Route::get('/dashboard/prestamos-documental/archivo-historico', function () {
     return view('components.loans.historicalarchive');
-})->name('loans.historicalarchive');
+})->name('lending.create');
+
+/** ########################################################################################## */
+
+Route::get('/dashboard/access-roles', function () {
+    return view('components.rolesandpermissions.index');
+})->name('roles.index');

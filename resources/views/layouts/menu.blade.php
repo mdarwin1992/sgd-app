@@ -83,7 +83,7 @@
                     <span> Enviar </span>
                 </a>
             </li>
-            <li class="side-nav-title">Archivo Central</li>
+            <li class="side-nav-title" id="centralfile">Archivo Central</li>
             <li class="side-nav-item" id="rutas">
                 <a href="/dashboard/archivo-central" class="side-nav-link visible"
                     data-roles="ADMINISTRADOR,EMPRESA,USUARIO" data-permissions="centralfile.create">
@@ -109,7 +109,7 @@
             <li class="side-nav-title">Prestamos Documentales</li>
             <li class="side-nav-item" id="rutas">
                 <a href="/dashboard/prestamos-documental" class="side-nav-link visible"
-                    data-roles="ADMINISTRADOR,EMPRESA" data-permissions="lending.create">
+                    data-roles="ADMINISTRADOR,EMPRESA" data-permissions="lending.index">
                     <i class="fas fa-people-arrows"></i>
                     <span> Prestamos Documentales </span>
                 </a>

@@ -12,7 +12,7 @@
     <link rel="shortcut icon" href="{{ asset('assets/images/favicon.ico') }}">
 
     <!-- Select2 css -->
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https:cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
     <link rel="stylesheet" href="{{ asset('assets/vendor/FontAwesome-pro/css/all.min.css') }}">
 
@@ -34,6 +34,16 @@
 
     <!-- SimpleMDE css -->
     <style>
+        .hidden-by-auth {
+            display: none !important;
+        }
+
+        .disabled-by-auth {
+            pointer-events: none;
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         #loading-background {
             position: fixed;
             top: 0;
@@ -129,12 +139,12 @@
     <script src="{{ asset('assets/js/vendor.min.js') }}"></script>
 
     <!--  Select2 Js -->
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https:cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <!-- App js -->
     <script src="{{ asset('assets/js/app.min.js') }}"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https:cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Datatables js -->
     <script src="{{ asset('assets/vendor/datatables.net/js/jquery.dataTables.min.js') }}"></script>
@@ -158,10 +168,10 @@
         });
     </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/locales/es.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.css" rel="stylesheet">
+    <script src="https:cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https:cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.js"></script>
+    <script src="https:cdn.jsdelivr.net/npm/fullcalendar@5.10.2/locales/es.js"></script>
+    <link href="https:cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.css" rel="stylesheet">
 
     <script type="module" src="{{ asset('services/notifications/notifications.js') }}"></script>
     <script type="module" src="{{ asset('services/RouterSif/RouteService.js') }}"></script>

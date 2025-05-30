@@ -44,6 +44,7 @@ Route::post('authenticate/register', [RegisterController::class, 'store']);
 Route::post('authenticate/login', [LoginController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('authenticate/logout', [LoginController::class, 'logout']);
+    Route::post('/refresh-token', [LoginController::class, 'refreshToken']);
 });
 
 // QR Code generation
@@ -51,6 +52,7 @@ Route::get('dashboard/qr/{id}/{iten}', [ReportsController::class, 'generateQrCod
 
 // Authenticated routes
 Route::middleware('auth:sanctum')->group(function () {
+
 
     // Entity routes
     Route::get('dashboard/entities', [EntityController::class, 'index'])->name('api.entities.index');

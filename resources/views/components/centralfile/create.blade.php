@@ -53,7 +53,7 @@
                                 <div class="col-md-4">
                                     <label for="shelf_number" class="form-label">N° Estante</label>
                                     <input type="text" class="form-control" id="shelf_number" name="shelf_number"
-                                           autocomplete="off" required>
+                                        autocomplete="off" required>
                                 </div>
                                 <div class="col-md-4">
                                     <label for="tray" class="form-label">Bandeja</label>
@@ -71,7 +71,7 @@
                                 <div class="col-md-4">
                                     <label for="box_number" class="form-label">N° Caja</label>
                                     <input type="text" class="form-control" id="box_number" name="box_number"
-                                           autocomplete="off">
+                                        autocomplete="off">
                                 </div>
                             </div>
                             <div class="row mb-3">
@@ -80,51 +80,45 @@
                                     <div class="mb-3">
                                         <div class="form-check form-check-inline">
                                             <input type="radio" id="main_conservation_medium_caja"
-                                                   name="main_conservation_medium" value="CAJA" class="form-check-input"
-                                                   required>
-                                            <label class="form-check-label"
-                                                   for="main_conservation_medium_caja">Caja</label>
+                                                name="main_conservation_medium" value="CAJA" class="form-check-input"
+                                                required>
+                                            <label class="form-check-label" for="main_conservation_medium_caja">Caja</label>
                                         </div>
                                         <div class="form-check form-check-inline">
                                             <input type="radio" id="main_conservation_medium_carpeta"
-                                                   name="main_conservation_medium" value="CARPETA"
-                                                   class="form-check-input">
+                                                name="main_conservation_medium" value="CARPETA" class="form-check-input">
                                             <label class="form-check-label"
-                                                   for="main_conservation_medium_carpeta">Carpeta</label>
+                                                for="main_conservation_medium_carpeta">Carpeta</label>
                                         </div>
                                         <div class="form-check form-check-inline">
                                             <input type="radio" id="main_conservation_medium_legado"
-                                                   name="main_conservation_medium" value="LEGADO"
-                                                   class="form-check-input">
+                                                name="main_conservation_medium" value="LEGADO" class="form-check-input">
                                             <label class="form-check-label"
-                                                   for="main_conservation_medium_legado">Legado</label>
+                                                for="main_conservation_medium_legado">Legado</label>
                                         </div>
                                         <div class="form-check form-check-inline">
                                             <input type="radio" id="main_conservation_medium_tomo"
-                                                   name="main_conservation_medium" value="TOMO"
-                                                   class="form-check-input">
+                                                name="main_conservation_medium" value="TOMO" class="form-check-input">
                                             <label class="form-check-label"
-                                                   for="main_conservation_medium_tomo">Tomo</label>
+                                                for="main_conservation_medium_tomo">Tomo</label>
                                         </div>
                                     </div>
                                     <p class="h3">Conservado En:</p>
                                     <div class="mb-1">
                                         <div class="form-check form-check-inline">
                                             <input type="radio" id="preserved_in_carpeta" name="preserved_in"
-                                                   value="CARPETA" class="form-check-input" required>
+                                                value="CARPETA" class="form-check-input" required>
                                             <label class="form-check-label" for="preserved_in_carpeta">Carpeta</label>
                                         </div>
                                         <div class="form-check form-check-inline">
                                             <input type="radio" id="preserved_in_libro" name="preserved_in"
-                                                   value="LIBRO"
-                                                   class="form-check-input">
+                                                value="LIBRO" class="form-check-input">
                                             <label class="form-check-label" for="preserved_in_libro">Libro</label>
                                         </div>
                                         <div class="form-check form-check-inline">
                                             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                                                 <input type="text" class="form-control" id="ord_number"
-                                                       name="ord_number"
-                                                       placeholder="No. Ord">
+                                                    name="ord_number" placeholder="No. Ord">
                                             </div>
                                         </div>
                                     </div>
@@ -134,37 +128,34 @@
                                         <div class="col-md-4">
                                             <label for="folio_number" class="form-label">Numero Folio</label>
                                             <input type="text" class="form-control" id="folio_number"
-                                                   name="folio_number"
-                                                   required autocomplete="off">
+                                                name="folio_number" required autocomplete="off">
                                         </div>
                                         <div class="col-md-4">
                                             <label for="folder_year" class="form-label">Año Carpeta</label>
                                             <input type="number" class="form-control" id="folder_year"
-                                                   name="folder_year"
-                                                   required autocomplete="off">
+                                                name="folder_year" required autocomplete="off">
                                         </div>
                                         <div class="col-md-4">
                                             <label for="support" class="form-label">Soporte</label>
                                             <input type="text" class="form-control" id="support" name="support"
-                                                   value="" autocomplete="off">
+                                                value="" autocomplete="off">
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-md-4">
                                             <label for="start_date" class="form-label">Fecha de Inicio</label>
                                             <input type="date" class="form-control" id="start_date" name="start_date"
-                                                   required autocomplete="off">
+                                                required autocomplete="off">
                                         </div>
                                         <div class="col-md-4">
                                             <label for="end_date" class="form-label">Fecha Final</label>
                                             <input type="date" class="form-control" id="end_date" name="end_date"
-                                                   required
-                                                   autocomplete="off">
+                                                required autocomplete="off">
                                         </div>
                                         <div class="col-md-4">
                                             <label for="ac_end_date" class="form-label">Fecha Final en A.C.</label>
-                                            <input type="date" class="form-control" id="ac_end_date" name="ac_end_date"
-                                                   readonly autocomplete="off">
+                                            <input type="date" class="form-control" id="ac_end_date"
+                                                name="ac_end_date" readonly autocomplete="off">
                                         </div>
                                     </div>
                                 </div>
@@ -173,19 +164,18 @@
                                 <div class="col-md-6 mb-3">
                                     <label for="document_reference" class="form-label">Referencia documental</label>
                                     <input type="text" class="form-control" id="document_reference"
-                                           name="document_reference" required autocomplete="off">
+                                        name="document_reference" required autocomplete="off">
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="third_parties" class="form-label">Terceros</label>
                                     <input type="text" class="form-control" id="third_parties" name="third_parties"
-                                           autocomplete="off">
+                                        autocomplete="off">
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-md-12 mb-3">
                                     <label for="object_observations" class="form-label">Objeto/Observaciones</label>
-                                    <textarea rows="3" class="form-control" id="object_observations"
-                                              name="object_observations"></textarea>
+                                    <textarea rows="3" class="form-control" id="object_observations" name="object_observations"></textarea>
                                 </div>
                             </div>
                             <div class="mb-3">
@@ -193,12 +183,11 @@
                                 <div class="input-group">
                                     <input type="file" class="form-control" id="filepath" name="filepath">
                                     <input type="hidden" class="form-control" id="file_path" name="file_path"
-                                           autocomplete="off" required>
+                                        autocomplete="off" required>
                                 </div>
                             </div>
                             <div class="d-flex justify-content-end mt-4">
-                                <a href="/dashboard/central-archives"
-                                   class="btn btn-primary btn-tool rounded-pill me-2">
+                                <a href="/dashboard/central-archives" class="btn btn-primary btn-tool rounded-pill me-2">
                                     <i class="fas fa-times me-1"></i> Cancelar
                                 </a>
                                 <button type="submit" class="btn btn-success rounded-pill" id="submitButton">
@@ -273,7 +262,9 @@
 
             const loadCounter = async () => {
                 try {
-                    const counterResponse = await HTTPService.get(`/api/entity/${HTTPService.getEntityId()}/counter/3`);
+                    const userData = HTTPService.getUserData();
+                    const counterResponse = await HTTPService.get(
+                        `/api/entity/${userData.entity_id}/counter/3`);
                     counter = counterResponse;
                     document.querySelector(elements.system_code).value = counterResponse.system_code || '';
                     document.querySelector(elements.entity_id).value = counterResponse.entity_id || '';
@@ -284,7 +275,8 @@
 
             const loadSeries = async (officeId) => {
                 try {
-                    const seriesResponse = await HTTPService.get(`/api/dashboard/offices/${officeId}/series`);
+                    const seriesResponse = await HTTPService.get(
+                        `/api/dashboard/offices/${officeId}/series`);
                     const seriesSelect = document.querySelector(elements.series_id);
                     seriesSelect.innerHTML = '<option value="">Seleccione una serie</option>';
                     seriesResponse.data.forEach(serie => {
@@ -301,7 +293,8 @@
 
             const loadSubseries = async (seriesId) => {
                 try {
-                    const subseriesResponse = await HTTPService.get(`/api/dashboard/series/${seriesId}/subseries`);
+                    const subseriesResponse = await HTTPService.get(
+                        `/api/dashboard/series/${seriesId}/subseries`);
                     const subseriesSelect = document.querySelector(elements.subseries_id);
                     subseriesSelect.innerHTML = '<option value="">Seleccione una subserie</option>';
                     subseriesResponse.data.forEach(subserie => {
@@ -371,7 +364,8 @@
                     const formDataObject = Object.fromEntries(formData);
 
                     try {
-                        const response = await HTTPService.post('/api/dashboard/central-archive/store', formDataObject);
+                        const response = await HTTPService.post('/api/dashboard/central-archive/store',
+                            formDataObject);
                         console.log(response);
                         Helpers.getMessage('Se ha guardado correctamente', '/dashboard/archivo-central');
                     } catch (error) {
@@ -398,14 +392,14 @@
                     errorClass: 'is-invalid',
                     validClass: 'is-valid',
                     errorElement: 'div',
-                    errorPlacement: function (error, element) {
+                    errorPlacement: function(error, element) {
                         error.addClass('invalid-feedback');
                         element.closest('.form-group').append(error);
                     },
-                    highlight: function (element, errorClass, validClass) {
+                    highlight: function(element, errorClass, validClass) {
                         $(element).addClass(errorClass).removeClass(validClass);
                     },
-                    unhighlight: function (element, errorClass, validClass) {
+                    unhighlight: function(element, errorClass, validClass) {
                         $(element).removeClass(errorClass).addClass(validClass);
                     }
                 });
@@ -527,10 +521,12 @@
                 document.querySelector(elements.fileInput).addEventListener('change', handleFileChange);
                 document.querySelector(elements.office_id).addEventListener('change', handleOfficeChange);
                 document.querySelector(elements.series_id).addEventListener('change', handleSeriesChange);
-                document.querySelector(elements.subseries_id).addEventListener('change', handleSubseriesChange);
+                document.querySelector(elements.subseries_id).addEventListener('change',
+                    handleSubseriesChange);
                 document.querySelector(elements.start_date).addEventListener('change', calculateAcEndDate);
                 document.querySelector(elements.end_date).addEventListener('change', calculateAcEndDate);
-                document.querySelector(elements.createCentralArchiveForm).addEventListener('submit', createCentralArchive);
+                document.querySelector(elements.createCentralArchiveForm).addEventListener('submit',
+                    createCentralArchive);
 
                 // Event listeners for conservation medium handling
                 const cajaRadio = document.querySelector(elements.main_conservation_medium_caja);
@@ -566,6 +562,5 @@
             // Return public API for module imports
             return publicApi;
         })();
-
     </script>
 @endsection

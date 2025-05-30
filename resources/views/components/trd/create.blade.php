@@ -577,11 +577,13 @@
                 loadOffices();
                 loadSeries();
 
+                const userData = HTTPService.getUserData();
+
                 // Set up event listeners
                 document.querySelector(elements.addSubseriesButton).addEventListener('click', addSubseries);
                 document.querySelector(elements.series_entity_id).addEventListener('change',
                     handleOfficeChange);
-                document.querySelector(elements.entityId).value = localStorage.getItem('entity_id');
+                document.querySelector(elements.entityId).value = userData.entity_id || '';
                 document.querySelector(elements.BtnFormSeries).addEventListener('click', createSeries);
             });
 

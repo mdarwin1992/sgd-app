@@ -30,8 +30,8 @@
                                                     <div class="col-md-5">
                                                         <label for="name" class="form-label">Nombre Completo</label>
                                                         <input type="text" class="form-control" id="name"
-                                                               name="name" required
-                                                               title="El nombre debe contener entre 3 y 50 caracteres, solo letras y espacios">
+                                                            name="name" required
+                                                            title="El nombre debe contener entre 3 y 50 caracteres, solo letras y espacios">
                                                         <div class="invalid-feedback">
                                                             Por favor ingrese un nombre válido
                                                         </div>
@@ -40,7 +40,7 @@
                                                         <label for="email" class="form-label">Correo
                                                             Electrónico</label>
                                                         <input type="email" class="form-control" id="email"
-                                                               name="email" required>
+                                                            name="email" required>
                                                         <div class="invalid-feedback">
                                                             Por favor ingrese un correo electrónico válido
                                                         </div>
@@ -48,8 +48,8 @@
                                                     <div class="col-md-2">
                                                         <label for="phone" class="form-label">Teléfono</label>
                                                         <input type="tel" class="form-control" id="phone"
-                                                               name="phone"
-                                                               title="Ingrese un número de teléfono válido de 10 dígitos">
+                                                            name="phone"
+                                                            title="Ingrese un número de teléfono válido de 10 dígitos">
                                                         <div class="invalid-feedback">
                                                             Por favor ingrese un número de teléfono válido
                                                         </div>
@@ -68,11 +68,10 @@
                                                     <div class="col-md-6">
                                                         <label for="password" class="form-label">Contraseña</label>
                                                         <div class="input-group">
-                                                            <input type="password" class="form-control"
-                                                                   id="password" name="password" required>
-                                                            <button class="btn btn-outline-secondary"
-                                                                    type="button"
-                                                                    id="togglePassword">
+                                                            <input type="password" class="form-control" id="password"
+                                                                name="password" required>
+                                                            <button class="btn btn-outline-secondary" type="button"
+                                                                id="togglePassword">
                                                                 <i class="mdi mdi-eye"></i>
                                                             </button>
                                                         </div>
@@ -85,11 +84,10 @@
                                                             contraseña</label>
                                                         <div class="input-group">
                                                             <input type="password" class="form-control"
-                                                                   id="password_confirmation"
-                                                                   name="password_confirmation" required>
-                                                            <button class="btn btn-outline-secondary"
-                                                                    type="button"
-                                                                    id="togglePasswordConfirmation">
+                                                                id="password_confirmation" name="password_confirmation"
+                                                                required>
+                                                            <button class="btn btn-outline-secondary" type="button"
+                                                                id="togglePasswordConfirmation">
                                                                 <i class="mdi mdi-eye"></i>
                                                             </button>
                                                         </div>
@@ -110,22 +108,19 @@
                                                 <div class="row g-3">
                                                     <div class="col-md-6">
                                                         <label for="roles" class="form-label">Roles *</label>
-                                                        <select class="js-example-basic-multiple"
-                                                                id="roles"
-                                                                name="roles"
-                                                                required>
+                                                        <select class="js-example-basic-multiple" id="roles"
+                                                            name="roles" required>
                                                             <option value="">Seleccione un rol</option>
                                                         </select>
                                                         <div class="invalid-feedback">
                                                             Por favor seleccione al menos un rol
                                                         </div>
                                                     </div>
-                                                    <div class="col-md-6" id="permissionsContainer"
-                                                         style="display: none;">
+                                                    <div class="col-md-6" id="permissionsContainer" style="display: none;">
                                                         <label for="permissions" class="form-label">Permisos
                                                             Adicionales</label>
                                                         <select class="js-example-basic-multiple" id="permissions"
-                                                                name="permissions[]" multiple="multiple">
+                                                            name="permissions[]" multiple="multiple">
                                                             <option value="">Seleccione</option>
                                                         </select>
                                                     </div>
@@ -135,11 +130,11 @@
 
                                         <div class="d-flex justify-content-end mt-4">
                                             <a href="/dashboard/usuarios"
-                                               class="btn btn-primary btn-tool rounded-pill me-2">
+                                                class="btn btn-primary btn-tool rounded-pill me-2">
                                                 <i class="fas fa-times me-1"></i> Cancelar
                                             </a>
                                             <button type="submit" class="btn btn-success rounded-pill"
-                                                    id="submitButton">
+                                                id="submitButton">
                                                 <i class="fas fa-check me-1"></i> Guardar
                                             </button>
                                         </div>
@@ -214,7 +209,8 @@
                 const roleId = event.target.value;
                 if (roleId) {
                     try {
-                        const response = await HTTPService.get(`/api/dashboard/roles/${roleId}/has-permissions`);
+                        const response = await HTTPService.get(
+                            `/api/dashboard/roles/${roleId}/has-permissions`);
                         $(elements.permissionsContainer).toggle(!response);
                     } catch (error) {
                         console.error('Error al verificar permisos del rol:', error);
@@ -286,14 +282,14 @@
                     errorClass: 'is-invalid',
                     validClass: 'is-valid',
                     errorElement: 'div',
-                    errorPlacement: function (error, element) {
+                    errorPlacement: function(error, element) {
                         error.addClass('invalid-feedback');
                         element.closest('.mb-3').append(error);
                     },
-                    highlight: function (element, errorClass, validClass) {
+                    highlight: function(element, errorClass, validClass) {
                         $(element).addClass(errorClass).removeClass(validClass);
                     },
-                    unhighlight: function (element, errorClass, validClass) {
+                    unhighlight: function(element, errorClass, validClass) {
                         $(element).removeClass(errorClass).addClass(validClass);
                     }
                 });
@@ -355,14 +351,14 @@
                 $(elements.roles).on('change', handleRoleChange);
 
                 // Toggle password visibility
-                $('#togglePassword').on('click', function () {
+                $('#togglePassword').on('click', function() {
                     const passwordInput = $('#password');
                     const type = passwordInput.attr('type') === 'password' ? 'text' : 'password';
                     passwordInput.attr('type', type);
                     $(this).find('i').toggleClass('mdi-eye mdi-eye-off');
                 });
 
-                $('#togglePasswordConfirmation').on('click', function () {
+                $('#togglePasswordConfirmation').on('click', function() {
                     const passwordInput = $('#password_confirmation');
                     const type = passwordInput.attr('type') === 'password' ? 'text' : 'password';
                     passwordInput.attr('type', type);
@@ -387,7 +383,5 @@
             // Return public API for module imports
             return publicApi;
         })();
-
-
     </script>
 @endsection

@@ -262,8 +262,11 @@
 
             const loadCounter = async () => {
                 try {
+
+                    const userData = HTTPService.getUserData();
+
                     const counterResponse = await HTTPService.get(
-                        `/api/entity/${HTTPService.getEntityId()}/counter/2`);
+                        `/api/entity/${userData.entity_id}/counter/2`);
                     counter = counterResponse;
                     document.querySelector(elements.system_code).value = counterResponse.system_code || '';
                     document.querySelector(elements.entity_id).value = counterResponse.entity_id || '';
@@ -505,11 +508,11 @@
                     ordNumberInput.value = ''; // Clear value when disabled
                 }
 
-                // Enable/disable box number input
+                /* // Enable/disable box number input
                 boxNumberInput.disabled = !isCajaSelected;
                 if (!isCajaSelected) {
                     boxNumberInput.value = ''; // Clear value when disabled
-                }
+                } */
             };
 
             // Initialize when DOM is ready

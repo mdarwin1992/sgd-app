@@ -170,6 +170,24 @@
                 permissionsContainer: '#permissionsContainer'
             };
 
+            // Private methods
+            const loadOffices = async () => {
+                try {
+                    const officesResponse = await HTTPService.get('/api/dashboard/offices');
+                    const officeSelect = document.querySelector(elements.office_id);
+                    officeSelect.innerHTML = '<option value="">Seleccione una oficina</option>';
+                    officesResponse.data.forEach(office => {
+                        const option = document.createElement('option');
+                        option.value = office.id;
+                        option.textContent = office.name;
+                        officeSelect.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error('Error al cargar las oficinas:', error);
+                }
+            };
+
+
             const fetchRolesAndPermissions = async () => {
                 try {
                     const [rolesResponse, permissionsResponse] = await Promise.all([
@@ -325,6 +343,8 @@
                     $(this).find('i').toggleClass('mdi-eye mdi-eye-off');
                 });
             });
+
+
 
 
             // Create public API

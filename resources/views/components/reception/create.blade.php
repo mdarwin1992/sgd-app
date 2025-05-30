@@ -126,7 +126,7 @@
 
             // Private methods
             const loadCounter = async () => {
-                const entityId = localStorage.getItem('entity_id');
+                const entityId = HTTPService.getUserData('entity_id')
                 if (!entityId) {
                     console.error('No se encontró el entity_id en localStorage.');
                     return;
@@ -159,12 +159,16 @@
                     const formDataObject = Object.fromEntries(formData);
 
                     try {
+
+                        const userData = HTTPService.getUserData();
                         const response = await HTTPService.post('/api/dashboard/reception/store',
                             formDataObject);
+
+
                         Helpers.getMessage('Se ha guardado correctamente',
                             '/dashboard/ventanilla-unica/recepcion');
                         window.open(
-                            `/dashboard/ticket/${response.data.reference_code}/${localStorage.getItem('entity_id')}`,
+                            `/dashboard/ticket/${response.data.reference_code}/${userData.entity_id}`,
                             '_blank');
                     } catch (error) {
                         console.error('Error al crear la recepción:', error);

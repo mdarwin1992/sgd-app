@@ -34,7 +34,7 @@ class CentralArchiveRequest extends FormRequest
             'tray' => 'nullable|string|max:50',
             'box_number' => 'nullable|string|max:50',
             'main_conservation_medium' => 'required|in:CAJA,CARPETA,LEGADO,TOMO',
-            'preserved_in' => 'required|in:CARPETA,LIBRO',
+            'preserved_in' => 'nullable|in:CARPETA,LIBRO',
             'ord_number' => 'nullable|string|max:50',
             'folio_number' => 'nullable|string|max:50',
             'folder_year' => 'nullable|numeric',

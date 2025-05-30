@@ -1,164 +1,71 @@
 // Importar rutas
-import {routes} from './routes.js';
+import { routes } from './routes.js'; // Asegúrate de que la ruta sea correcta
+// Importar el servicio HTTP centralizado
+import HTTPService from '../httpService/HTTPService.js'; // Asegúrate de que la ruta sea correcta
 
-/* ======================== Limitación de Tasa (Rate Limiting) ======================== */
-const rateLimiter = {
-    lastRequestTime: {}, requestCount: {}, limit: 5, interval: 60000, // en milisegundos (1 minuto)
-
-    canMakeRequest(endpoint) {
-        const now = Date.now();
-        if (!this.lastRequestTime[endpoint]) {
-            this.lastRequestTime[endpoint] = now;
-            this.requestCount[endpoint] = 1;
-            return true;
-        }
-        if (now - this.lastRequestTime[endpoint] > this.interval) {
-            this.lastRequestTime[endpoint] = now;
-            this.requestCount[endpoint] = 1;
-            return true;
-        }
-        if (this.requestCount[endpoint] < this.limit) {
-            this.requestCount[endpoint]++;
-            return true;
-        }
-        return false;
-    },
-};
-
-async function rateLimitedFetch(url, options = {}) {
-    if (rateLimiter.canMakeRequest(url)) {
-        try {
-            const response = await fetch(url, options);
-            if (!response.ok) {
-                throw new Error(`Error HTTP: ${response.statusText}`);
-            }
-            return response;
-        } catch (error) {
-            throw new Error(`Error en la solicitud: ${error.message}`);
-        }
-    } else {
-        throw new Error('Has excedido el límite de solicitudes. Inténtalo más tarde.');
-    }
-}
-
-/* ======================== Autenticación ======================== */
+/* ======================== Autenticación y Autorización (Delegado a HTTPService) ======================== */
 
 function isAuthenticated() {
-    return !!getToken();
+    return !!HTTPService.getToken(); // Delega a HTTPService para verificar si hay un token
 }
 
-function isTokenExpired() {
-    const expirationTime = localStorage.getItem('expirationTime');
-    if (!expirationTime) return true;
-    return Date.now() > parseInt(expirationTime, 10);
-}
-
-function checkTokenExpiration() {
-    if (isAuthenticated()) {
-        if (isTokenExpired()) {
-            console.log('El token ha expirado. Cerrando sesión...');
-            logout(true); // Pasamos true para indicar que es un cierre de sesión automático
-        }
-    } else {
-        stopTokenCheck();
-    }
-}
-
-let tokenCheckInterval;
-
-function startTokenCheck() {
-    if (!tokenCheckInterval) {
-        tokenCheckInterval = setInterval(checkTokenExpiration, 60000); // Verifica cada minuto
-    }
-}
-
-function stopTokenCheck() {
-    if (tokenCheckInterval) {
-        clearInterval(tokenCheckInterval);
-        tokenCheckInterval = null;
-    }
-}
-
-function getToken() {
-    return localStorage.getItem('token');
-}
-
-function clearLocalStorage() {
-    localStorage.clear();
-}
-
-/* ======================== Roles y Permisos ======================== */
 function getUserRoles() {
-    const roles = localStorage.getItem('roles');
-    return roles ? JSON.parse(roles) : [];
+    const userData = HTTPService.getUserData();
+    return userData && Array.isArray(userData.roles) ? userData.roles : [];
 }
 
 function getUserPermissions() {
-    const permissions = localStorage.getItem('permissions');
-    return permissions ? JSON.parse(permissions) : [];
+    const userData = HTTPService.getUserData();
+    return userData && Array.isArray(userData.permissions) ? userData.permissions : [];
 }
 
 function hasRequiredRole(requiredRoles) {
-    const userRoles = getUserRoles();
-    return requiredRoles.some((role) => userRoles.includes(role));
+    if (!requiredRoles || requiredRoles.length === 0) return true; // Si no se requieren roles, se considera autorizado
+    return requiredRoles.some((role) => HTTPService.hasRole(role)); // Delega a HTTPService para verificar roles
 }
 
 function hasRequiredPermission(requiredPermissions) {
-    const userPermissions = getUserPermissions();
-    return requiredPermissions.every((permission) => userPermissions.includes(permission));
+    if (!requiredPermissions || requiredPermissions.length === 0) return true; // Si no se requieren permisos, se considera autorizado
+    return requiredPermissions.every((permission) => HTTPService.hasPermission(permission)); // Delega a HTTPService para verificar permisos
 }
 
-/* ======================== Obtener Datos de Usuario ======================== */
-let currentUserData = null;
+
+
+/* ======================== Obtener Datos de Usuario y Actualizar DOM ======================== */
 
 function getUserData() {
-    if (currentUserData) {
-        return currentUserData;
-    }
-
-    // Obtener datos del usuario del localStorage
-    const attributesString = localStorage.getItem('attributes');
-    let attributes = {};
-    if (attributesString) {
-        try {
-            attributes = JSON.parse(attributesString);
-        } catch (error) {
-            console.error('Error al parsear los datos del usuario:', error);
-        }
-    }
-
-    // Obtener nombre del elemento HTML si está disponible
+    const userData = HTTPService.getUserData();
+    // Intenta obtener el nombre del usuario desde un elemento del DOM si existe, priorizándolo
     const nameElement = document.querySelector('[data-user-attribute="name"]');
-    const name = nameElement ? nameElement.textContent.trim() : '';
+    const nameFromDOM = nameElement ? nameElement.textContent.trim() : '';
 
-    // Obtener roles usando la función existente
-    const userRoles = getUserRoles();
-
-    // Combinar datos, dando prioridad al nombre del elemento HTML si está disponible
-    currentUserData = {
-        ...attributes, name: name || attributes.name || '', roles: userRoles
+    return {
+        ...userData, // Combina los datos obtenidos de HTTPService
+        name: nameFromDOM || (userData ? userData.name : ''), // Usa el nombre del DOM o del servicio
+        roles: getUserRoles() // Asegura que los roles también estén actualizados
     };
-
-    return currentUserData;
 }
 
 function updateUserDataInDOM() {
     const userData = getUserData();
 
-    // Actualizar el nombre del usuario en el DOM
+    // Actualiza todos los elementos con el atributo data-user-attribute="name"
     const userNameElements = document.querySelectorAll('[data-user-attribute="name"]');
     userNameElements.forEach(element => {
-        element.textContent = userData.name;
+        element.textContent = userData.name || 'Invitado';
     });
 
-    // Actualizar los roles del usuario en el DOM
+    // Actualiza todos los elementos con el atributo data-user-attribute="roles"
     const userRolesElements = document.querySelectorAll('[data-user-attribute="roles"]');
     userRolesElements.forEach(element => {
-        element.textContent = userData.roles.join(', ');
+        element.textContent = userData.roles.join(', ') || 'Ninguno';
     });
 }
 
+
+
 /* ======================== Spinner de Carga ======================== */
+
 function showLoadingSpinner() {
     const loadingBackground = document.getElementById('loading-background');
     if (loadingBackground) {
@@ -173,25 +80,33 @@ function hideLoadingSpinner() {
     }
 }
 
+
+
 /* ======================== Renderizado de Componentes ======================== */
+
 const renderComponent = (componentName, params = {}) => {
-    // Find the matching route
     const matchedRoute = routes.find(route => route.component === componentName);
 
     if (matchedRoute) {
-        // Ocultar elementos no autorizados
-        hideUnauthorizedElements();
+        // Aplica la lógica de visibilidad/deshabilitación cada vez que se renderiza un componente
+        applyAuthorizationVisibility();
+        console.log(`Renderizando componente: ${componentName} con parámetros:`, params);
+        // Aquí iría la lógica real para cargar e inicializar el componente (ej. importar y renderizar su HTML/JS)
     } else {
-        console.log("No matching route found for component:", componentName);
+        console.warn("No se encontró una ruta coincidente para el componente:", componentName);
     }
 };
 
+
+
 /* ======================== Manejo de Navegación ======================== */
+
 function handleNavigation() {
     const currentUrl = window.location.pathname;
     let matchedRoute = null;
     let params = {};
 
+    // Recorre las rutas definidas para encontrar una coincidencia
     for (let route of routes) {
         const routeParts = route.path.split('/');
         const urlParts = currentUrl.split('/');
@@ -199,7 +114,7 @@ function handleNavigation() {
         if (routeParts.length === urlParts.length) {
             let match = true;
             for (let i = 0; i < routeParts.length; i++) {
-                if (routeParts[i].startsWith(':')) {
+                if (routeParts[i].startsWith(':')) { // Maneja parámetros dinámicos de ruta (ej. /users/:id)
                     params[routeParts[i].slice(1)] = urlParts[i];
                 } else if (routeParts[i] !== urlParts[i]) {
                     match = false;
@@ -213,128 +128,201 @@ function handleNavigation() {
         }
     }
 
+    // Si no se encuentra una ruta, redirige a la página 404
     if (!matchedRoute) {
-        console.log("Ruta no encontrada. Redirigiendo a página 404...");
+        console.warn("Ruta no encontrada. Redirigiendo a página 404...");
         window.location.href = '/not-found';
         return;
     }
 
-    const {requiresAuth, roles, permissions} = matchedRoute.meta || {};
+    const { requiresAuth, roles, permissions } = matchedRoute.meta || {};
 
+    // Validaciones de autenticación y autorización de la ruta
     if (requiresAuth && !isAuthenticated()) {
         console.log("Autenticación requerida. Redirigiendo a login...");
-        logout();
-        redirectToLogin();
+        logout(); // Cierra la sesión y redirige al login si no está autenticado
         return;
     }
 
     if (roles && !hasRequiredRole(roles)) {
-        console.log("Usuario no tiene los roles necesarios. Redirigiendo a página de acceso denegado...");
-        window.location.href = '/forbidden';
+        console.warn("Usuario no tiene los roles necesarios. Redirigiendo a página de acceso denegado...");
+        window.location.href = '/forbidden'; // Redirige si no tiene los roles requeridos
         return;
     }
 
     if (permissions && !hasRequiredPermission(permissions)) {
-        console.log("Usuario no tiene los permisos necesarios. Redirigiendo a página de acceso denegado...");
-        window.location.href = '/forbidden';
+        console.warn("Usuario no tiene los permisos necesarios. Redirigiendo a página de acceso denegado...");
+        window.location.href = '/forbidden'; // Redirige si no tiene los permisos requeridos
         return;
     }
 
+    // Si todas las validaciones pasan, renderiza el componente asociado a la ruta
     renderComponent(matchedRoute.component, params);
 }
 
-/* ======================== Autorización y Visibilidad de Elementos ======================== */
-function hideUnauthorizedElements() {
+
+
+/* ======================== Autorización y Visibilidad de Elementos del DOM (Doble Capa de Control) ======================== */
+
+// **Asegúrate de añadir estas clases en tu archivo CSS:**
+// .hidden-by-auth {
+//     display: none !important; /* OCULTA COMPLETAMENTE el elemento */
+// }
+
+// .disabled-by-auth {
+//     pointer-events: none; /* INHABILITA los clics y eventos de ratón */
+//     opacity: 0.5;        /* Hace el elemento semitransparente para indicar que está inactivo */
+//     cursor: not-allowed; /* Cambia el cursor del ratón a "no permitido" */
+// }
+
+/**
+ * Verifica si un elemento del DOM tiene autorización para ser visible y activo
+ * basándose en sus atributos `data-roles` y `data-permissions`.
+ * @param {HTMLElement} element - El elemento del DOM a verificar.
+ * @returns {boolean} - `true` si el elemento está autorizado, `false` en caso contrario.
+ */
+function isElementAuthorized(element) {
+    // Obtiene los roles y permisos requeridos del atributo data del elemento
+    const requiredRoles = element.dataset.roles ? element.dataset.roles.split(',').map(s => s.trim()) : [];
+    const requiredPermissions = element.dataset.permissions ? element.dataset.permissions.split(',').map(s => s.trim()) : [];
+
+    // Verifica si el usuario tiene los roles y permisos necesarios
+    const hasRole = requiredRoles.length === 0 || hasRequiredRole(requiredRoles);
+    const hasPermission = requiredPermissions.length === 0 || hasRequiredPermission(requiredPermissions);
+
+    // Un elemento es autorizado si cumple ambas condiciones (roles Y permisos)
+    return hasRole && hasPermission;
+}
+
+/**
+ * Aplica el control de visibilidad y estado de actividad a todos los elementos del DOM
+ * marcados con `data-roles` o `data-permissions`.
+ *
+ * Si un elemento no está autorizado, se le aplican dos capas de control en el frontend:
+ * 1. Siempre se **oculta** usando la clase `hidden-by-auth`.
+ * 2. Si es un elemento interactivo, además se **deshabilita** (con `disabled-by-auth` y/o el atributo `disabled`).
+ */
+function applyAuthorizationVisibility() {
+    // Selecciona todos los elementos del DOM que tienen atributos de roles o permisos
     const elements = document.querySelectorAll('[data-roles], [data-permissions]');
 
     elements.forEach((element) => {
-        const requiredRoles = element.dataset.roles ? element.dataset.roles.split(',') : [];
-        const requiredPermissions = element.dataset.permissions ? element.dataset.permissions.split(',') : [];
+        const authorized = isElementAuthorized(element);
 
-        const hasRole = requiredRoles.length === 0 || hasRequiredRole(requiredRoles);
-        const hasPermission = requiredPermissions.length === 0 || hasRequiredPermission(requiredPermissions);
+        // Limpiamos cualquier estado previo para elementos que ahora están autorizados.
+        // Esto asegura que si un usuario gana permisos, los elementos vuelvan a ser visibles y activos.
+        if (authorized) {
+            element.classList.remove('hidden-by-auth');
+            element.classList.remove('disabled-by-auth');
+            if (element.hasAttribute('disabled')) {
+                element.removeAttribute('disabled');
+            }
+        } else { // Si el elemento NO está autorizado
+            // Primera capa de control: Ocultar el elemento para que no sea visible.
+            element.classList.add('hidden-by-auth');
 
-        if (hasRole && hasPermission) {
-            element.style.display = 'block';
-        } else {
-            element.style.display = 'none';
+            // Segunda capa de control: Deshabilitar el elemento si es interactivo.
+            // Esto previene interacciones accidentales incluso si la ocultación CSS es sobreescrita.
+            const isInteractive = (
+                element.tagName === 'BUTTON' ||
+                element.tagName === 'INPUT' ||
+                element.tagName === 'SELECT' ||
+                element.tagName === 'TEXTAREA' ||
+                element.tagName === 'A' // Los enlaces son interactivos y se deshabilitan con pointer-events
+            );
+
+            if (isInteractive) {
+                element.classList.add('disabled-by-auth');
+                // Aplica el atributo 'disabled' solo a los elementos HTML que lo soportan nativamente.
+                // Los enlaces (<a>) no tienen 'disabled' nativo; 'pointer-events: none' es suficiente para ellos.
+                if (element.tagName !== 'A') {
+                    element.setAttribute('disabled', 'true');
+                }
+            } else {
+                // Si no es interactivo pero no autorizado, asegúrate de que no tenga la clase de deshabilitado
+                // (útil si los permisos cambiaron y antes era interactivo)
+                element.classList.remove('disabled-by-auth');
+            }
         }
     });
 }
+
+
 
 /* ======================== Cierre de Sesión ======================== */
 
 function clearCookies() {
     const cookies = document.cookie.split(";");
-
-    // Iterar sobre cada cookie y eliminarla
     for (let i = 0; i < cookies.length; i++) {
         const cookie = cookies[i];
         const eqPos = cookie.indexOf("=");
         const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-
-        // Establecer fecha de expiración en el pasado para eliminar la cookie
+        // Elimina la cookie del path actual, el dominio raíz y el subdominio (para asegurar la eliminación)
         document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
-
-        // Intentar eliminar la cookie para el dominio actual y subdominio
         document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=" + location.hostname;
         document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=." + location.hostname;
     }
 }
 
 async function logout() {
-    showLoadingSpinner();
+    showLoadingSpinner(); // Muestra el spinner de carga
     try {
-        const token = getToken();
-        if (token && !isTokenExpired()) {
-            await rateLimitedFetch('/api/authenticate/logout', {
-                method: 'POST', headers: {
-                    'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`,
-                }, credentials: 'same-origin',
-            });
-        }
+        // Intenta llamar al endpoint de logout del backend a través de HTTPService
+        await HTTPService.post('/api/authenticate/logout', {});
+        console.log('Sesión cerrada en el backend.');
     } catch (error) {
-        console.error('Error durante el cierre de sesión:', error);
+        // Captura errores durante el logout (puede ser normal si el refresh token ya expiró en el backend)
+        console.error('Error durante el cierre de sesión en el backend (puede ser normal si el refresh token ya expiró):', error);
     } finally {
-        hideLoadingSpinner();
-        clearCookies();
-        clearLocalStorage();
-        stopTokenCheck(); // Asegurarse de detener la verificación
-        redirectToLogin();
+        hideLoadingSpinner(); // Oculta el spinner de carga
+        clearCookies(); // Limpia todas las cookies del navegador
+        // Forzar la limpieza del token y datos de usuario en HTTPService y localStorage para asegurar el logout local
+        HTTPService.setToken(null, 0); // Establece el token a nulo y expiración a 0
+        HTTPService.setUserData(null); // Borra los datos del usuario
+        redirectToLogin(); // Redirige al usuario a la página de inicio de sesión
     }
 }
 
 function redirectToLogin() {
-    clearLocalStorage();
     window.location.href = '/login';
 }
 
-/* ======================== Inicialización ======================== */
-function initApp() {
-    getUserData(); // Cargar datos de usuario
-    updateUserDataInDOM(); // Actualizar el DOM con los datos del usuario
-    handleNavigation(); // Manejar la navegación inicial
-    hideUnauthorizedElements(); // Ocultar elementos no autorizados
 
-    // Configurar el botón de cierre de sesión
+
+/* ======================== Inicialización de la Aplicación ======================== */
+
+function initApp() {
+    // Es crucial que HTTPService.initializeSanctum() se ejecute antes de cualquier
+    // petición que requiera el XSRF-TOKEN (típicamente las POST, PUT, DELETE).
+    // Si HTTPService ya lo maneja internamente al inicio del módulo, no es necesario aquí.
+    // Si no, descomenta y asegura su llamada:
+    // HTTPService.initializeSanctum();
+
+    updateUserDataInDOM(); // Actualiza la información del usuario en el DOM
+    handleNavigation(); // Maneja la navegación inicial basada en la URL actual
+    applyAuthorizationVisibility(); // Aplica el control de visibilidad/deshabilitación al cargar la app
+
+    // Configura el listener para el botón de cierre de sesión
     const logoutButton = document.getElementById('logout-btn');
     if (logoutButton) {
         logoutButton.addEventListener('click', logout);
     }
-
-    // Configurar intervalo para verificación continua
-    // Iniciar la verificación del token si el usuario está autenticado
-    if (isAuthenticated()) {
-        checkTokenExpiration(); // Verificación inicial
-        startTokenCheck(); // Iniciar verificaciones periódicas
-    }
 }
 
-/* ======================== Eventos de Navegación ======================== */
-window.addEventListener('popstate', handleNavigation);
 
+
+/* ======================== Eventos de Navegación del Navegador ======================== */
+
+// Escucha el evento 'popstate' para manejar la navegación hacia atrás/adelante del navegador
+window.addEventListener('popstate', handleNavigation);
+// Cuando el DOM esté completamente cargado, inicializa la aplicación
 document.addEventListener('DOMContentLoaded', initApp);
 
+// Exporta funciones y el servicio HTTP para que otros módulos puedan usarlos
 export {
-    rateLimitedFetch, logout, isAuthenticated, getUserData, updateUserDataInDOM
+    logout,
+    isAuthenticated,
+    getUserData,
+    updateUserDataInDOM,
+    HTTPService // Es útil exportar HTTPService para que otros módulos puedan usarlo directamente.
 };

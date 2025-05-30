@@ -130,8 +130,8 @@
 
             const loadCounter = async () => {
                 const referenceCode = getElement(elements.referenceCode);
-                const entityId = localStorage.getItem('entity_id');
-
+                const entityId = HTTPService.getUserData('entity_id');
+              
                 if (!entityId || !selectedOffice) {
                     console.error(
                         'No se encontró el entity_id en localStorage o no se ha seleccionado una oficina.'

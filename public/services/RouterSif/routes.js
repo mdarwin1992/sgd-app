@@ -337,11 +337,11 @@ export const routes = [
     {
         path: "/dashboard/prestamos-documental",
         component: "components.loans.index",
-        name: "Crear prestamos de documentos",
+        name: "Gestión de prestamos de documentos",
         meta: {
             requiresAuth: true,
             roles: ["ADMINISTRADOR", "EMPRESA"],
-            permissions: ["historic.create"],
+            permissions: ["lending.index"],
         },
     },
 
@@ -352,7 +352,7 @@ export const routes = [
         meta: {
             requiresAuth: true,
             roles: ["ADMINISTRADOR", "EMPRESA"],
-            permissions: ["historic.create"],
+            permissions: ["lending.create"],
         },
     },
     {
@@ -362,7 +362,7 @@ export const routes = [
         meta: {
             requiresAuth: true,
             roles: ["ADMINISTRADOR", "EMPRESA"],
-            permissions: ["historic.create"],
+            permissions: ["lending.create"],
         },
     },
     {
@@ -370,9 +370,7 @@ export const routes = [
         component: "viewer.file",
         name: "imprimir tiket de prestamos",
         meta: {
-            requiresAuth: true,
-            roles: ["ADMINISTRADOR", "EMPRESA"],
-            permissions: ["historic.create"],
+            requiresAuth: false,
         },
     },
 ];
