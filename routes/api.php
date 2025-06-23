@@ -79,6 +79,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('dashboard/office/destroy/{id}', [OfficeController::class, 'destroy'])->name('api.office.destroy');
     Route::get('dashboard/offices/{officeId}/series', [OfficeController::class, 'series'])->name('api.office.series');
     Route::get('dashboard/series/{seriesId}/subseries', [OfficeController::class, 'subseries'])->name('api.office.subseries');
+    Route::get('dashboard/offices-without-user', [OfficeController::class, 'getOfficesWithoutUser']);
+
 
     // User routes
     //Route::get('dashboard/users', [UserController::class, 'index'])->name('api.users.index');

@@ -1,3 +1,5 @@
+// main.js (o el nombre que le des a este archivo central)
+
 // Importar rutas
 import { routes } from './routes.js'; // Asegúrate de que la ruta sea correcta
 // Importar el servicio HTTP centralizado
@@ -5,54 +7,78 @@ import HTTPService from '../httpService/HTTPService.js'; // Asegúrate de que la
 
 /* ======================== Autenticación y Autorización (Delegado a HTTPService) ======================== */
 
+/**
+ * Verifica si el usuario está autenticado.
+ * Delega la verificación de la existencia y validez del token a HTTPService.
+ * @returns {boolean} - True si el usuario está autenticado, false en caso contrario.
+ */
 function isAuthenticated() {
-    return !!HTTPService.getToken(); // Delega a HTTPService para verificar si hay un token
+    return !!HTTPService.getToken();
 }
 
+/**
+ * Obtiene los roles del usuario actual.
+ * @returns {Array<string>} - Un array de roles del usuario.
+ */
 function getUserRoles() {
     const userData = HTTPService.getUserData();
     return userData && Array.isArray(userData.roles) ? userData.roles : [];
 }
 
+/**
+ * Obtiene los permisos del usuario actual.
+ * @returns {Array<string>} - Un array de permisos del usuario.
+ */
 function getUserPermissions() {
     const userData = HTTPService.getUserData();
     return userData && Array.isArray(userData.permissions) ? userData.permissions : [];
 }
 
+/**
+ * Verifica si el usuario tiene al menos uno de los roles requeridos.
+ * @param {Array<string>} requiredRoles - Array de roles necesarios.
+ * @returns {boolean} - True si el usuario tiene al menos uno de los roles, false en caso contrario.
+ */
 function hasRequiredRole(requiredRoles) {
     if (!requiredRoles || requiredRoles.length === 0) return true; // Si no se requieren roles, se considera autorizado
-    return requiredRoles.some((role) => HTTPService.hasRole(role)); // Delega a HTTPService para verificar roles
+    return requiredRoles.some((role) => HTTPService.hasRole(role)); // Lógica OR: el usuario necesita AL MENOS UNO de los roles
 }
 
+/**
+ * Verifica si el usuario tiene todos los permisos requeridos.
+ * @param {Array<string>} requiredPermissions - Array de permisos necesarios.
+ * @returns {boolean} - True si el usuario tiene TODOS los permisos, false en caso contrario.
+ */
 function hasRequiredPermission(requiredPermissions) {
     if (!requiredPermissions || requiredPermissions.length === 0) return true; // Si no se requieren permisos, se considera autorizado
-    return requiredPermissions.every((permission) => HTTPService.hasPermission(permission)); // Delega a HTTPService para verificar permisos
+    return requiredPermissions.every((permission) => HTTPService.hasPermission(permission)); // Lógica AND: el usuario necesita TODOS los permisos
 }
-
-
 
 /* ======================== Obtener Datos de Usuario y Actualizar DOM ======================== */
 
-function getUserData() {
+/**
+ * Obtiene los datos completos del usuario, priorizando el servicio HTTP como fuente de verdad.
+ * @returns {Object} - Objeto con los datos del usuario (name, roles, permissions).
+ */
+function getFullUserData() {
     const userData = HTTPService.getUserData();
-    // Intenta obtener el nombre del usuario desde un elemento del DOM si existe, priorizándolo
-    const nameElement = document.querySelector('[data-user-attribute="name"]');
-    const nameFromDOM = nameElement ? nameElement.textContent.trim() : '';
-
     return {
-        ...userData, // Combina los datos obtenidos de HTTPService
-        name: nameFromDOM || (userData ? userData.name : ''), // Usa el nombre del DOM o del servicio
-        roles: getUserRoles() // Asegura que los roles también estén actualizados
+        name: userData ? userData.name : 'Invitado',
+        roles: getUserRoles(),
+        permissions: getUserPermissions() // Incluir permisos para consistencia
     };
 }
 
+/**
+ * Actualiza la información del usuario en los elementos del DOM.
+ */
 function updateUserDataInDOM() {
-    const userData = getUserData();
+    const userData = getFullUserData(); // Usar la función que prioriza el servicio
 
     // Actualiza todos los elementos con el atributo data-user-attribute="name"
     const userNameElements = document.querySelectorAll('[data-user-attribute="name"]');
     userNameElements.forEach(element => {
-        element.textContent = userData.name || 'Invitado';
+        element.textContent = userData.name;
     });
 
     // Actualiza todos los elementos con el atributo data-user-attribute="roles"
@@ -60,12 +86,19 @@ function updateUserDataInDOM() {
     userRolesElements.forEach(element => {
         element.textContent = userData.roles.join(', ') || 'Ninguno';
     });
+
+    // Opcional: Actualizar permisos si se muestran en algún lugar
+    const userPermissionsElements = document.querySelectorAll('[data-user-attribute="permissions"]');
+    userPermissionsElements.forEach(element => {
+        element.textContent = userData.permissions.join(', ') || 'Ninguno';
+    });
 }
-
-
 
 /* ======================== Spinner de Carga ======================== */
 
+/**
+ * Muestra el spinner de carga.
+ */
 function showLoadingSpinner() {
     const loadingBackground = document.getElementById('loading-background');
     if (loadingBackground) {
@@ -73,6 +106,9 @@ function showLoadingSpinner() {
     }
 }
 
+/**
+ * Oculta el spinner de carga.
+ */
 function hideLoadingSpinner() {
     const loadingBackground = document.getElementById('loading-background');
     if (loadingBackground) {
@@ -80,28 +116,48 @@ function hideLoadingSpinner() {
     }
 }
 
-
-
 /* ======================== Renderizado de Componentes ======================== */
 
+/**
+ * Renderiza un componente de la aplicación.
+ * Este es un placeholder. Aquí iría la lógica real para cargar y mostrar el componente.
+ * @param {string} componentName - El nombre del componente a renderizar.
+ * @param {Object} [params={}] - Parámetros a pasar al componente.
+ */
 const renderComponent = (componentName, params = {}) => {
     const matchedRoute = routes.find(route => route.component === componentName);
 
     if (matchedRoute) {
-        // Aplica la lógica de visibilidad/deshabilitación cada vez que se renderiza un componente
-        applyAuthorizationVisibility();
         console.log(`Renderizando componente: ${componentName} con parámetros:`, params);
-        // Aquí iría la lógica real para cargar e inicializar el componente (ej. importar y renderizar su HTML/JS)
+        // Lógica para cargar dinámicamente el módulo del componente e inicializarlo.
+        // Ejemplo (requiere un sistema de importación dinámica y un punto de entrada para cada componente):
+        // import(`/path/to/components/${componentName}.js`)
+        //     .then(module => {
+        //         if (module.init) { // Si el módulo exporta una función init
+        //             module.init(params);
+        //         } else if (module.default) { // Si exporta una clase o función por defecto
+        //             new module.default(params);
+        //         }
+        //         applyAuthorizationVisibility(); // Aplicar visibilidad después de que el componente se renderice
+        //     })
+        //     .catch(error => {
+        //         console.error(`Error al cargar el componente ${componentName}:`, error);
+        //         // Redirigir a una página de error o mostrar un mensaje
+        //     });
+        applyAuthorizationVisibility(); // Aplicar visibilidad a elementos estáticos o ya presentes
     } else {
         console.warn("No se encontró una ruta coincidente para el componente:", componentName);
     }
 };
 
-
-
 /* ======================== Manejo de Navegación ======================== */
 
-function handleNavigation() {
+/**
+ * Maneja la navegación de la aplicación basándose en la URL actual.
+ * Realiza verificaciones de autenticación y autorización antes de renderizar el componente.
+ */
+async function handleNavigation() { // Hacer la función async para await initializeSanctum
+    showLoadingSpinner(); // Muestra el spinner al inicio de la navegación
     const currentUrl = window.location.pathname;
     let matchedRoute = null;
     let params = {};
@@ -131,6 +187,7 @@ function handleNavigation() {
     // Si no se encuentra una ruta, redirige a la página 404
     if (!matchedRoute) {
         console.warn("Ruta no encontrada. Redirigiendo a página 404...");
+        hideLoadingSpinner();
         window.location.href = '/not-found';
         return;
     }
@@ -140,27 +197,29 @@ function handleNavigation() {
     // Validaciones de autenticación y autorización de la ruta
     if (requiresAuth && !isAuthenticated()) {
         console.log("Autenticación requerida. Redirigiendo a login...");
+        hideLoadingSpinner();
         logout(); // Cierra la sesión y redirige al login si no está autenticado
         return;
     }
 
     if (roles && !hasRequiredRole(roles)) {
         console.warn("Usuario no tiene los roles necesarios. Redirigiendo a página de acceso denegado...");
+        hideLoadingSpinner();
         window.location.href = '/forbidden'; // Redirige si no tiene los roles requeridos
         return;
     }
 
     if (permissions && !hasRequiredPermission(permissions)) {
         console.warn("Usuario no tiene los permisos necesarios. Redirigiendo a página de acceso denegado...");
+        hideLoadingSpinner();
         window.location.href = '/forbidden'; // Redirige si no tiene los permisos requeridos
         return;
     }
 
     // Si todas las validaciones pasan, renderiza el componente asociado a la ruta
     renderComponent(matchedRoute.component, params);
+    hideLoadingSpinner(); // Oculta el spinner una vez que el componente se ha "renderizado"
 }
-
-
 
 /* ======================== Autorización y Visibilidad de Elementos del DOM (Doble Capa de Control) ======================== */
 
@@ -171,8 +230,8 @@ function handleNavigation() {
 
 // .disabled-by-auth {
 //     pointer-events: none; /* INHABILITA los clics y eventos de ratón */
-//     opacity: 0.5;        /* Hace el elemento semitransparente para indicar que está inactivo */
-//     cursor: not-allowed; /* Cambia el cursor del ratón a "no permitido" */
+//     opacity: 0.5;          /* Hace el elemento semitransparente para indicar que está inactivo */
+//     cursor: not-allowed;   /* Cambia el cursor del ratón a "no permitido" */
 // }
 
 /**
@@ -247,10 +306,13 @@ function applyAuthorizationVisibility() {
     });
 }
 
-
-
 /* ======================== Cierre de Sesión ======================== */
 
+/**
+ * Borra las cookies del navegador.
+ * Nota: Esta función es muy agresiva y borrará TODAS las cookies para el dominio.
+ * Para un control más granular, sería mejor borrar solo las cookies de sesión/auth por nombre.
+ */
 function clearCookies() {
     const cookies = document.cookie.split(";");
     for (let i = 0; i < cookies.length; i++) {
@@ -264,10 +326,15 @@ function clearCookies() {
     }
 }
 
+/**
+ * Realiza el proceso de cierre de sesión.
+ * Llama al backend para invalidar la sesión y limpia el estado local.
+ */
 async function logout() {
     showLoadingSpinner(); // Muestra el spinner de carga
     try {
         // Intenta llamar al endpoint de logout del backend a través de HTTPService
+        // El backend debería invalidar el refresh token y la sesión
         await HTTPService.post('/api/authenticate/logout', {});
         console.log('Sesión cerrada en el backend.');
     } catch (error) {
@@ -283,24 +350,33 @@ async function logout() {
     }
 }
 
+/**
+ * Redirige al usuario a la página de inicio de sesión.
+ */
 function redirectToLogin() {
     window.location.href = '/login';
 }
 
-
-
 /* ======================== Inicialización de la Aplicación ======================== */
 
-function initApp() {
+/**
+ * Inicializa la aplicación: carga datos de usuario, maneja la navegación inicial
+ * y aplica la visibilidad basada en autorización.
+ */
+async function initApp() {
     // Es crucial que HTTPService.initializeSanctum() se ejecute antes de cualquier
     // petición que requiera el XSRF-TOKEN (típicamente las POST, PUT, DELETE).
-    // Si HTTPService ya lo maneja internamente al inicio del módulo, no es necesario aquí.
-    // Si no, descomenta y asegura su llamada:
-    // HTTPService.initializeSanctum();
+    // Si tu HTTPService ya lo maneja internamente al inicio de su módulo,
+    // o en la primera petición, esta llamada explícita puede ser redundante pero segura.
+    // Si tu backend usa Sanctum, DESCOMENTA esta línea:
+    await HTTPService.initializeSanctum(); // Asegura que el CSRF token esté disponible
 
     updateUserDataInDOM(); // Actualiza la información del usuario en el DOM
-    handleNavigation(); // Maneja la navegación inicial basada en la URL actual
-    applyAuthorizationVisibility(); // Aplica el control de visibilidad/deshabilitación al cargar la app
+    await handleNavigation(); // Maneja la navegación inicial basada en la URL actual (ahora async)
+    // applyAuthorizationVisibility() ya se llama dentro de handleNavigation y renderComponent
+    // pero una llamada aquí asegura que los elementos iniciales estén correctos antes de la navegación
+    // y puede ser útil si la navegación no renderiza todo inmediatamente.
+    applyAuthorizationVisibility();
 
     // Configura el listener para el botón de cierre de sesión
     const logoutButton = document.getElementById('logout-btn');
@@ -308,8 +384,6 @@ function initApp() {
         logoutButton.addEventListener('click', logout);
     }
 }
-
-
 
 /* ======================== Eventos de Navegación del Navegador ======================== */
 
@@ -322,7 +396,7 @@ document.addEventListener('DOMContentLoaded', initApp);
 export {
     logout,
     isAuthenticated,
-    getUserData,
+    getFullUserData, // Renombrado para mayor claridad
     updateUserDataInDOM,
     HTTPService // Es útil exportar HTTPService para que otros módulos puedan usarlo directamente.
 };

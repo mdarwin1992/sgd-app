@@ -45,7 +45,7 @@ class CentralArchiveRequest extends FormRequest
             'document_reference' => 'nullable|string|max:250',
             'third_parties' => 'nullable|string|max:250',
             'object_observations' => 'nullable|string',
-            'file_path' => 'required|string|max:255',
+            'file_path' => 'nullable|string|max:255',
         ];
     }
 

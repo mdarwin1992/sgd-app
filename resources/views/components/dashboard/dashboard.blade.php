@@ -195,20 +195,6 @@
     <script type="module">
         import HTTPService from '/services/httpService/HTTPService.js';
 
-        /* const createButton = document.getElementById('centralfile');
-        if (HTTPService.hasPermission('centralfile.create')) {
-            createButton.style.display = 'block';
-        } else {
-            createButton.style.display = 'none';
-        } */
-
-        const adminPanelLink = document.getElementById('centralfile');
-        if (HTTPService.hasRole('centralfile.create')) {
-            adminPanelLink.style.display = 'block';
-        } else {
-            adminPanelLink.style.display = 'none';
-        }
-
         const DashboardComponent = (() => {
             const elements = {
                 totalDocuments: '#totalDocuments',
@@ -676,9 +662,6 @@
         // Inicializar el componente cuando el DOM esté listo
         document.addEventListener('DOMContentLoaded', () => {
             DashboardComponent.init();
-
-            HTTPService.initializeSanctum();
-
         });
     </script>
 @endsection

@@ -71,6 +71,8 @@ class UserController extends Controller
                 'password' => 'required|string|min:8',
                 'phone' => 'nullable|string|max:20',
                 'roles' => 'required|string',
+                'entity_id' => 'nullable',
+                'office_id' => 'required|exists:office,id',
                 'permissions' => 'array'
             ]);
 
@@ -81,7 +83,13 @@ class UserController extends Controller
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
                 'phone' => $validated['phone'] ?? null,
+                'entity_id' => $validated['entity_id'],
             ]);
+
+            $officeSelectUSer = DB::table('office')->where('office.id', '=', $request['office_id'])->update([
+                'user_id' => $user->id,
+            ]);
+
 
             // Asignar roles al usuario
             if (!empty($validated['roles'])) {
@@ -107,7 +115,6 @@ class UserController extends Controller
                 'message' => 'Usuario creado exitosamente',
                 'data' => $user->load(['roles', 'permissions'])
             ], 201);
-
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
@@ -179,7 +186,6 @@ class UserController extends Controller
                 'message' => 'Usuario actualizado exitosamente',
                 'data' => $user->load(['roles', 'permissions'])
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
@@ -218,7 +224,6 @@ class UserController extends Controller
                 'status' => 'success',
                 'message' => 'Usuario eliminado exitosamente'
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
@@ -294,5 +299,4 @@ class UserController extends Controller
             ], 500);
         }
     }
-
 }

@@ -46,14 +46,14 @@
             </li>
 
             <li class="side-nav-item" id="rutas">
-                <a href="/dashboard/empresa" class="side-nav-link visible" data-roles="ADMINISTRADOR,EMPRESA"
+                <a href="/dashboard/empresa" class="side-nav-link visible" data-roles="ADMINISTRADOR,EMPRESA,USUARIO"
                     data-permissions="business.index">
                     <i class="fas fa-building"></i>
                     <span> Empresa </span>
                 </a>
             </li>
 
-            <li class="side-nav-title">Ventanilla Única</li>
+            <li class="side-nav-title" id="OneStopShop" data-roles="ADMINISTRADOR,EMPRESA,USUARIO">Ventanilla Única</li>
             <li class="side-nav-item" id="rutas">
                 <a href="/dashboard/ventanilla-unica/recepcion" class="side-nav-link visible"
                     data-roles="ADMINISTRADOR,EMPRESA,USUARIO" data-permissions="reception.create">
@@ -83,7 +83,8 @@
                     <span> Enviar </span>
                 </a>
             </li>
-            <li class="side-nav-title" id="centralfile">Archivo Central</li>
+            <li class="side-nav-title" data-roles="ADMINISTRADOR,EMPRESA,USUARIO" data-permissions="centralfile.create">
+                Archivo Central</li>
             <li class="side-nav-item" id="rutas">
                 <a href="/dashboard/archivo-central" class="side-nav-link visible"
                     data-roles="ADMINISTRADOR,EMPRESA,USUARIO" data-permissions="centralfile.create">
@@ -98,7 +99,9 @@
                     <span> Consultas </span>
                 </a>
             </li>
-            <li class="side-nav-title">Archivo Historico</li>
+            <li class="side-nav-title" data-roles="ADMINISTRADOR,EMPRESA,USUARIO" data-permissions="historic.create">
+                Archivo Historico
+            </li>
             <li class="side-nav-item" id="rutas">
                 <a href="/dashboard/archivo-historico/crear" class="side-nav-link visible"
                     data-roles="ADMINISTRADOR,EMPRESA,USUARIO" data-permissions="historic.create">
@@ -106,7 +109,8 @@
                     <span> Archivo Historico </span>
                 </a>
             </li>
-            <li class="side-nav-title">Prestamos Documentales</li>
+            <li class="side-nav-title" data-roles="ADMINISTRADOR,EMPRESA" data-permissions="lending.index">Prestamos
+                Documentales</li>
             <li class="side-nav-item" id="rutas">
                 <a href="/dashboard/prestamos-documental" class="side-nav-link visible"
                     data-roles="ADMINISTRADOR,EMPRESA" data-permissions="lending.index">
@@ -114,7 +118,8 @@
                     <span> Prestamos Documentales </span>
                 </a>
             </li>
-            <li class="side-nav-title">Configuracion</li>
+            <li class="side-nav-title" id="settings" data-roles="ADMINISTRADOR,EMPRESA,USUARIO"
+                data-permissions="settings.index">Configuracion</li>
             <li class="side-nav-item" id="rutas">
                 <a href="/dashboard/usuarios" class="side-nav-link visible" data-roles="ADMINISTRADOR,EMPRESA"
                     data-permissions="users.index">
@@ -124,6 +129,7 @@
             </li>
             <li class="side-nav-item">
                 <a data-bs-toggle="collapse" href="#sidebarDashboards" aria-expanded="false"
+                    data-roles="ADMINISTRADOR,EMPRESA,USUARIO" data-permissions="settings.index"
                     aria-controls="sidebarDashboards" class="side-nav-link">
                     <i class="far fa-user-cog"></i>
                     <span> Configuracion </span>
@@ -145,7 +151,8 @@
                     </ul>
                 </div>
             </li>
-            <li class="side-nav-title">Reportes</li>
+            <li class="side-nav-title" id="reports" data-roles="ADMINISTRADOR,EMPRESA,USUARIO"
+                data-permissions="reports.singlewindow">Reportes</li>
             <li class="side-nav-item" id="rutas">
                 <a href="/dashboard/ventanilla-unica/reportes" class="side-nav-link visible"
                     data-roles="ADMINISTRADOR,EMPRESA,USUARIO" data-permissions="reports.singlewindow">

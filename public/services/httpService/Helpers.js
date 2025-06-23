@@ -11,8 +11,9 @@ class Helpers {
      * Muestra un mensaje de éxito usando SweetAlert2 y redirige a la URL especificada.
      * @param {string} message - Mensaje a mostrar.
      * @param {string} url - URL a la que redirigir después de mostrar el mensaje.
+     * showSuccessMessageAndRedirect
      */
-    static showSuccessMessageAndRedirect(message, url) {
+    static getMessage(message, url) {
         Swal.fire({
             toast: true,
             icon: 'success',
@@ -37,8 +38,9 @@ class Helpers {
      * Ejemplo: para una URL como '/users/123/edit', `getPathSegment(1)` devolvería '123'.
      * @param {number} [index=0] - El índice del segmento de la ruta a obtener (0-based).
      * @return {string|null} - El segmento de la ruta o null si no existe.
+     * getPathSegment
      */
-    static getPathSegment(index = 0) {
+    static getAllGetParams(index = 0) {
         // Separa la ruta por '/' y filtra los elementos vacíos (ej. de un '/' inicial o final).
         const parts = location.pathname.split("/").filter(item => item !== "");
         return parts[index] || null; // Devuelve el parámetro en el índice dado o null si no existe.

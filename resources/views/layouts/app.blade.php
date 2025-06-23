@@ -175,6 +175,7 @@
 
     <script type="module" src="{{ asset('services/notifications/notifications.js') }}"></script>
     <script type="module" src="{{ asset('services/RouterSif/RouteService.js') }}"></script>
+
     @yield('scripts')
 </body>
 

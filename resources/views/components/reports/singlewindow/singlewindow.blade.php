@@ -178,56 +178,101 @@
 @section('scripts')
     <script type="module">
         import HTTPService from '/services/httpService/HTTPService.js';
+        // Asumo que Helpers.js existe y contiene getMessage, si no, puedes eliminar la importación o simularla.
+        // import Helpers from '/services/httpService/Helpers.js';
 
         const ReportComponent = (() => {
-            // Private variables
             let isGenerating = false;
-            let isSubmitting = false;
 
-            const elements = {
-                filterType: document.getElementById('filterType'),
-                yearField: document.querySelector('.year-field'),
-                dateRangeFields: document.querySelectorAll('.date-range-field'),
-                departmentSelect: document.getElementById('department_id'),
-                officeSelect: document.getElementById('office_id'),
-                reportForm: '#reportForm',
-                customReportResult: document.getElementById('customReportResult'),
-                generatePdfBtn: document.getElementById('generatePdfBtn'),
-                reportType: document.getElementById('reportType')
+            const elements = {};
+
+            const getDOMElements = () => {
+                elements.filterType = document.getElementById('filterType');
+                elements.yearField = document.querySelector('.year-field');
+                elements.dateRangeFields = document.querySelectorAll('.date-range-field');
+                elements.departmentSelect = document.getElementById('department_id');
+                elements.officeSelect = document.getElementById('office_id');
+                elements.reportForm = document.getElementById('reportForm');
+                elements.generateReportBtn = document.getElementById('generateReportBtn');
+                elements.generatePdfBtn = document.getElementById('generatePdfBtn');
+                elements.customReportResult = document.getElementById('customReportResult');
+                elements.reportType = document.getElementById('reportType');
+                elements.loadingIndicator = null;
             };
 
-            // Función para determinar el color del badge según el valor (con outline)
+            /**
+             * Determina el color del badge según el valor (con outline).
+             * @param {string} value - El texto del valor a categorizar.
+             * @returns {string} La clase CSS para el badge.
+             */
             const getBadgeColor = (value) => {
-                if (!value) return 'outline-secondary';
+                if (!value) return 'badge-outline-secondary';
 
                 const lowerValue = value.toString().toLowerCase();
 
                 // Para Tipo de Documento
-                if (lowerValue.includes('oficio')) return 'outline-primary';
+                if (lowerValue.includes('oficio')) return 'badge-outline-primary';
                 if (lowerValue.includes('memorandum') || lowerValue.includes('memorándum'))
-                    return 'outline-info';
-                if (lowerValue.includes('circular')) return 'outline-warning';
-                if (lowerValue.includes('resolución')) return 'outline-success';
-                if (lowerValue.includes('nota')) return 'outline-dark';
+                    return 'badge-outline-info';
+                if (lowerValue.includes('circular')) return 'badge-outline-warning';
+                if (lowerValue.includes('resolución')) return 'badge-outline-success';
+                if (lowerValue.includes('nota')) return 'badge-outline-dark';
 
                 // Para Estado
-                if (lowerValue.includes('pendiente')) return 'outline-warning';
+                if (lowerValue.includes('pendiente')) return 'badge-outline-warning';
                 if (lowerValue.includes('aprobado') || lowerValue.includes('completado') || lowerValue.includes(
-                        'finalizado')) return 'outline-success';
+                        'finalizado')) return 'badge-outline-success';
                 if (lowerValue.includes('rechazado') || lowerValue.includes('cancelado') || lowerValue.includes(
-                        'anulado')) return 'outline-danger';
-                if (lowerValue.includes('en proceso') || lowerValue.includes('revisión')) return 'outline-info';
-                if (lowerValue.includes('archivado')) return 'outline-secondary';
-                if (lowerValue.includes('urgente')) return 'outline-danger';
+                        'anulado')) return 'badge-outline-danger';
+                if (lowerValue.includes('en proceso') || lowerValue.includes('revisión'))
+                    return 'badge-outline-info';
+                if (lowerValue.includes('archivado')) return 'badge-outline-secondary';
+                if (lowerValue.includes('urgente')) return 'badge-outline-danger';
 
-                // Valor por defecto
                 return 'badge-outline-primary';
             };
 
-            // Private methods
+            /**
+             * Muestra el indicador de carga y deshabilita los botones de acción.
+             * @param {string} message - Mensaje a mostrar en el indicador de carga.
+             */
+            const showLoading = (message = 'Generando...') => {
+                isGenerating = true;
+                if (!elements.loadingIndicator) {
+                    elements.loadingIndicator = document.createElement('div');
+                    elements.loadingIndicator.className =
+                        'loading-indicator text-center py-4 text-muted fs-5'; // Agregado estilos Bootstrap
+                    elements.customReportResult.innerHTML = '';
+                    elements.customReportResult.appendChild(elements.loadingIndicator);
+                }
+                elements.loadingIndicator.textContent = message;
+                elements.loadingIndicator.style.display = 'block';
+
+                if (elements.generateReportBtn) elements.generateReportBtn.disabled = true;
+                if (elements.generatePdfBtn) elements.generatePdfBtn.disabled = true;
+            };
+
+            /**
+             * Oculta el indicador de carga y habilita los botones de acción.
+             */
+            const hideLoading = () => {
+                isGenerating = false;
+                if (elements.loadingIndicator) {
+                    elements.loadingIndicator.style.display = 'none';
+                }
+                if (elements.generateReportBtn) elements.generateReportBtn.disabled = false;
+                if (elements.generatePdfBtn) elements.generatePdfBtn.disabled = false;
+            };
+
+            /**
+             * Carga los departamentos y los popula en el selector.
+             */
             const fetchDepartments = async () => {
+                if (!elements.departmentSelect) return;
                 try {
                     const result = await HTTPService.get('/api/dashboard/departments');
+                    elements.departmentSelect.innerHTML =
+                        '<option value="">Seleccione un Departamento</option>';
                     result.data.forEach(department => {
                         const option = document.createElement('option');
                         option.value = department.id;
@@ -236,15 +281,22 @@
                     });
                 } catch (error) {
                     console.error('Error al cargar departamentos:', error);
+                    elements.customReportResult.innerHTML =
+                        '<p class="text-danger">No se pudieron cargar los departamentos.</p>';
                 }
             };
 
+            /**
+             * Carga las oficinas según el departamento seleccionado y las popula.
+             * @param {string} departmentId - ID del departamento.
+             */
             const fetchOffices = async (departmentId) => {
+                if (!elements.officeSelect) return;
                 try {
-                    const data = await HTTPService.get(
+                    const offices = await HTTPService.get(
                         `/api/dashboard/office/show/offices/${departmentId}`);
                     elements.officeSelect.innerHTML = '<option value="">Todas</option>';
-                    data.forEach(office => {
+                    offices.forEach(office => {
                         const option = document.createElement('option');
                         option.value = office.id;
                         option.textContent = office.name;
@@ -252,61 +304,64 @@
                     });
                 } catch (error) {
                     console.error('Error al cargar oficinas:', error);
+                    elements.officeSelect.innerHTML = '<option value="">Error al cargar oficinas</option>';
                 }
             };
 
+            /**
+             * Maneja el envío del formulario para generar un reporte.
+             * @param {Event} event - El evento de envío del formulario.
+             */
             const generateReport = async (event) => {
                 event.preventDefault();
 
-                if (isSubmitting) {
+                if (isGenerating || !elements.reportForm) {
                     return;
                 }
 
-                isSubmitting = true;
-                elements.customReportResult.innerHTML =
-                    '<div class="loading-indicator">Generando reporte...</div>';
+                showLoading('Generando reporte...');
 
-                const form = document.querySelector(elements.reportForm);
-                const formData = new FormData(form);
-                const formDataObject = Object.fromEntries(formData);
+                const formData = new FormData(elements.reportForm);
+                const formDataObject = Object.fromEntries(formData.entries());
 
                 try {
                     let endpoint = '/api/single-window/reports/generate';
 
-                    // Cambiar el endpoint según el tipo de reporte
-                    if (formDataObject.report_type.startsWith('prestamos_')) {
+
+                    if (formDataObject.report_type && formDataObject.report_type.startsWith('prestamos_')) {
                         endpoint = '/api/reports/loans/generate';
                     }
 
                     const response = await HTTPService.post(endpoint, formDataObject);
+                    console.log(response);
+
                     displayReportResult(response);
                 } catch (error) {
-                    console.error('Error:', error);
+                    console.error('Error al generar el reporte:', error);
                     elements.customReportResult.innerHTML =
-                        `<p class="text-danger">Error al generar el reporte: ${error.message}</p>`;
+                        `<p class="text-danger">Error al generar el reporte: ${error.message || 'Error desconocido'}.</p>`;
                 } finally {
-                    isSubmitting = false;
+                    hideLoading();
                 }
             };
 
+            /**
+             * Maneja la generación de un PDF.
+             */
             const generatePdf = async () => {
-                if (isSubmitting) {
+                if (isGenerating || !elements.reportForm) {
                     return;
                 }
 
-                isSubmitting = true;
-                elements.customReportResult.innerHTML =
-                    '<div class="loading-indicator">Generando PDF...</div>';
+                showLoading('Generando PDF...');
 
-                const form = document.querySelector(elements.reportForm);
-                const formData = new FormData(form);
-                const formDataObject = Object.fromEntries(formData);
+                const formData = new FormData(elements.reportForm);
+                const formDataObject = Object.fromEntries(formData.entries());
 
                 try {
                     let endpoint = '/api/single-window/reports/generate-pdf';
 
-                    // Cambiar el endpoint según el tipo de reporte
-                    if (formDataObject.report_type.startsWith('prestamos_')) {
+                    if (formDataObject.report_type && formDataObject.report_type.startsWith('prestamos_')) {
                         endpoint = '/api/reports/loans/generate-pdf';
                     }
 
@@ -322,71 +377,105 @@
 
                     if (!newTab || newTab.closed || typeof newTab.closed === 'undefined') {
                         alert(
-                            'La nueva pestaña fue bloqueada. Permite las ventanas emergentes para ver el PDF.'
-                        );
+                            'La nueva pestaña fue bloqueada por el navegador. Por favor, permite las ventanas emergentes para ver el PDF.'
+                            );
                     }
+                    setTimeout(() => URL.revokeObjectURL(url), 60000);
                 } catch (error) {
-                    console.error('Error:', error);
-                    let errorMessage = 'Error generating PDF';
-                    if (error.message) {
-                        errorMessage += ': ' + error.message;
+                    console.error('Error al generar el PDF:', error);
+                    let errorMessage = 'Error al generar el PDF';
+                    if (error instanceof Error) {
+                        errorMessage += `: ${error.message}`;
+                    } else if (error.status && error.statusText) {
+                        errorMessage += `: ${error.status} ${error.statusText}`;
                     }
                     alert(errorMessage);
                 } finally {
-                    isSubmitting = false;
+                    hideLoading();
                 }
             };
 
+            // Se declara aquí para que sea accesible en showPdfModal
+            let pdfModalInstance;
+
+            /**
+             * Crea y añade el modal de PDF al DOM si no existe, utilizando el HTML proporcionado.
+             * @returns {HTMLElement} El elemento modal del PDF.
+             */
             const createPdfModal = () => {
-                const modal = document.createElement('div');
+                let modal = document.getElementById(
+                    'bs-example-modal-lg'); // Usamos el ID del modal proporcionado
+                if (modal) return modal;
+
+                modal = document.createElement('div');
                 modal.className = 'modal fade';
-                modal.id = 'pdfModal';
+                modal.id = 'bs-example-modal-lg'; // ID del modal proporcionado
                 modal.setAttribute('tabindex', '-1');
                 modal.setAttribute('role', 'dialog');
-                modal.setAttribute('aria-labelledby', 'pdfModalLabel');
+                modal.setAttribute('aria-labelledby', 'myLargeModalLabel'); // Label del modal proporcionado
                 modal.setAttribute('aria-hidden', 'true');
 
+                // Insertamos el HTML del modal proporcionado, asegurándonos de tener un iframe dentro del body
                 modal.innerHTML = `
-            <div class="modal-dialog modal-lg" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="pdfModalLabel">Ver PDF</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title" id="myLargeModalLabel">Visualizador de PDF</h4>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+                            </div>
+                            <div class="modal-body">
+                                <iframe id="pdfIframeContent" width="100%" height="500px" frameborder="0"></iframe>
+                            </div>
+                        </div>
                     </div>
-                    <div class="modal-body">
-                        <iframe id="pdfIframe" width="100%" height="500px" frameborder="0"></iframe>
-                    </div>
-                </div>
-            </div>
-        `;
-
+                `;
                 document.body.appendChild(modal);
                 return modal;
             };
 
-            const pdfModal = createPdfModal();
 
+            /**
+             * Muestra el modal con el PDF.
+             * @param {string} pdfUrl - URL del PDF a mostrar.
+             */
             const showPdfModal = (pdfUrl) => {
-                const iframe = document.getElementById('pdfIframe');
-                iframe.src = pdfUrl;
-                $(pdfModal).modal('show');
+                if (!pdfModalInstance) {
+                    pdfModalInstance = createPdfModal(); // Crea el modal la primera vez que se necesita
+                }
+
+                // El iframe ahora tiene el ID 'pdfIframeContent' dentro del modal 'bs-example-modal-lg'
+                const iframe = pdfModalInstance.querySelector('#pdfIframeContent');
+                if (iframe) {
+                    iframe.src = pdfUrl.startsWith('/') ? pdfUrl : `/${pdfUrl}`;
+                    // Usa la API de Bootstrap 5 para mostrar el modal
+                    const modal = new bootstrap.Modal(pdfModalInstance);
+                    modal.show();
+                } else {
+                    console.error('El iframe de contenido del PDF no se encontró dentro del modal.');
+                }
             };
 
-            const closePdfModal = () => {
-                $(pdfModal).modal('hide');
-            };
-
+            /**
+             * Crea una tabla HTML a partir de encabezados y datos.
+             * @param {Array<string>} headers - Array de encabezados de la tabla.
+             * @param {Array<Array<any>>} data - Array de filas de datos.
+             * @returns {HTMLElement} El div contenedor de la tabla HTML creada.
+             */
             const createTable = (headers, data) => {
                 const table = document.createElement('table');
-                table.className = 'table table-striped table-bordered dt-responsive nowrap w-100';
+                // Añadido table-hover para interactividad. Las clases dt-responsive, nowrap, w-100 son comunes con DataTables.
+                // Si DataTables se inicializa por separado, estas clases pueden ser añadidas por DataTables.
+                table.className = 'table table-striped table-bordered table-hover w-100';
 
                 const thead = document.createElement('thead');
+                thead.classList.add(
+                    'table-light'); // Fondo claro para el encabezado para mejor separación visual
                 const headerRow = document.createElement('tr');
                 headers.forEach(header => {
                     const th = document.createElement('th');
                     th.textContent = header;
+                    th.classList.add('text-center',
+                        'align-middle'); // Centrar texto y alinear verticalmente
                     headerRow.appendChild(th);
                 });
                 thead.appendChild(headerRow);
@@ -397,9 +486,11 @@
                     const tr = document.createElement('tr');
                     row.forEach((cell, index) => {
                         const td = document.createElement('td');
-
-                        // Aplicar badge para columnas de Tipo o Estado
+                        td.classList.add(
+                            'align-middle'
+                            ); // Alinear verticalmente el contenido de todas las celdas
                         const headerText = headers[index].toLowerCase();
+
                         if (headerText.includes('tipo') || headerText.includes('estado') ||
                             headerText.includes('status') || headerText.includes('state')) {
                             const badge = document.createElement('span');
@@ -407,18 +498,37 @@
                             badge.className = `badge ${colorClass}`;
                             badge.textContent = cell || 'N/A';
                             td.appendChild(badge);
-                        } else if (index === 3 && Array.isArray(cell)) {
-                            const detailsTable = createDetailsTable(cell);
-                            td.appendChild(detailsTable);
+                            td.classList.add('text-center'); // Centrar los badges
                         } else if (typeof cell === 'string' && cell.toLowerCase().endsWith(
                                 '.pdf')) {
                             const button = document.createElement('button');
-                            button.textContent = 'Ver';
+                            button.textContent = 'Ver PDF';
                             button.className = 'btn btn-sm btn-outline-primary';
                             button.onclick = () => showPdfModal(cell);
                             td.appendChild(button);
+                            td.classList.add('text-center'); // Centrar el botón
+                        } else if (Array.isArray(cell) && (headerText.includes('documentos') ||
+                                headerText.includes('préstamos') || headerText.includes(
+                                    'historial'))) {
+                            const detailsTable = headerText.includes('préstamos') ?
+                                createLoanDetailsTable(cell) : createDetailsTable(cell);
+                            td.appendChild(detailsTable);
                         } else {
-                            td.textContent = cell || 'N/A';
+                            // Si la celda es null/undefined/cadena vacía, mostrar 'N/A' con texto atenuado e itálico
+                            if (cell === null || cell === undefined || cell === '') {
+                                const span = document.createElement('span');
+                                span.textContent = 'N/A';
+                                span.classList.add('text-muted', 'fst-italic');
+                                td.appendChild(span);
+                            } else {
+                                td.textContent = cell;
+                            }
+                            // Alineación específica para ciertas columnas
+                            if (headerText.includes('código')) {
+                                td.classList.add('text-center');
+                            } else if (headerText.includes('fecha')) {
+                                td.classList.add('text-center');
+                            }
                         }
                         tr.appendChild(td);
                     });
@@ -426,12 +536,24 @@
                 });
                 table.appendChild(tbody);
 
-                return table;
+                // Envolver la tabla en un div responsivo
+                const tableContainer = document.createElement('div');
+                tableContainer.classList.add(
+                    'table-responsive'); // Hace la tabla desplazable horizontalmente en pantallas pequeñas
+                tableContainer.appendChild(table);
+
+                return tableContainer; // Retornar el contenedor de la tabla
             };
 
+            /**
+             * Crea una tabla de detalles de documentos anidados.
+             * @param {Array<Object>} details - Array de objetos de documentos.
+             * @returns {HTMLTableElement} La tabla de detalles.
+             */
             const createDetailsTable = (details) => {
                 const table = document.createElement('table');
-                table.className = 'table table-sm';
+                table.className =
+                    'table table-sm table-nested table-borderless my-0'; // Mejorado: sm, nested, borderless, no margin
 
                 const thead = document.createElement('thead');
                 const headerRow = document.createElement('tr');
@@ -449,14 +571,14 @@
                     ['reference_code', 'received_date', 'sender_name', 'subject', 'status'].forEach(
                         key => {
                             const td = document.createElement('td');
-                            if (key === 'subject' && doc[key] && doc[key].toLowerCase().endsWith(
-                                    '.pdf')) {
+                            if (key === 'subject' && doc[key] && typeof doc[key] === 'string' &&
+                                doc[key].toLowerCase().endsWith('.pdf')) {
                                 const button = document.createElement('button');
-                                button.textContent = 'Ver';
+                                button.textContent = 'Ver PDF';
                                 button.className = 'btn btn-sm btn-outline-primary';
                                 button.onclick = () => showPdfModal(doc[key]);
                                 td.appendChild(button);
-                            } else if ((key === 'status' || key === 'state') && doc[key]) {
+                            } else if (key === 'status' && doc[key]) {
                                 const badge = document.createElement('span');
                                 const colorClass = getBadgeColor(doc[key]);
                                 badge.className = `badge ${colorClass}`;
@@ -474,9 +596,15 @@
                 return table;
             };
 
+            /**
+             * Crea una tabla de detalles de préstamos anidados.
+             * @param {Array<Object>} details - Array de objetos de préstamos.
+             * @returns {HTMLTableElement} La tabla de detalles de préstamos.
+             */
             const createLoanDetailsTable = (details) => {
                 const table = document.createElement('table');
-                table.className = 'table table-sm';
+                table.className =
+                    'table table-sm table-nested table-borderless my-0'; // Mejorado: sm, nested, borderless, no margin
 
                 const thead = document.createElement('thead');
                 const headerRow = document.createElement('tr');
@@ -492,7 +620,6 @@
                 details.forEach(item => {
                     const tr = document.createElement('tr');
 
-                    // Tipo de documento
                     const typeTd = document.createElement('td');
                     const typeBadge = document.createElement('span');
                     const typeColorClass = getBadgeColor(item.type);
@@ -501,17 +628,14 @@
                     typeTd.appendChild(typeBadge);
                     tr.appendChild(typeTd);
 
-                    // Código
                     const codeTd = document.createElement('td');
                     codeTd.textContent = item.code || 'N/A';
                     tr.appendChild(codeTd);
 
-                    // Descripción
                     const descTd = document.createElement('td');
                     descTd.textContent = item.description || 'N/A';
                     tr.appendChild(descTd);
 
-                    // Estado
                     const statusTd = document.createElement('td');
                     const statusBadge = document.createElement('span');
                     const statusColorClass = getBadgeColor(item.status);
@@ -527,134 +651,259 @@
                 return table;
             };
 
-            const displayGeneralSummary = (data) => {
+            /**
+             * Muestra el resultado del reporte en el contenedor designado.
+             * @param {Object} data - Los datos recibidos del reporte.
+             */
+            const displayReportResult = (data) => {
+                if (!elements.customReportResult) return;
+
+                // Limpia el contenido previo y establece la estructura de la tarjeta
+                elements.customReportResult.innerHTML = `
+                    <div class="card shadow-sm mt-4"> <div class="card-header bg-light"> <h3 class="card-title mb-0 fs-5">Resultado del Reporte:</h3> </div>
+                        <div class="card-body p-4" id="reportCardBody"> </div>
+                    </div>
+                `;
+                const reportCardBody = document.getElementById(
+                    'reportCardBody'); // Obtener el elemento del cuerpo de la tarjeta recién creado
+
+                if (data.error) {
+                    reportCardBody.innerHTML +=
+                        `<p class="alert alert-danger mb-0">Error: ${data.error}</p>`; // Usar alerta para errores
+                    if (data.trace) {
+                        console.error('Error trace:', data.trace);
+                    }
+                } else if (data.data) {
+                    reportCardBody.innerHTML +=
+                        `<h4 class="mb-4 text-primary">${data.report_type || data.tipo_reporte || 'Resumen General'}</h4>`; // Título del tipo de reporte con estilo
+                    if (Array.isArray(data.data)) {
+                        const tableContainer = createTable(data.headers || data.encabezados || [], data.data);
+                        // table.classList.add('table-hover'); // Esta clase ya está dentro de createTable
+                        reportCardBody.appendChild(
+                            tableContainer); // Asegurarse de que el contenedor de la tabla se adjunte
+                        // $(table).DataTable(); // Si usas DataTables, descomenta e inicializa aquí
+                    } else if (typeof data.data === 'object') {
+                        displayGeneralSummary(data.data,
+                            reportCardBody); // Pasar el cuerpo de la tarjeta para adjuntar
+                    } else {
+                        reportCardBody.innerHTML +=
+                            '<p class="text-muted">No se pudo generar el reporte. Formato de datos inesperado.</p>';
+                    }
+                } else {
+                    reportCardBody.innerHTML +=
+                        '<p class="text-muted">No se recibieron datos para el reporte.</p>';
+                }
+            };
+
+            /**
+             * Muestra el resumen general del reporte (tipo clave-valor).
+             * @param {Object} data - El objeto de resumen.
+             * @param {HTMLElement} targetElement - El elemento donde se añadirá el resumen.
+             */
+            const displayGeneralSummary = (data, targetElement) => {
                 const summaryTable = document.createElement('table');
-                summaryTable.className = 'table table-bordered';
+                summaryTable.className =
+                    'table table-bordered table-striped mt-3'; // Agregado table-striped y margen superior
 
                 for (const [key, value] of Object.entries(data)) {
                     const row = summaryTable.insertRow();
                     const keyCell = row.insertCell(0);
                     keyCell.textContent = key;
-                    keyCell.style.fontWeight = 'bold';
+                    keyCell.classList.add('fw-bold', 'col-md-4'); // Texto clave en negrita y ancho relativo
+                    keyCell.style.verticalAlign = 'middle'; // Alineación vertical
 
                     const valueCell = row.insertCell(1);
-                    if (key === "Documentos por estado" || key === "Ultimos documentos" ||
-                        key === "Préstamos por estado" || key === "Últimos préstamos") {
-                        const subTable = document.createElement('table');
-                        subTable.className = 'table table-sm';
+                    valueCell.classList.add('col-md-8'); // Celdas de valor con ancho relativo
+                    valueCell.style.verticalAlign = 'middle'; // Alineación vertical
 
-                        if (Array.isArray(value)) {
-                            value.forEach(item => {
-                                const subRow = subTable.insertRow();
+                    if (Array.isArray(value) && (key.includes("Documentos por estado") || key.includes(
+                            "Ultimos documentos") || key.includes("Préstamos por estado") || key.includes(
+                            "Últimos préstamos") || key.includes("Tipos de documentos"))) {
+                        // Verifica si todos los elementos del array están vacíos o son N/A
+                        const allItemsAreEmpty = value.length === 0 || value.every(item => {
+                            if (typeof item !== 'object' || item === null) return true;
+                            const relevantValues = Object.values(item).filter(val => typeof val ===
+                                'string' || typeof val === 'number');
+                            return relevantValues.length === 0 || relevantValues.every(val => val ===
+                                null || val === undefined || val === '' || val === 'N/A' || (
+                                    typeof val === 'number' && val === 0));
+                        });
 
-                                // Celda de estado con badge
-                                const statusCell = subRow.insertCell(0);
-                                const statusBadge = document.createElement('span');
-                                const statusColorClass = getBadgeColor(item.status || item.estado);
-                                statusBadge.className = `badge ${statusColorClass}`;
-                                statusBadge.textContent = item.status || item.estado || 'N/A';
-                                statusCell.appendChild(statusBadge);
+                        if (key.includes("Ultimos documentos") && allItemsAreEmpty) {
+                            valueCell.innerHTML =
+                                '<span class="text-muted fst-italic">No hay documentos recientes.</span>';
+                        } else if (key.includes("Documentos por estado") || key.includes(
+                                "Préstamos por estado") || key.includes("Tipos de documentos")) {
+                            if (allItemsAreEmpty) {
+                                valueCell.innerHTML =
+                                    '<span class="text-muted fst-italic">No hay datos disponibles para esta categoría.</span>';
+                            } else {
+                                // Para "Documentos por estado", etc., usar una lista no ordenada para una mejor presentación
+                                const subList = document.createElement('ul');
+                                subList.className =
+                                    'list-unstyled mb-0'; // Lista sin estilo por defecto y sin margen inferior
+                                value.forEach(item => {
+                                    const listItem = document.createElement('li');
+                                    let itemText = 'N/A';
+                                    const statusOrType = item.status || item.estado || item.type || item
+                                        .tipo;
+                                    const countOrQuantity = item.count || item.cantidad;
 
-                                subRow.insertCell(1).textContent = item.count || item.cantidad || 'N/A';
-                            });
-                        } else {
-                            for (const [subKey, subValue] of Object.entries(value)) {
-                                const subRow = subTable.insertRow();
-
-                                // Celda de estado con badge
-                                const statusCell = subRow.insertCell(0);
-                                const statusBadge = document.createElement('span');
-                                const statusColorClass = getBadgeColor(subKey);
-                                statusBadge.className = `badge ${statusColorClass}`;
-                                statusBadge.textContent = subKey;
-                                statusCell.appendChild(statusBadge);
-
-                                subRow.insertCell(1).textContent = subValue;
+                                    if (statusOrType) {
+                                        const colorClass = getBadgeColor(statusOrType);
+                                        const badgeHtml =
+                                            `<span class="badge ${colorClass} me-2">${statusOrType}</span>`; // Margen a la derecha para el badge
+                                        if (countOrQuantity !== undefined && countOrQuantity !== null) {
+                                            itemText =
+                                                `${badgeHtml} <span class="fw-bold">${countOrQuantity}</span>`;
+                                        } else {
+                                            itemText = badgeHtml;
+                                        }
+                                    } else {
+                                        itemText = JSON.stringify(
+                                            item); // Fallback para elementos de array desconocidos
+                                    }
+                                    listItem.innerHTML = itemText;
+                                    subList.appendChild(listItem);
+                                });
+                                valueCell.appendChild(subList);
                             }
+                        } else {
+                            // Para otros arrays donde una tabla anidada podría ser deseada
+                            const subTable = document.createElement('table');
+                            subTable.className = 'table table-sm table-borderless table-nested my-0';
+                            value.forEach(item => {
+                                const tr = subTable.insertRow();
+                                Object.entries(item).forEach(([propKey, propValue]) => {
+                                    const td = tr.insertCell();
+                                    if (typeof propValue === 'string' && propValue.toLowerCase()
+                                        .endsWith('.pdf')) {
+                                        const button = document.createElement('button');
+                                        button.textContent = 'Ver PDF';
+                                        button.className = 'btn btn-sm btn-outline-primary';
+                                        button.onclick = () => showPdfModal(propValue);
+                                        td.appendChild(button);
+                                    } else if (propKey.toLowerCase().includes('status') ||
+                                        propKey.toLowerCase().includes('estado') || propKey
+                                        .toLowerCase().includes('type') || propKey.toLowerCase()
+                                        .includes('tipo')) {
+                                        const badge = document.createElement('span');
+                                        const colorClass = getBadgeColor(propValue);
+                                        badge.className = `badge ${colorClass}`;
+                                        badge.textContent = propValue || 'N/A';
+                                        td.appendChild(badge);
+                                    } else {
+                                        td.textContent = propValue !== null && propValue !==
+                                            undefined ? propValue : 'N/A';
+                                    }
+                                });
+                            });
+                            if (value.length > 0) {
+                                valueCell.appendChild(subTable);
+                            } else {
+                                valueCell.innerHTML =
+                                    '<span class="text-muted fst-italic">No hay detalles disponibles.</span>';
+                            }
+                        }
+
+                    } else if (typeof value === 'object' && value !== null) {
+                        // Para objetos que no son arrays pero son pares clave-valor
+                        const subTable = document.createElement('table');
+                        subTable.className = 'table table-sm table-borderless table-nested my-0';
+                        for (const [subKey, subValue] of Object.entries(value)) {
+                            const subRow = subTable.insertRow();
+                            const subKeyCell = subRow.insertCell(0);
+                            const subValueCell = subRow.insertCell(1);
+
+                            const statusBadge = document.createElement('span');
+                            const statusColorClass = getBadgeColor(subKey);
+                            statusBadge.className = `badge ${statusColorClass} me-2`;
+                            statusBadge.textContent = subKey;
+                            subKeyCell.appendChild(statusBadge);
+                            subValueCell.textContent = subValue !== null && subValue !== undefined ? subValue :
+                                'N/A';
                         }
                         valueCell.appendChild(subTable);
                     } else if (typeof value === 'string' && value.toLowerCase().endsWith('.pdf')) {
                         const button = document.createElement('button');
-                        button.textContent = 'Ver';
+                        button.textContent = 'Ver PDF';
                         button.className = 'btn btn-sm btn-outline-primary';
                         button.onclick = () => showPdfModal(value);
                         valueCell.appendChild(button);
-                    } else if (key === "Documentos prestados" || key === "Historial de préstamos") {
-                        const loanTable = createLoanDetailsTable(value);
-                        valueCell.appendChild(loanTable);
                     } else {
-                        // Aplicar badge si el valor parece ser un estado
-                        if (typeof value === 'string' && (
-                                value.toLowerCase().includes('pendiente') ||
-                                value.toLowerCase().includes('aprobado') ||
-                                value.toLowerCase().includes('rechazado') ||
-                                value.toLowerCase().includes('completado'))) {
+                        // Texto o valor único, aplicar badge si es un estado
+                        if (typeof value === 'string' && (value.toLowerCase().includes('pendiente') || value
+                                .toLowerCase().includes('aprobado') || value.toLowerCase().includes(
+                                    'rechazado') || value.toLowerCase().includes('completado') || value
+                                .toLowerCase().includes('en proceso') || value.toLowerCase().includes(
+                                    'archivado') || value.toLowerCase().includes('urgente'))) {
                             const badge = document.createElement('span');
                             const colorClass = getBadgeColor(value);
                             badge.className = `badge ${colorClass}`;
                             badge.textContent = value;
                             valueCell.appendChild(badge);
                         } else {
-                            valueCell.textContent = value !== null && value !== undefined ? value :
-                                'No disponible';
+                            valueCell.textContent = value !== null && value !== undefined && value !== '' ?
+                                value : 'No disponible';
                         }
                     }
                 }
 
-                elements.customReportResult.appendChild(summaryTable);
+                targetElement.appendChild(summaryTable);
             };
 
-            const displayReportResult = (data) => {
-                elements.customReportResult.innerHTML = '<h3>Resultado del Reporte:</h3>';
-                if (data.error) {
-                    elements.customReportResult.innerHTML += `<p class="text-danger">${data.error}</p>`;
-                    if (data.trace) {
-                        console.error('Error trace:', data.trace);
-                    }
-                } else if (data.data) {
-                    elements.customReportResult.innerHTML +=
-                        `<h4>${data.report_type || data.tipo_reporte}</h4>`;
-                    if (Array.isArray(data.data)) {
-                        const table = createTable(data.headers || data.encabezados, data.data);
-                        elements.customReportResult.appendChild(table);
-                    } else if (typeof data.data === 'object') {
-                        displayGeneralSummary(data.data);
-                    } else {
-                        elements.customReportResult.innerHTML +=
-                            '<p>No se pudo generar el reporte. Formato de datos inesperado.</p>';
-                    }
-                } else {
-                    elements.customReportResult.innerHTML += '<p>No se recibieron datos para el reporte.</p>';
+            /**
+             * Inicializa los listeners de eventos para los elementos del formulario.
+             */
+            const addEventListeners = () => {
+                if (elements.filterType) {
+                    elements.filterType.addEventListener('change', function() {
+                        const isYearFilter = this.value === 'year';
+                        if (elements.yearField) {
+                            elements.yearField.style.display = isYearFilter ? 'block' : 'none';
+                        }
+                        elements.dateRangeFields.forEach(field => field.style.display = isYearFilter ?
+                            'none' : 'block');
+                    });
+                    elements.filterType.dispatchEvent(new Event('change'));
+                }
+
+                if (elements.departmentSelect) {
+                    elements.departmentSelect.addEventListener('change', function() {
+                        if (this.value) {
+                            fetchOffices(this.value);
+                        } else {
+                            if (elements.officeSelect) {
+                                elements.officeSelect.innerHTML = '<option value="">Todas</option>';
+                            }
+                        }
+                    });
+                }
+
+                if (elements.reportForm) {
+                    elements.reportForm.addEventListener('submit', generateReport);
+                }
+                if (elements.generatePdfBtn) {
+                    elements.generatePdfBtn.addEventListener('click', generatePdf);
                 }
             };
 
-            // Initialize when DOM is ready
-            $(document).ready(() => {
+            const init = () => {
+                getDOMElements();
+                // Inicializa el modal PDF aquí para que siempre esté en el DOM desde el principio.
+                // Aunque no se muestre, su estructura ya estará disponible para ser usada.
+                pdfModalInstance = createPdfModal();
                 fetchDepartments();
-
-                elements.filterType.addEventListener('change', function() {
-                    const isYearFilter = this.value === 'year';
-                    elements.yearField.style.display = isYearFilter ? 'block' : 'none';
-                    elements.dateRangeFields.forEach(field => field.style.display = isYearFilter ?
-                        'none' : 'block');
-                });
-
-                elements.departmentSelect.addEventListener('change', function() {
-                    if (this.value) {
-                        fetchOffices(this.value);
-                    } else {
-                        elements.officeSelect.innerHTML = '<option value="">Todas</option>';
-                    }
-                });
-
-                document.querySelector(elements.reportForm).addEventListener('submit', generateReport);
-                elements.generatePdfBtn.addEventListener('click', generatePdf);
-            });
+                addEventListeners();
+            };
 
             return {
-                generateReport,
-                generatePdf
+                init: init
             };
         })();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            ReportComponent.init();
+        });
     </script>
 @endsection

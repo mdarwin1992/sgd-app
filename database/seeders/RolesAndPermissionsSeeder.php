@@ -24,6 +24,7 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // Acceso al panel principal
         Permission::create(['name' => 'dashboard.page', 'description' => 'Acceder al panel principal'])->syncRoles([$administrator, $reader, $business]);
+        Permission::create(['name' => 'settings.index', 'description' => 'Configuraciones'])->syncRoles([$administrator, $business]);
 
         // Gestión de Empresas
         Permission::create(['name' => 'business.index', 'description' => 'Visualizar listado de empresas'])->syncRoles([$administrator]);
@@ -47,16 +48,16 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::create(['name' => 'offices.destroy', 'description' => 'Eliminar registro de oficina'])->syncRoles([$administrator, $business]);
 
         // Entity series
-        Permission::create(['name' => 'entityseries.index', 'description' => 'Visualizar listado de las series de entidad'])->syncRoles([$administrator, $business, $reader]);
-        Permission::create(['name' => 'entityseries.create', 'description' => 'Registrar nueva series de entidad'])->syncRoles([$administrator, $business, $reader]);
-        Permission::create(['name' => 'entityseries.show', 'description' => 'Consultar detalles series de entidad'])->syncRoles([$administrator, $business, $reader]);
+        Permission::create(['name' => 'entityseries.index', 'description' => 'Visualizar listado de las series de entidad'])->syncRoles([$administrator, $business]);
+        Permission::create(['name' => 'entityseries.create', 'description' => 'Registrar nueva series de entidad'])->syncRoles([$administrator, $business]);
+        Permission::create(['name' => 'entityseries.show', 'description' => 'Consultar detalles series de entidad'])->syncRoles([$administrator, $business]);
         Permission::create(['name' => 'entityseries.update', 'description' => 'Modificar series de entidad'])->syncRoles([$administrator, $business]);
         Permission::create(['name' => 'entityseries.destroy', 'description' => 'Eliminar series de entidad'])->syncRoles([$administrator, $business]);
 
         // Gestión de Tabla de Retención Documental (TRD)
-        Permission::create(['name' => 'trd.index', 'description' => 'Visualizar listado de tablas de retención documental'])->syncRoles([$administrator, $business, $reader]);
-        Permission::create(['name' => 'trd.create', 'description' => 'Registrar nueva tabla de retención documental'])->syncRoles([$administrator, $business, $reader]);
-        Permission::create(['name' => 'trd.show', 'description' => 'Consultar detalles de tabla de retención documental'])->syncRoles([$administrator, $business, $reader]);
+        Permission::create(['name' => 'trd.index', 'description' => 'Visualizar listado de tablas de retención documental'])->syncRoles([$administrator, $business]);
+        Permission::create(['name' => 'trd.create', 'description' => 'Registrar nueva tabla de retención documental'])->syncRoles([$administrator, $business]);
+        Permission::create(['name' => 'trd.show', 'description' => 'Consultar detalles de tabla de retención documental'])->syncRoles([$administrator, $business]);
         Permission::create(['name' => 'trd.update', 'description' => 'Modificar tabla de retención documental'])->syncRoles([$administrator, $business]);
         Permission::create(['name' => 'trd.destroy', 'description' => 'Eliminar tabla de retención documental'])->syncRoles([$administrator, $business]);
 

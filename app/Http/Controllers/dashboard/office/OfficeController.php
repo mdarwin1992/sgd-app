@@ -28,6 +28,15 @@ class OfficeController extends Controller
         ]);
     }
 
+    public function getOfficesWithoutUser()
+    {
+        $offices = Office::whereNull('user_id')->get();
+        return response()->json([
+            'data' => $offices,
+            'message' => 'offices successfully recovered'
+        ]);
+    }
+
     /**
      * Store a newly created resource in storage.
      *
@@ -43,7 +52,11 @@ class OfficeController extends Controller
 
             // Crear un nuevo registro en la tabla 'Office' con los datos enviados en la solicitud
             $office = Office::create($request->only([
-                'code', 'name', 'department_id', 'user_id', 'status'
+                'code',
+                'name',
+                'department_id',
+                'user_id',
+                'status'
             ]));
 
             // Confirmar la transacción de la base de datos
@@ -54,7 +67,6 @@ class OfficeController extends Controller
                 'data' => $office,
                 'message' => "Office created successfully"
             ], 200);
-
         } catch (QueryException $e) {
             // Revertir la transacción en caso de error en la consulta SQL
             DB::rollBack();
@@ -191,7 +203,11 @@ class OfficeController extends Controller
 
             // Actualizar el registro con los datos enviados en la solicitud
             $office->update($request->only([
-                'code', 'name', 'department_id', 'user_id', 'status'
+                'code',
+                'name',
+                'department_id',
+                'user_id',
+                'status'
             ]));
 
             // Confirmar la transacción de la base de datos
@@ -254,7 +270,6 @@ class OfficeController extends Controller
                 'data' => $office,
                 'message' => "Office deleted successfully"
             ]);
-
         } catch (\Exception $e) {
             // Revertir la transacción en caso de cualquier otro error
             DB::rollBack();
@@ -266,8 +281,6 @@ class OfficeController extends Controller
             return response()->json([
                 'message' => 'Error inesperado. Contacte al administrador.'
             ], 500);
-
-
         }
     }
 }

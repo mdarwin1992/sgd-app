@@ -20,22 +20,23 @@
                                         <div class="row">
                                             <div class="col-md-2 mb-3">
                                                 <label for="code" class="form-label">Código</label>
-                                                <input type="text" class="form-control" id="code" name="code" required>
+                                                <input type="text" class="form-control" id="code" name="code"
+                                                    required>
                                                 <div class="invalid-feedback">
                                                     Por favor, ingrese un código válido.
                                                 </div>
                                             </div>
                                             <div class="col-md-5 mb-3">
                                                 <label for="name" class="form-label">Nombre</label>
-                                                <input type="text" class="form-control" id="name" name="name" required autocomplete="off">
+                                                <input type="text" class="form-control" id="name" name="name"
+                                                    required autocomplete="off">
                                                 <div class="invalid-feedback">
                                                     Por favor, ingrese un nombre válido.
                                                 </div>
                                             </div>
                                             <div class="col-md-5 mb-3">
                                                 <label for="department" class="form-label">Departamento</label>
-                                                <select class="form-control" id="department" name="department_id"
-                                                        required>
+                                                <select class="form-control" id="department" name="department_id" required>
                                                     <option value="">Seleccione un departamento</option>
                                                 </select>
                                                 <div class="invalid-feedback">
@@ -46,7 +47,7 @@
                                         <div class="row">
                                             <div class="col-md-12 mb-3">
                                                 <label for="user" class="form-label">Responsable</label>
-                                                <select class="form-control" id="user" name="user_id" required>
+                                                <select class="form-control" id="user" name="user_id">
                                                     <option value="">Seleccione un responsable</option>
                                                 </select>
                                                 <div class="invalid-feedback">
@@ -56,11 +57,10 @@
                                         </div>
                                         <div class="d-flex justify-content-end mt-4">
                                             <a href="/dashboard/oficinas"
-                                               class="btn btn-primary rounded-pill btn-tool me-2">
+                                                class="btn btn-primary rounded-pill btn-tool me-2">
                                                 <i class="fas fa-times me-1"></i> Cancelar
                                             </a>
-                                            <button type="submit" class="btn btn-success rounded-pill"
-                                                    id="submitButton">
+                                            <button type="submit" class="btn btn-success rounded-pill" id="submitButton">
                                                 <i class="fas fa-check me-1"></i> Guardar
                                             </button>
                                         </div>
@@ -154,7 +154,8 @@
                     const formDataObject = Object.fromEntries(formData);
 
                     try {
-                        const response = await HTTPService.post('/api/dashboard/office/store', formDataObject);
+                        const response = await HTTPService.post('/api/dashboard/office/store',
+                            formDataObject);
                         Helpers.getMessage('Oficina creada exitosamente', '/dashboard/oficinas');
                     } catch (error) {
                         console.error('Error al crear la oficina:', error);
@@ -169,14 +170,14 @@
                     errorClass: 'is-invalid',
                     validClass: 'is-valid',
                     errorElement: 'div',
-                    errorPlacement: function (error, element) {
+                    errorPlacement: function(error, element) {
                         error.addClass('invalid-feedback');
                         element.closest('.mb-3').append(error);
                     },
-                    highlight: function (element, errorClass, validClass) {
+                    highlight: function(element, errorClass, validClass) {
                         $(element).addClass(errorClass).removeClass(validClass);
                     },
-                    unhighlight: function (element, errorClass, validClass) {
+                    unhighlight: function(element, errorClass, validClass) {
                         $(element).removeClass(errorClass).addClass(validClass);
                     }
                 });
@@ -186,14 +187,12 @@
                         code: "required",
                         name: "required",
                         department_id: "required",
-                        user_id: "required",
                         status: "required"
                     },
                     messages: {
                         code: "Por favor, ingrese un código para la oficina",
                         name: "Por favor, ingrese un nombre para la oficina",
                         department_id: "Por favor, seleccione un departamento",
-                        user_id: "Por favor, seleccione un responsable",
                         status: "Por favor, seleccione un estado"
                     },
                     submitHandler: (form, event) => {

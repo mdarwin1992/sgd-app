@@ -183,7 +183,7 @@
                                 <div class="input-group">
                                     <input type="file" class="form-control" id="filepath" name="filepath">
                                     <input type="hidden" class="form-control" id="file_path" name="file_path"
-                                        autocomplete="off" required>
+                                        autocomplete="off">
                                 </div>
                             </div>
                             <div class="d-flex justify-content-end mt-4">
@@ -367,7 +367,7 @@
                         const response = await HTTPService.post('/api/dashboard/central-archive/store',
                             formDataObject);
                         console.log(response);
-                        Helpers.getMessage('Se ha guardado correctamente', '/dashboard/archivo-central');
+                        //Helpers.getMessage('Se ha guardado correctamente', '/dashboard/archivo-central');
                     } catch (error) {
                         console.error('Error al crear el archivo central:', error);
                     } finally {
