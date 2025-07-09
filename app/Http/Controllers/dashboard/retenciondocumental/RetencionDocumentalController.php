@@ -2,22 +2,23 @@
 
 namespace App\Http\Controllers\dashboard\retenciondocumental;
 
-use App\Http\Controllers\Controller;
-use App\Http\Controllers\helpers\CounterController;
-use App\Models\Counter;
-use App\Models\DocumentaryType;
-use App\Models\FinalDisposition;
 use App\Models\Office;
-use App\Models\Retention;
 use App\Models\Series;
-use App\Models\SeriesEntity;
+use App\Models\Counter;
+use App\Models\Retention;
 use App\Models\Subseries;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Http\JsonResponse;
+use App\Models\SeriesEntity;
 use Illuminate\Http\Request;
+use App\Models\DocumentaryType;
+use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\FinalDisposition;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use App\Http\Controllers\helpers\CounterController;
 
 class RetencionDocumentalController extends Controller
 {
@@ -172,7 +173,6 @@ class RetencionDocumentalController extends Controller
                 'message' => 'Serie Documental creada exitosamente',
                 'series' => $counter
             ], 201);
-
         } catch (ValidationException $e) {
             DB::rollBack();
             return response()->json([
@@ -189,12 +189,149 @@ class RetencionDocumentalController extends Controller
         }
     }
 
+    public function storeBatch(Request $request)
+    {
+        // 1. Validación para el lote completo
+        $rules = [
+            'records' => 'required|array',
+            'records.*.office_id' => 'required',
+            'records.*.series_entity_id' => 'required',
+            'records.*.series_name' => 'required|string', // Agregué esta regla que faltaba en tu original
+            'records.*.series_code' => 'required|string',
+            'records.*.subseries' => 'present|array',
+            'records.*.subseries.*.name' => 'required|string|max:100',
+            'records.*.subseries.*.code' => 'required|string|max:10',
+            'records.*.administrative_retention' => 'required|integer',
+            'records.*.central_retention' => 'required|integer',
+            'records.*.disposition_type' => 'required|array',
+            'records.*.documentary_types' => 'required|array',
+            'records.*.entity_id' => 'required',
+            'records.*.disposal_procedure' => 'nullable|string',
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Error de validación en el lote de datos',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $validatedData = $validator->validated();
+        $records = $validatedData['records'];
+
+        DB::beginTransaction();
+
+        try {
+            $createdSeriesList = [];
+            $recordCount = count($records);
+
+            // 2. Iterar sobre cada registro del lote
+            foreach ($records as $recordData) {
+
+                // --- INICIO DE LA LÓGICA ADAPTADA DE TU MÉTODO 'store' ---
+
+                // Crear la serie documental
+                $series = Series::create([
+                    'office_id' => $recordData['office_id'],
+                    'series_entity_id' => $recordData['series_entity_id'],
+                    'series_name' => $recordData['series_name'], // Usando el campo 'series_name'
+                    'series_code' => $recordData['series_code'],
+                ]);
+
+                // Crear las subseries
+                if (!empty($recordData['subseries'])) {
+                    foreach ($recordData['subseries'] as $subseries) {
+                        Subseries::create([
+                            'series_id' => $series->id,
+                            'subseries_name' => $subseries['name'],
+                            'subseries_code' => $subseries['code'],
+                        ]);
+                    }
+                }
+
+                // Crear la retención
+                Retention::create([
+                    'series_id' => $series->id,
+                    'administrative_retention' => $recordData['administrative_retention'],
+                    'central_retention' => $recordData['central_retention'],
+                ]);
+
+                // Crear la disposición final
+                if (!empty($recordData['disposition_type'])) {
+                    foreach ($recordData['disposition_type'] as $dispositionType) {
+                        FinalDisposition::create([
+                            'series_id' => $series->id,
+                            'disposition_type' => $dispositionType,
+                            'disposal_procedure' => $recordData['disposal_procedure'] ?? null,
+                        ]);
+                    }
+                }
+
+                // Crear los tipos documentales
+                if (!empty($recordData['documentary_types'])) {
+                    foreach ($recordData['documentary_types'] as $documentType) {
+                        DocumentaryType::create([
+                            'series_id' => $series->id,
+                            'document_name' => $documentType,
+                        ]);
+                    }
+                }
+
+                $createdSeriesList[] = $series->load(['subseries', 'retention', 'finalDisposition', 'documentaryTypes']);
+
+                // --- FIN DE LA LÓGICA ADAPTADA ---
+            }
+
+            // 3. Lógica del contador (actualizada para lote)
+            // La lógica del contador original es compleja para un lote.
+            // Una aproximación más simple para un lote sería incrementar los contadores existentes
+            // con la cantidad de series y subseries creadas.
+            // **NOTA:** La lógica original del contador debe ser repensada para funcionar correctamente con lotes.
+            // La siguiente es una sugerencia simplificada.
+
+            $firstRecord = $records[0];
+            $totalSubseries = 0;
+            foreach ($records as $rec) {
+                $totalSubseries += count($rec['subseries']);
+            }
+
+            $counter = Counter::where('series_entity_id', $firstRecord['series_entity_id'])->first();
+            if ($counter) {
+                $counter->increment('parent_count', $recordCount);
+                $counter->increment('child_count', $totalSubseries);
+            } else {
+                Counter::create([
+                    'series_entity_id' => $firstRecord['series_entity_id'],
+                    'parent_count' => $recordCount,
+                    'child_count' => $totalSubseries,
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'message' => "{$recordCount} Series Documentales creadas exitosamente",
+                'data' => $createdSeriesList
+            ], 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error al crear lote de Series Documentales: ' . $e->getMessage() . ' en la línea ' . $e->getLine());
+            return response()->json([
+                'message' => 'Ocurrió un error al crear el lote de Series Documentales',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function getUsedSeries()
     {
         $usedSeries = Series::whereHas('centralArchives')
-            ->with('seriesEntity:id,series_name')
+            ->with('seriesEntity:id,series_name',
+            )
             ->select('series.id', 'series.series_entity_id', 'series.series_code')
-            ->addSelect(DB::raw('(SELECT series_id FROM central_archive WHERE central_archive.series_id = series.id LIMIT 1) as central_archive_series_id'))
+            //->addSelect(DB::raw('(SELECT series_id FROM central_archive WHERE central_archive.series_id = series.id LIMIT 1) as central_archive_series_id'))
             ->get()
             ->map(function ($series) {
                 return [

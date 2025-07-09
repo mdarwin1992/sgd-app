@@ -129,7 +129,7 @@ Route::get('/dashboard/archivo-central/consultas', function () {
 
 /** ########################################################################################## */
 
-Route::get('/dashboard/archivo-historico', function () {
+Route::get('/dashboard/archivo-historico/consultas', function () {
     return view('components.historicFile.index');
 })->name('historic.file');
 

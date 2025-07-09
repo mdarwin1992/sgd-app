@@ -18,25 +18,25 @@
                             </div>
                             <div class="col-md-9">
                                 <button type="button" class="btn btn-primary btn-sm"
-                                        onclick="window.DocumentManagement.showSearchModal()">
+                                    onclick="window.DocumentManagement.showSearchModal()">
                                     Buscar Documento
                                 </button>
                                 <button type="button" class="btn btn-secondary btn-sm"
-                                        onclick="window.DocumentManagement.openSearchModal('box')">Buscar Por Caja
+                                    onclick="window.DocumentManagement.openSearchModal('box')">Buscar Por Caja
                                 </button>
                                 <button type="button" class="btn btn-info btn-sm"
-                                        onclick="window.DocumentManagement.openSearchModal('series')">Buscar por
+                                    onclick="window.DocumentManagement.openSearchModal('series')">Buscar por
                                     Serie
                                 </button>
                                 <button type="button" class="btn btn-success btn-sm"
-                                        onclick="window.DocumentManagement.showSigns()">
+                                    onclick="window.DocumentManagement.showSigns()">
                                     Rotulos
                                 </button>
                                 <button type="button" class="btn btn-warning btn-sm"
-                                        onclick="window.DocumentManagement.openSearchModal('year')">Buscar Por Año
+                                    onclick="window.DocumentManagement.openSearchModal('year')">Buscar Por Año
                                 </button>
                                 <button type="button" class="btn btn-danger btn-sm"
-                                        onclick="window.DocumentManagement.showDeleteModal()">
+                                    onclick="window.DocumentManagement.showDeleteModal()">
                                     Eliminar
                                 </button>
 
@@ -44,17 +44,17 @@
                         </div>
                         <div class="table-responsive">
                             <table id="documentsTable"
-                                   class="table table-striped table-sm table-centered dt-responsive nowrap w-100">
+                                class="table table-striped table-sm table-centered dt-responsive nowrap w-100">
                                 <thead>
-                                <tr>
-                                    <th></th>
-                                    <th>CODIGO_SISTEMA</th>
-                                    <th>Archivado</th>
-                                    <th>Oficina</th>
-                                    <th>Serie</th>
-                                    <th>Número de Folio</th>
-                                    <th>Terceros</th>
-                                </tr>
+                                    <tr>
+                                        <th></th>
+                                        <th>CODIGO_SISTEMA</th>
+                                        <th>Archivado</th>
+                                        <th>Oficina</th>
+                                        <th>Serie</th>
+                                        <th>Número de Folio</th>
+                                        <th>Terceros</th>
+                                    </tr>
                                 </thead>
                                 <tbody>
                                 </tbody>
@@ -67,7 +67,7 @@
     </div>
     <!-- Search Modal -->
     <div class="modal fade" id="bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
-         aria-hidden="true">
+        aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -138,7 +138,7 @@
     </div>
 
     <div class="modal fade" id="bs-example-modal-lg-pdfViewer" tabindex="-1" role="dialog"
-         aria-labelledby="pdfViewerModalTitle" aria-hidden="true">
+        aria-labelledby="pdfViewerModalTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -146,9 +146,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
                 </div>
                 <div class="modal-body" style="height: 80vh;"> <!-- Altura fija para mejor visualización -->
-                    <iframe id="pdfViewer"
-                            style="width: 100%; height: 100%; border: none;"
-                            allowfullscreen>
+                    <iframe id="pdfViewer" style="width: 100%; height: 100%; border: none;" allowfullscreen>
                     </iframe>
                 </div>
                 <div class="modal-footer">
@@ -159,7 +157,7 @@
     </div>
 
     <div id="full-width-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="fullWidthModalLabel"
-         aria-hidden="true">
+        aria-hidden="true">
         <div class="modal-dialog modal-full-width">
             <div class="modal-content">
                 <div class="modal-header">
@@ -181,7 +179,7 @@
                                     <option value="">Seleccione una serie</option>
                                 </select>
                                 <input type="text" id="searchTerm" class="form-control"
-                                       placeholder="Ingrese término de búsqueda">
+                                    placeholder="Ingrese término de búsqueda">
                                 <button onclick="window.DocumentManagement.searchDocuments()" class="btn btn-primary">
                                     <i class="mdi mdi-magnify"></i> Buscar
                                 </button>
@@ -190,22 +188,22 @@
                     </div>
                     <div class="table-responsive">
                         <table id="resultsTable"
-                               class="table table-striped table-sm table-centered t-responsive mb-0 nowrap w-100">
+                            class="table table-striped table-sm table-centered t-responsive mb-0 nowrap w-100">
                             <thead>
-                            <tr>
-                                <th scope="col">Código</th>
-                                <th scope="col">Serie y Sub Serie</th>
-                                <th scope="col">Referencia Documental</th>
-                                <th scope="col">Tercero(s)</th>
-                                <th scope="col">Estante</th>
-                                <th scope="col">Caja</th>
-                                <th scope="col">Orden</th>
-                                <th scope="col">N° Folio</th>
-                                <th scope="col">Año</th>
-                            </tr>
+                                <tr>
+                                    <th scope="col">Código</th>
+                                    <th scope="col">Serie y Sub Serie</th>
+                                    <th scope="col">Referencia Documental</th>
+                                    <th scope="col">Tercero(s)</th>
+                                    <th scope="col">Estante</th>
+                                    <th scope="col">Caja</th>
+                                    <th scope="col">Orden</th>
+                                    <th scope="col">N° Folio</th>
+                                    <th scope="col">Año</th>
+                                </tr>
                             </thead>
                             <tbody>
-                            <!-- Results will be dynamically inserted here -->
+                                <!-- Results will be dynamically inserted here -->
                             </tbody>
                         </table>
                     </div>
@@ -236,7 +234,9 @@
                     initializeDataTable(documents);
                 } catch (error) {
                     console.error('Error al obtener los documentos:', error);
-                    Swal.fire('Error', 'Error al cargar los documentos. Por favor, intente de nuevo más tarde.', 'error');
+                    Swal.fire('Error',
+                        'Error al cargar los documentos. Por favor, intente de nuevo más tarde.',
+                        'error');
                 }
             };
 
@@ -247,19 +247,36 @@
 
                 dataTable = $('#documentsTable').DataTable({
                     data: data,
-                    columns: [
-                        {
+                    columns: [{
                             data: null,
                             render: (data, type, row) =>
                                 `<input type="checkbox" class="document-checkbox" data-codigo="${row.filed}" onclick="window.DocumentManagement.toggleDocument(this, '${row.filed}')">`,
                             orderable: false
                         },
-                        {data: 'filed', title: 'Codigo sistema'},
-                        {data: 'document_reference', title: 'Referencia del Documento'},
-                        {data: 'office.name', title: 'Oficina'},
-                        {data: 'series.series_entity.series_name', title: 'Serie'},
-                        {data: 'folio_number', title: 'Número de Folio'},
-                        {data: 'third_parties', title: 'Terceros'}
+                        {
+                            data: 'filed',
+                            title: 'Codigo sistema'
+                        },
+                        {
+                            data: 'document_reference',
+                            title: 'Referencia del Documento'
+                        },
+                        {
+                            data: 'office.name',
+                            title: 'Oficina'
+                        },
+                        {
+                            data: 'series.series_entity.series_name',
+                            title: 'Serie'
+                        },
+                        {
+                            data: 'folio_number',
+                            title: 'Número de Folio'
+                        },
+                        {
+                            data: 'third_parties',
+                            title: 'Terceros'
+                        }
                     ],
                     language: {
                         search: "Buscar:",
@@ -311,7 +328,8 @@
                     $('#bs-example-modal-lg').modal('show');
                 } catch (error) {
                     if (error.message.includes('401')) {
-                        await Swal.fire('Error', 'Sesión expirada. Por favor, inicie sesión nuevamente.', 'error');
+                        await Swal.fire('Error', 'Sesión expirada. Por favor, inicie sesión nuevamente.',
+                            'error');
                     } else {
                         await Swal.fire('Error', 'Error al buscar documentos', 'error');
                     }
@@ -351,7 +369,8 @@
 
                 const selectedDoc = documents.find(doc => doc.filed === selectedCode);
                 if (selectedDoc) {
-                    $('#deleteList').html(`Código: ${selectedDoc.filed}<br>Referencia: ${selectedDoc.document_reference}`);
+                    $('#deleteList').html(
+                        `Código: ${selectedDoc.filed}<br>Referencia: ${selectedDoc.document_reference}`);
                     $('#deleteImput').val(selectedDoc.id)
                     $('#deleteModal').modal('show');
                 }
@@ -378,7 +397,9 @@
                     window.location.reload();
                 } catch (error) {
                     console.error('Error al eliminar el documento:', error);
-                    await Swal.fire('Error', 'Error al eliminar el documento. Por favor, intente de nuevo más tarde.', 'error');
+                    await Swal.fire('Error',
+                        'Error al eliminar el documento. Por favor, intente de nuevo más tarde.',
+                        'error');
                 }
             };
 
@@ -402,7 +423,9 @@
                     }
                 } catch (error) {
                     console.error('Error al actualizar el documento:', error);
-                    await Swal.fire('Error', 'Error al actualizar el documento. Por favor, intente de nuevo más tarde.', 'error');
+                    await Swal.fire('Error',
+                        'Error al actualizar el documento. Por favor, intente de nuevo más tarde.',
+                        'error');
                 }
             };
 
@@ -430,7 +453,7 @@
             const generateDocumentHtml = (doc) => {
                 const ruta = doc.file_path;
                 const numero = ruta.match(/archivo_central\/(\d+)\//);
-
+                console.log(doc)
                 if (numero) {
                     console.log(numero[1]); // Esto imprimirá "8111"
                 } else {
@@ -438,69 +461,68 @@
                 }
 
                 return `
-                <div class="col-lg-12">
-                        <div class="border p-1 mt-1 mt-lg-0 rounded">
-                            <div class="table-responsive">
-                                <table class="table table-sm table-centered t-responsive mb-0 nowrap w-100">
-                                    <tbody>
-                                        <tr>
-                                            <th>
-                                                Código Sistema<br>
-                                                ${doc.system_code || ''}
-                                            </th>
-                                            <th>Retención Doc <br> </th>
-                                            <th colspan="3">Codigo Documental <br> ${doc.filed || ''}</th>
-                                        </tr>
-                                        <tr>
-                                            <th>Codigo de Oficina <br> ${doc.office?.code || ''}</th>
-                                            <th colspan="4">Oficina <br> ${doc.office?.name.toUpperCase() || ''}</th>
-                                        </tr>
-                                        <tr>
-                                            <th colspan="5">Referencia del Documento <br> ${doc.document_reference || ''}</th>
-                                        </tr>
-                                        <tr>
-                                            <th colspan="5">Terceros <br> ${doc.third_parties || ''}</th>
-                                        </tr>
-                                        <tr>
-                                            <th colspan="5">Objeto <br> ${doc.object_observations || ''}</th>
-                                        </tr>
-                                        <tr>
-                                            <th>Codigo Serie <br> ${doc.series?.series_code || ''}</th>
-                                            <th colspan="3">Nombre Serie <br> ${doc.series?.series_entity?.series_name || ''}</th>
-                                             <th>N° Estante <br> ${doc.shelf_number || ''}</th>
-                                        </tr>
-                                        <tr>
-                                            <th>Cod. Sub Serie <br> ${doc.subseries?.subseries_code || ''}</th>
-                                            <th colspan="3">Nombre Sub Serie <br> ${doc.subseries?.subseries_name || ''}</th>
-                                            <th>Bandeja <br> ${doc.tray || ''}</th>
-                                        </tr>
-                                        <tr>
-                                            <th>Soportado en <br> ${doc.support || ''}</th>
-                                            <th>Fecha Inicial <br> ${formatDate(doc.start_date) || ''}</th>
-                                            <th>Fecha Final <br> ${formatDate(doc.end_date) || ''}</th>
-                                            <th>N° Caja <br> ${doc.box_number || ''}</th>
-                                            <th>N° Orden <br> ${doc.ord_number || ''}</th>
-                                        </tr>
-                                        <tr>
-                                            <th>Medio Cons <br> ${doc.main_conservation_medium || ''}</th>
-                                            <th>Conservado en <br> ${doc.preserved_in || ''}</th>
-                                            <th>Año Caja <br> ${doc.folder_year || ''}</th>
-                                            <th>Archivado En <br> ${formatDate(doc.updated_at)}</th>
-                                            <th>N° Folio <br> ${doc.folio_number || ''}</th>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                    <div class="col-lg-12">
+                            <div class="border p-1 mt-1 mt-lg-0 rounded">
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-centered t-responsive mb-0 nowrap w-100">
+                                        <tbody>
+                                            <tr>
+                                                <th>
+                                                    Código Sistema<br>
+                                                    ${doc.system_code || ''}
+                                                </th>
+                                                <th colspan="3">Codigo Documental <br> ${doc.filed || ''}</th>
+                                            </tr>
+                                            <tr>
+                                                <th>Codigo de Oficina <br> ${doc.office?.code || ''}</th>
+                                                <th colspan="4">Oficina <br> ${doc.office?.name.toUpperCase() || ''}</th>
+                                            </tr>
+                                            <tr>
+                                                <th colspan="5">Referencia del Documento <br> ${doc.document_reference || ''}</th>
+                                            </tr>
+                                            <tr>
+                                                <th colspan="5">Terceros <br> ${doc.third_parties || ''}</th>
+                                            </tr>
+                                            <tr>
+                                                <th colspan="5">Objeto <br> ${doc.object_observations || ''}</th>
+                                            </tr>
+                                            <tr>
+                                                <th>Codigo Serie <br> ${doc.series?.series_code || ''}</th>
+                                                <th colspan="3">Nombre Serie <br> ${doc.series?.series_entity?.series_name || ''}</th>
+                                                <th>N° Estante <br> ${doc.shelf_number || ''}</th>
+                                            </tr>
+                                            <tr>
+                                                <th>Cod. Sub Serie <br> ${doc.subseries?.subseries_code || ''}</th>
+                                                <th colspan="3">Nombre Sub Serie <br> ${doc.subseries?.subseries_name || ''}</th>
+                                                <th>Bandeja <br> ${doc.tray || ''}</th>
+                                            </tr>
+                                            <tr>
+                                                <th>Soportado en <br> ${doc.support || ''}</th>
+                                                <th>Fecha Inicial <br> ${formatDate(doc.start_date) || ''}</th>
+                                                <th>Fecha Final <br> ${formatDate(doc.end_date) || ''}</th>
+                                                <th>N° Caja <br> ${doc.box_number || ''}</th>
+                                                <th>N° Orden <br> ${doc.ord_number || ''}</th>
+                                            </tr>
+                                            <tr>
+                                                <th>Medio Cons <br> ${doc.main_conservation_medium || ''}</th>
+                                                <th>Conservado en <br> ${doc.preserved_in || ''}</th>
+                                                <th>Año Caja <br> ${doc.folder_year || ''}</th>
+                                                <th>Archivado En <br> ${formatDate(doc.updated_at)}</th>
+                                                <th>N° Folio <br> ${doc.folio_number || ''}</th>
+                                            </tr>
+                                        </tbody>
+                                    </table>
 
+                                </div>
+                                <div class="d-flex justify-content-end mt-2">
+                                <div class="btn-group mb-2">
+                                    <button type="button" class="btn btn-warning" onclick="window.DocumentManagement.downloadPDF(${numero ? numero[1] : ''})"> <i class="fas fa-download"></i> Descargar PDF</button>
+                                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" aria-hidden="true"><i class="fas fa-times"></i> Cerrar</button>
+                                </div>
+                                </div>
                             </div>
-                            <div class="d-flex justify-content-end mt-2">
-                            <div class="btn-group mb-2">
-                                <button type="button" class="btn btn-warning" onclick="window.DocumentManagement.downloadPDF(${numero ? numero[1] : ''})"> <i class="fas fa-download"></i> Descargar PDF</button>
-                                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" aria-hidden="true"><i class="fas fa-times"></i> Cerrar</button>
-                            </div>
-                            </div>
-                        </div>
-                </div>
-        `;
+                    </div>
+                `;
             };
 
             const downloadPDF = async (id) => {
@@ -542,9 +564,11 @@
                     try {
                         const response = await HTTPService.get(`/api/dashboard/series/used-series`);
                         const series = await response;
+                        console.log(series)
                         seriesSelect.empty().append('<option value="">Seleccione una serie</option>');
                         series.forEach(s => {
-                            seriesSelect.append(`<option value="${s.series_id}">${s.code} - ${s.name}</option>`);
+                            seriesSelect.append(
+                                `<option value="${s.series_id}">${s.code} - ${s.name}</option>`);
                         });
                     } catch (error) {
                         console.error('Error fetching series:', error);
@@ -587,21 +611,25 @@
                 try {
                     Swal.showLoading();
                     if (searchType === 'box') {
-                        const response = await HTTPService.get(`/api/dashboard/search-by-box/${searchTerm}`);
+                        const response = await HTTPService.get(
+                            `/api/dashboard/search-by-box/${searchTerm}`);
                         if (response) {
                             updateTable(response, searchType);
                         } else {
                             updateTable([], searchType);
                         }
                     } else if (searchType === 'series') {
-                        const response = await HTTPService.get(`/api/dashboard/search-by-serial/${searchTerm}`);
+                        const response = await HTTPService.get(
+                            `/api/dashboard/search-by-serial/${searchTerm}`);
                         if (response) {
                             updateTable(response, searchType);
                         } else {
                             updateTable([], searchType);
                         }
                     } else {
-                        const response = await HTTPService.get(`/api/dashboard/search-by-year/${searchTerm}`);
+                        const response = await HTTPService.get(
+                            `/api/dashboard/search-by-year/${searchTerm}`);
+                        console.log(response)
                         if (response) {
                             updateTable(response, searchType);
                         } else {
@@ -634,58 +662,58 @@
                 const thead = document.querySelector('#resultsTable thead tr');
                 if (searchType === 'series' || searchType === 'year') {
                     thead.innerHTML = `
-        <th scope="col">Código</th>
-        <th scope="col">Serie Documental</th>
-        <th scope="col">Sub Serie Documental</th>
-        <th scope="col">Referencia Documental</th>
-        <th scope="col">Estante</th>
-        <th scope="col">Caja</th>
-        <th scope="col">Año</th>
-    `;
+                        <th scope="col">Código</th>
+                        <th scope="col">Serie Documental</th>
+                        <th scope="col">Sub Serie Documental</th>
+                        <th scope="col">Referencia Documental</th>
+                        <th scope="col">Estante</th>
+                        <th scope="col">Caja</th>
+                        <th scope="col">Año</th>
+                    `;
                 } else {
                     // Default box view
                     thead.innerHTML = `
-        <th scope="col">Código</th>
-        <th scope="col">Serie y Sub Serie</th>
-        <th scope="col">Referencia Documental</th>
-        <th scope="col">Tercero(s)</th>
-        <th scope="col">Estante</th>
-        <th scope="col">Caja</th>
-        <th scope="col">Orden</th>
-        <th scope="col">N° Folio</th>
-        <th scope="col">Año</th>
-    `;
+                    <th scope="col">Código</th>
+                    <th scope="col">Serie y Sub Serie</th>
+                    <th scope="col">Referencia Documental</th>
+                    <th scope="col">Tercero(s)</th>
+                    <th scope="col">Estante</th>
+                    <th scope="col">Caja</th>
+                    <th scope="col">Orden</th>
+                    <th scope="col">N° Folio</th>
+                    <th scope="col">Año</th>
+                `;
                 }
 
                 documents.forEach(doc => {
                     let row = '';
                     if (searchType === 'series' || searchType === 'year') {
                         row = `
-            <tr>
-                <td>${doc.filed || ''}</td>
-                <td>${doc.series?.series_entity?.series_name || ''}</td>
-                <td>${doc.subseries?.subseries_name || ''}</td>
-                <td>${doc.document_reference || ''}</td>
-                <td>${doc.shelf_number || ''}</td>
-                <td>${doc.box_number || ''}</td>
-                <td>${doc.folder_year || ''}</td>
-            </tr>
-        `;
+                            <tr>
+                                <td>${doc.filed || ''}</td>
+                                <td>${doc.series?.series_entity?.series_name || ''}</td>
+                                <td>${doc.subseries?.subseries_name || ''}</td>
+                                <td>${doc.document_reference || ''}</td>
+                                <td>${doc.shelf_number || ''}</td>
+                                <td>${doc.box_number || ''}</td>
+                                <td>${doc.folder_year || ''}</td>
+                            </tr>
+                        `;
                     } else {
                         // Default box view
                         row = `
-            <tr>
-                <td>${doc.filed || ''}</td>
-                <td>${doc.series?.series_code || ''} ${doc.series?.series_entity?.series_name || ''} ${doc.subseries?.subseries_name || ''}</td>
-                <td>${doc.document_reference || ''}</td>
-                <td>${doc.third_parties || ''}</td>
-                <td>${doc.shelf_number || ''}</td>
-                <td>${doc.box_number || ''}</td>
-                <td>${doc.ord_number || ''}</td>
-                <td>${doc.folio_number || ''}</td>
-                <td>${doc.folder_year || ''}</td>
-            </tr>
-        `;
+                            <tr>
+                                <td>${doc.filed || ''}</td>
+                                <td>${doc.series?.series_code || ''} ${doc.series?.series_entity?.series_name || ''} ${doc.subseries?.subseries_name || ''}</td>
+                                <td>${doc.document_reference || ''}</td>
+                                <td>${doc.third_parties || ''}</td>
+                                <td>${doc.shelf_number || ''}</td>
+                                <td>${doc.box_number || ''}</td>
+                                <td>${doc.ord_number || ''}</td>
+                                <td>${doc.folio_number || ''}</td>
+                                <td>${doc.folder_year || ''}</td>
+                            </tr>
+                        `;
                     }
                     tbody.innerHTML += row;
                 });
@@ -729,7 +757,5 @@
             // Return public API for module imports
             return publicApi;
         })();
-
-
     </script>
 @endsection

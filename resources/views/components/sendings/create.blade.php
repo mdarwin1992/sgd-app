@@ -23,7 +23,7 @@
                                             <div class="col-md-3 mb-3">
                                                 <label for="id">Nº Radicado</label>
                                                 <input type="text" class="form-control" id="reference_code"
-                                                    name="reference_code" value="">
+                                                    name="reference_code" value="" readonly>
                                             </div>
                                         </div>
                                         <div class="row">
@@ -130,9 +130,9 @@
 
             const loadCounter = async () => {
                 const referenceCode = getElement(elements.referenceCode);
-                const entityId = HTTPService.getUserData('entity_id');
-              
-                if (!entityId || !selectedOffice) {
+                const entity = HTTPService.getUserData('entity_id')
+
+                if (!entity.entity_id || !selectedOffice) {
                     console.error(
                         'No se encontró el entity_id en localStorage o no se ha seleccionado una oficina.'
                     );
@@ -140,7 +140,8 @@
                 }
 
                 try {
-                    const counterResponse = await HTTPService.get(`/api/entity/${entityId}/counter/2`);
+                    const counterResponse = await HTTPService.get(
+                        `/api/entity/${entity.entity_id}/counter/2`);
                     counter = counterResponse;
                     const formattedReferenceCode = selectedOffice.toString().padStart(3, '0') + (
                         counterResponse.reference_code || '').padStart(7, '0');
@@ -192,14 +193,80 @@
                 }
             };
 
+            /*  const handleFileChange = async (event) => {
+                 const url = '/api/dashboard/upload';
+                 try {
+                     const uploadedData = await HTTPService.upload(url, event);
+                     filePath = uploadedData;
+                     getElement(elements.filePath).value = uploadedData;
+                 } catch (error) {
+                     console.error('Error al cargar el archivo:', error.message);
+                 }
+             }; */
+
             const handleFileChange = async (event) => {
-                const url = '/api/dashboard/upload';
+                // 1. Obtener el archivo desde el evento.
+                // El objeto 'File' está en `event.target.files[0]`.
+                const fileToUpload = event.target.files[0];
+
+                // 2. (RECOMENDADO) Añadir una validación para asegurarse de que se seleccionó un archivo.
+                if (!fileToUpload) {
+                    console.log("No se seleccionó ningún archivo. La operación se ha cancelado.");
+                    return; // Detener la ejecución si no hay archivo
+                }
+
+                const systemCode = $('#reference_code').val();
+                if (!systemCode) {
+                    //console.error("El código del sistema no está definido. Por favor, asegúrate de que el campo 'reference_code' tenga un valor.");
+                    return; // Detener la ejecución si no hay código del sistema
+                } else {
+                    console.log("Código del sistema:", systemCode);
+                }
+
+                // 3. Definir el endpoint y los datos adicionales si los necesitas.
+                // He cambiado la URL para que coincida con el controlador de Laravel que hicimos.
+                // Si tu ruta es diferente, ajústala aquí.
+                const url = '/api/dashboard/upload'; // O la ruta correcta a tu controlador
+
+                // ¡IMPORTANTE! Si tu endpoint 'upload' necesita datos adicionales,
+                // como 'reference_code', debes añadirlos aquí.
+                const additionalData = {
+                    reference_code: systemCode // Sustituye esto por el valor real
+                };
+
                 try {
-                    const uploadedData = await HTTPService.upload(url, event);
-                    filePath = uploadedData;
-                    getElement(elements.filePath).value = uploadedData;
+                    //console.log("Iniciando subida para el archivo:", fileToUpload.name);
+
+                    // 4. Llamar al servicio de subida con los parámetros CORRECTOS:
+                    //    - url
+                    //    - el objeto File
+                    //    - los datos adicionales
+                    const response = await HTTPService.upload(url, fileToUpload, additionalData);
+
+                    //console.log('Archivo subido con éxito. Respuesta del servidor:', response);
+
+                    // El backend ahora devuelve: { data: { url: '...', path: '...' }, message: '...' }
+                    // La ruta del archivo para guardar está en `response.data.path`.
+                    // La URL pública está en `response.data.url`.
+
+                    // Decide qué valor quieres guardar. `response.data.path` es usualmente
+                    // lo que se almacena en la base de datos.
+                    const filePathFromServer = response.data;
+
+
+                    // 5. Actualizar la UI con la ruta obtenida del servidor.
+                    const filePathInput = document.querySelector(elements.filePath);
+                    if (filePathInput) {
+                        filePathInput.value = filePathFromServer;
+                    } else {
+                        console.warn("No se encontró el elemento para mostrar la ruta del archivo.");
+                    }
+
                 } catch (error) {
-                    console.error('Error al cargar el archivo:', error.message);
+                    // HTTPService ya maneja bien los errores, aquí solo los mostramos.
+                    console.error('Error durante la carga del archivo:', error.message);
+                    // Podrías mostrar este error al usuario en un elemento del DOM.
+                    // ej. document.getElementById('error-message').textContent = error.message;
                 }
             };
 
@@ -220,7 +287,8 @@
                     try {
                         const response = await HTTPService.post('api/dashboard/document-sendings/store',
                             formDataObject);
-                        Helpers.getMessage('Se ha guardado correctamente', '/dashboard/ventanilla-unica/recepcion');
+                        Helpers.getMessage('Se ha guardado correctamente',
+                            '/dashboard/ventanilla-unica/recepcion');
                     } catch (error) {
                         console.error('Error al crear la recepción:', error);
                     } finally {

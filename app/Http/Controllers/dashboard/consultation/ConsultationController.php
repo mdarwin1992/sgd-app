@@ -165,11 +165,10 @@ class ConsultationController extends Controller
             ]);
 
         if ($id) {
-            $query->whereYear('start_date', $id);
+            $query->where('folder_year', $id);
         }
 
         $documents = $query->get();
-
 
         return response()->json($documents);
     }
@@ -188,7 +187,7 @@ class ConsultationController extends Controller
             ]);
 
         if ($id) {
-            $query->whereYear('start_date', $id);
+            $query->where('folder_year', $id);
         }
 
         $documents = $query->get();
@@ -196,5 +195,4 @@ class ConsultationController extends Controller
 
         return response()->json($documents);
     }
-
 }

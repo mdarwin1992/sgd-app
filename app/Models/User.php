@@ -3,13 +3,14 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Notifications\Notifiable;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Traits\HasPermissions;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Traits\HasRoles;
-use Spatie\Permission\Traits\HasPermissions;
 
 class User extends Authenticatable
 {
@@ -57,8 +58,18 @@ class User extends Authenticatable
         return $this->hasMany(Office::class);
     }
 
-    public function modelPermissions()
+    /* public function modelPermissions()
     {
         return $this->morphToMany(Permission::class, 'model', 'model_has_permissions');
     }
+
+    public function modelRoles()
+    {
+        return $this->morphToMany(Role::class, 'model', 'model_has_roles');
+    }
+
+    public function getRoleNames()
+    {
+        return $this->modelRoles()->pluck('name');
+    } */
 }

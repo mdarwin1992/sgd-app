@@ -46,6 +46,47 @@
             </div>
         </div>
     </div>
+    <!-- ========== VENTANA MODAL PARA VER DETALLES ========== -->
+    <div class="modal fade" id="viewDocumentModal" tabindex="-1" aria-labelledby="viewDocumentModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="viewDocumentModalLabel">Detalles de la Correspondencia</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>No. Radicado:</strong> <span id="modal-reference-code"></span></p>
+                            <p><strong>No. Sistema:</strong> <span id="modal-system-code"></span></p>
+                            <p><strong>Fecha de Recepción:</strong> <span id="modal-received-date"></span></p>
+                            <p><strong>Estado:</strong> <span id="modal-status"></span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Origen:</strong> <span id="modal-origin"></span></p>
+                            <p><strong>Nombre del Remitente:</strong> <span id="modal-sender-name"></span></p>
+                            <p><strong>¿Tiene Adjuntos?:</strong> <span id="modal-has-attachments"></span></p>
+                            <p><strong>Número de Páginas:</strong> <span id="modal-page-count"></span></p>
+                        </div>
+                    </div>
+                    <hr>
+                    <p><strong>Asunto:</strong></p>
+                    <p><span id="modal-subject"></span></p>
+                    <hr>
+                    <div class="text-center">
+                        <a href="#" id="modal-file-link" target="_blank" class="btn btn-primary"><i
+                                class="fas fa-file-pdf"></i> Ver Documento Adjunto</a>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ========== FIN DE LA VENTANA MODAL ========== -->
+
 @endsection
 @section('scripts')
     <script type="module">
@@ -60,6 +101,7 @@
                 try {
                     const response = await HTTPService.get(`/api/dashboard/reception`);
                     documents = response.data || response;
+                    console.log('Documentos obtenidos:', documents);
                     initDataTable();
                 } catch (error) {
                     console.error('Error al obtener los documentos:', error);
@@ -150,6 +192,7 @@
                     const documentId = $(event.currentTarget).data('id');
                     const document = documents.find(doc => doc.id === documentId);
                     if (document) {
+                        // LLAMADA A LA FUNCIÓN ACTUALIZADA
                         viewDocument(document);
                     } else {
                         console.error('Documento no encontrado:', documentId);
@@ -157,15 +200,63 @@
                 });
             };
 
+            const viewDocument = (item) => {
+                console.log('Viendo documento:', item);
+
+                // 1. Llenar los campos de la modal con los datos del documento
+                $('#modal-reference-code').text(item.reference_code || 'N/A');
+                $('#modal-system-code').text(item.system_code || 'N/A');
+
+                const receivedDate = new Date(item.received_date);
+                const formattedDate = receivedDate.toLocaleDateString('es-ES', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                $('#modal-received-date').text(formattedDate);
+
+                $('#modal-status').html(
+                    `<span class="badge badge-outline-primary">${item.document_status.status || 'N/A'}</span>`
+                );
+
+                $('#modal-origin').text(item.origin || 'N/A');
+                $('#modal-sender-name').text(item.sender_name || 'N/A');
+
+                $('#modal-has-attachments').text(item.has_attachments ? 'Sí' : 'No');
+                $('#modal-page-count').text(item.page_count || 'N/A');
+
+                $('#modal-subject').text(item.subject || 'Sin asunto');
+
+                // 2. Construir y asignar el enlace al archivo adjunto
+                // Ahora `document` se refiere correctamente al DOM global del navegador.
+                const filePath = item.file_path;
+                const fileUrl = filePath ? `/${filePath}` : '#';
+                const fileLink = document.getElementById('modal-file-link'); // <-- ESTO YA NO FALLARÁ
+
+                if (fileLink) {
+                    fileLink.setAttribute('href', fileUrl);
+                    // Opcional: deshabilitar el botón si no hay archivo
+                    if (!filePath) {
+                        fileLink.classList.add('disabled');
+                    } else {
+                        fileLink.classList.remove('disabled');
+                    }
+                }
+
+                // 3. Mostrar la ventana modal
+                // `document` aquí es el DOM global, como debe ser.
+                const modalElement = document.getElementById('viewDocumentModal'); // <-- ESTO YA NO FALLARÁ
+                const viewModal = new bootstrap.Modal(modalElement);
+                viewModal.show();
+            };
+
+
             const exportDocument = (document) => {
                 console.log('Exportando documento:', document.reference_code);
                 // Implementa la lógica de exportación aquí
             };
 
-            const viewDocument = (document) => {
-                console.log('Viendo documento:', document.reference_code);
-                // Implementa la lógica de visualización aquí
-            };
+
 
             // Inicializar cuando el DOM esté listo
             $(document).ready(() => {

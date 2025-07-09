@@ -2,15 +2,17 @@
 
 namespace App\Http\Controllers\dashboard\centralarchive;
 
-use App\Helpers\DatabaseErrorHandler;
-use App\Http\Controllers\Controller;
-use App\Http\Requests\centralarchive\CentralArchiveRequest;
-use App\Models\CentralArchive;
-use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use mysql_xdevapi\Exception;
+use App\Models\CentralArchive;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use mysql_xdevapi\Exception;
+use App\Http\Controllers\Controller;
+use App\Helpers\DatabaseErrorHandler;
+use Illuminate\Database\QueryException;
+use Illuminate\Http\Resources\Json\JsonResource;
+use App\Http\Requests\centralarchive\CentralArchiveRequest;
 
 class CentralArchiveController extends Controller
 {
@@ -19,24 +21,34 @@ class CentralArchiveController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index()
+    public function index(): JsonResponse
     {
-        //
         $archives = CentralArchive::with([
             'office',
             'entity',
-            'series',
             'series.seriesEntity',
             'subseries',
             'centralArchiveLoans.documentLoan'
-        ])->get();
+        ])->get()->map(function ($archive) {
+            return [
+                'filed' => $archive->filed,
+                'document_reference' => $archive->document_reference,
+                'office' => ['name' => optional($archive->office)->name],
+                'series' => [
+                    'series_entity' => [
+                        'series_name' => optional(optional($archive->series)->seriesEntity)->series_name
+                    ]
+                ],
+                'folio_number' => $archive->folio_number,
+                'third_parties' => $archive->third_parties,
+            ];
+        });
 
         return response()->json([
             'data' => $archives,
-            'message' => 'Archives retrieved successfully'
+            'message' => 'Archivos recuperados correctamente'
         ], 200);
     }
-
     /**
      * Store a newly created resource in storage.
      *

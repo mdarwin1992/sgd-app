@@ -323,7 +323,7 @@ export const routes = [
         },
     },
     {
-        path: "/dashboard/archivo-historico",
+        path: "/dashboard/archivo-historico/consultas",
         component: "components.historicFile.index",
         name: "Gestión Archivo Histórico",
         meta: {

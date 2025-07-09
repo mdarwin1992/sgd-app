@@ -282,7 +282,7 @@
                     seriesResponse.data.forEach(serie => {
                         const option = document.createElement('option');
                         option.value = serie.id;
-                        option.textContent = serie.series_name;
+                        option.textContent = serie.id + ' - ' + serie.series_name;
                         seriesSelect.appendChild(option);
                     });
                     seriesSelect.disabled = false;
@@ -300,7 +300,7 @@
                     subseriesResponse.data.forEach(subserie => {
                         const option = document.createElement('option');
                         option.value = subserie.id;
-                        option.textContent = subserie.subseries_name;
+                        option.textContent = subserie.id + ' - ' + subserie.subseries_name;
                         subseriesSelect.appendChild(option);
                     });
                     subseriesSelect.disabled = false;
@@ -367,7 +367,7 @@
                         const response = await HTTPService.post('/api/dashboard/central-archive/store',
                             formDataObject);
                         console.log(response);
-                        //Helpers.getMessage('Se ha guardado correctamente', '/dashboard/archivo-central');
+                        Helpers.getMessage('Se ha guardado correctamente', '/dashboard/archivo-central');
                     } catch (error) {
                         console.error('Error al crear el archivo central:', error);
                     } finally {
@@ -376,16 +376,84 @@
                 }
             };
 
+            /*  const handleFileChange = async (event) => {
+                            const url = '/api/dashboard/central-archive/upload';
+                            try {
+                                const uploadedData = await HTTPService.upload(url, event);
+                                filePath = uploadedData;
+                                document.querySelector(elements.file_path).value = uploadedData;
+                            } catch (error) {
+                                console.error('Error al cargar el archivo:', error.message);
+                            }
+                        };
+             */
             const handleFileChange = async (event) => {
-                const url = '/api/dashboard/central-archive/upload';
+                // 1. Obtener el archivo desde el evento.
+                // El objeto 'File' está en `event.target.files[0]`.
+                const fileToUpload = event.target.files[0];
+
+                // 2. (RECOMENDADO) Añadir una validación para asegurarse de que se seleccionó un archivo.
+                if (!fileToUpload) {
+                    console.log("No se seleccionó ningún archivo. La operación se ha cancelado.");
+                    return; // Detener la ejecución si no hay archivo
+                }
+
+                const systemCode = $('#response_file').val();
+                if (!systemCode) {
+                    //console.error("El código del sistema no está definido. Por favor, asegúrate de que el campo 'reference_code' tenga un valor.");
+                    return; // Detener la ejecución si no hay código del sistema
+                } else {
+                    console.log("Código del sistema:", systemCode);
+                }
+
+                // 3. Definir el endpoint y los datos adicionales si los necesitas.
+                // He cambiado la URL para que coincida con el controlador de Laravel que hicimos.
+                // Si tu ruta es diferente, ajústala aquí.
+                const url = '/api/dashboard/central-archive/upload'; // O la ruta correcta a tu controlador
+
+                // ¡IMPORTANTE! Si tu endpoint 'upload' necesita datos adicionales,
+                // como 'reference_code', debes añadirlos aquí.
+                const additionalData = {
+                    response_file: systemCode // Sustituye esto por el valor real
+                };
+
                 try {
-                    const uploadedData = await HTTPService.upload(url, event);
-                    filePath = uploadedData;
-                    document.querySelector(elements.file_path).value = uploadedData;
+                    //console.log("Iniciando subida para el archivo:", fileToUpload.name);
+
+                    // 4. Llamar al servicio de subida con los parámetros CORRECTOS:
+                    //    - url
+                    //    - el objeto File
+                    //    - los datos adicionales
+                    const response = await HTTPService.upload(url, fileToUpload, additionalData);
+
+                    console.log("Archivo subido con éxito:", response);
+
+                    //console.log('Archivo subido con éxito. Respuesta del servidor:', response);
+
+                    // El backend ahora devuelve: { data: { url: '...', path: '...' }, message: '...' }
+                    // La ruta del archivo para guardar está en `response.data.path`.
+                    // La URL pública está en `response.data.url`.
+
+                    // Decide qué valor quieres guardar. `response.data.path` es usualmente
+                    // lo que se almacena en la base de datos.
+                    const filePathFromServer = response.data;
+
+                    // 5. Actualizar la UI con la ruta obtenida del servidor.
+                    const filePathInput = document.querySelector(elements.file_path);
+                    if (filePathInput) {
+                        filePathInput.value = filePathFromServer;
+                    } else {
+                        console.warn("No se encontró el elemento para mostrar la ruta del archivo.");
+                    }
+
                 } catch (error) {
-                    console.error('Error al cargar el archivo:', error.message);
+                    // HTTPService ya maneja bien los errores, aquí solo los mostramos.
+                    console.error('Error durante la carga del archivo:', error.message);
+                    // Podrías mostrar este error al usuario en un elemento del DOM.
+                    // ej. document.getElementById('error-message').textContent = error.message;
                 }
             };
+
 
             const setupValidation = () => {
                 $.validator.setDefaults({

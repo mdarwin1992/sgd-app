@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="light" data-layout-mode="fluid" data-menu-color="light" data-topbar-color="light"
+    data-layout-position="fixed" data-sidenav-size="default" class="menuitem-active">
 
 <head>
     <meta charset="utf-8" />
@@ -12,7 +13,7 @@
     <link rel="shortcut icon" href="{{ asset('assets/images/favicon.ico') }}">
 
     <!-- Select2 css -->
-    <link href="https:cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
 
     <link rel="stylesheet" href="{{ asset('assets/vendor/FontAwesome-pro/css/all.min.css') }}">
 
@@ -139,12 +140,12 @@
     <script src="{{ asset('assets/js/vendor.min.js') }}"></script>
 
     <!--  Select2 Js -->
-    <script src="https:cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <!-- App js -->
     <script src="{{ asset('assets/js/app.min.js') }}"></script>
 
-    <script src="https:cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.22.1/dist/sweetalert2.all.min.js"></script>
 
     <!-- Datatables js -->
     <script src="{{ asset('assets/vendor/datatables.net/js/jquery.dataTables.min.js') }}"></script>
@@ -168,7 +169,7 @@
         });
     </script>
 
-    <script src="https:cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ asset('assets/js/chart.js') }}"></script>
     <script src="https:cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.js"></script>
     <script src="https:cdn.jsdelivr.net/npm/fullcalendar@5.10.2/locales/es.js"></script>
     <link href="https:cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.css" rel="stylesheet">

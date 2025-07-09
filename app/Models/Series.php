@@ -17,6 +17,11 @@ class Series extends Model
 
     protected $fillable = ['office_id', 'series_entity_id', 'series_code'];
 
+    public function office()
+    {
+        return $this->belongsTo(Office::class);
+    }
+
     public function subseries(): HasMany
     {
         return $this->hasMany(Subseries::class);
@@ -46,5 +51,4 @@ class Series extends Model
     {
         return $this->hasMany(CentralArchive::class);
     }
-
 }

@@ -291,11 +291,11 @@
                                 <div class="d-flex align-items-start">
                                     <div>
                                         <h6 class="mt-0 mb-1">${activity.subject}</h6>
-                                        <span class="badge badge-outline-primary font-11">Envío de Documento</span> <span class="badge badge-outline-info font-11">Destinatario: ${activity.sender}</span> 
+                                        <span class="badge badge-outline-primary font-11">Envío de Documento</span> <span class="badge badge-outline-info font-11">Destinatario: ${activity.sender}</span>
                                         <small class="fw-normal ms-1">${new Date(activity.created_at).toLocaleString()}</small>
                                     </div>
                                 </div>
-                            </td>                           
+                            </td>
                         `;
                     tableBody.appendChild(row);
                 });
@@ -311,7 +311,7 @@
                                         <small class="fw-normal ms-1">${new Date(activity.created_at).toLocaleString()}</small>
                                     </div>
                                 </div>
-                            </td>                       
+                            </td>
                         `;
                     tableBody.appendChild(row);
                 });
@@ -325,11 +325,11 @@
                                         <h5 class="mt-0 mb-1">${activity.document.subject}</h5>
                                         <span class="badge badge-outline-primary font-11">Recepción</span>
                                         <span class="badge badge-outline-primary font-11">Recepción: ${activity.document.reference_code}</span>
-                                        <span class="badge badge-outline-info font-11">Remitente: ${activity.document.sender_name}</span> 
+                                        <span class="badge badge-outline-info font-11">Remitente: ${activity.document.sender_name}</span>
                                         <small class="fw-normal ms-1">${new Date(activity.created_at).toLocaleString()}</small>
                                     </div>
                                 </div>
-                            </td>                                                     
+                            </td>
                         `;
                     tableBody.appendChild(row);
                 });
@@ -341,7 +341,7 @@
                                 <div class="d-flex align-items-start">
                                     <div>
                                         <h6 class="mt-0 mb-1">${activity.response_content}</h6>
-                                        <span class="badge badge-outline-primary font-11">Respuesta</span> 
+                                        <span class="badge badge-outline-primary font-11">Respuesta</span>
                                         <small class="fw-normal ms-1">${new Date(activity.created_at).toLocaleString()}</small>
                                     </div>
                                 </div>
@@ -372,12 +372,12 @@
                                 <div class="d-flex align-items-start">
                                     <div>
                                         <h6 class="mt-0 mb-1">${documentReference}</h6>
-                                        <span class="badge badge-outline-primary font-11">Préstamo</span> <span class="badge badge-outline-info font-11">Estado: ${loanStatus}</span> 
-                                        <span class="badge badge-outline-info font-11">Tipo: ${documentType}</span> 
+                                        <span class="badge badge-outline-primary font-11">Préstamo</span> <span class="badge badge-outline-info font-11">Estado: ${loanStatus}</span>
+                                        <span class="badge badge-outline-info font-11">Tipo: ${documentType}</span>
                                         <small class="fw-normal ms-1">${new Date(activity.created_at).toLocaleString()}</small>
                                     </div>
                                 </div>
-                            </td>                                                    
+                            </td>
                         `;
                     tableBody.appendChild(row);
                 });

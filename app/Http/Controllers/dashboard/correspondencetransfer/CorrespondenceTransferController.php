@@ -51,7 +51,14 @@ class CorrespondenceTransferController extends Controller
 
         $officeId = $id ?? null;
 
-        $transferQuery = DB::table('document')
+        $transferQuery = DB::table('document')->select(
+            'document.id',
+            'document.reference_code',
+            'document.subject',
+            'document.origin',
+            'document.sender_name',
+            'document_status.status',
+            'correspondence_transfer.id as transfer_id',)
             ->join('correspondence_transfer', 'document.id', '=', 'correspondence_transfer.document_id')
             ->join('office', 'correspondence_transfer.office_id', '=', 'office.id')
             ->join('document_status', 'document.id', '=', 'document_status.document_id')

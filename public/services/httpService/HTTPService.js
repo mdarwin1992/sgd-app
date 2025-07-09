@@ -490,73 +490,96 @@ const HTTPService = (() => {
     };
 
     /**
-     * Carga un archivo a una URL específica.
-     * @param {string} url - La URL del endpoint de carga.
+     * Carga un archivo a una URL específica, compatible con el backend de Laravel.
+     * @param {string} url - La URL del endpoint de carga (ej: '/api/helpers/files/upload').
      * @param {File} file - El objeto File a cargar.
-     * @param {Object} [additionalData={}] - Datos adicionales que se añadirán al FormData.
-     * @returns {Promise<Object|string>} Los datos de la respuesta del servidor o la URL del archivo cargado.
-     * @throws {Error} Si la carga falla o las validaciones no son exitosas.
+     * @param {Object} [additionalData={}] - Datos adicionales que se añadirán al FormData (ej: { reference_code: '123' }).
+     * @returns {Promise<Object>} La respuesta completa del servidor, incluyendo el objeto `data` con la URL y path del archivo.
+     * @throws {HttpError} Si la carga falla o las validaciones no son exitosas en el backend.
      */
     const upload = async (url, file, additionalData = {}) => {
+        // --- 1. Validaciones en el lado del cliente (sin cambios, ya estaban bien) ---
+        if (!(file instanceof File)) {
+            throw new Error('El segundo argumento debe ser un objeto File.');
+        }
+
+        if (file.size > FILE_CONSTRAINTS.MAX_SIZE) {
+            throw new Error(`El archivo excede el tamaño máximo permitido de ${FILE_CONSTRAINTS.MAX_SIZE / 1048576}MB.`);
+        }
+
+        validateFileType(file);
+
+        // --- 2. Creación del FormData (sin cambios, ya estaba bien) ---
+        const formData = new FormData();
+        formData.append('filepath', file); // Clave 'filepath' que espera el backend de Laravel
+
+        for (const key in additionalData) {
+            if (Object.prototype.hasOwnProperty.call(additionalData, key)) {
+                formData.append(key, additionalData[key]); // Añade 'reference_code', 'directory', etc.
+            }
+        }
+
         try {
-            if (!(file instanceof File)) {
-                throw new Error('El segundo argumento debe ser un objeto File.');
-            }
-
-            if (file.size > FILE_CONSTRAINTS.MAX_SIZE) {
-                throw new Error(`El archivo excede el tamaño máximo permitido de ${FILE_CONSTRAINTS.MAX_SIZE / 1048576}MB`);
-            }
-
-            validateFileType(file);
-
-            const formData = new FormData();
-            formData.append('filepath', file);
-
-            for (const key in additionalData) {
-                if (Object.prototype.hasOwnProperty.call(additionalData, key)) {
-                    formData.append(key, additionalData[key]);
-                }
-            }
-
-            // Nota: getHeaders(true) NO incluye 'Content-Type: application/json'
-            // El navegador establecerá 'Content-Type: multipart/form-data' automáticamente
-            // junto con el boundary, cuando se envía FormData.
+            // --- 3. Obtención de Headers (sin cambios, ya estaba bien) ---
+            // getHeaders(true) es correcto: obtiene Auth y CSRF, pero deja que el navegador
+            // establezca el 'Content-Type: multipart/form-data' automáticamente.
             const headers = getHeaders(true);
-            // Si el token está en el Authorization header, se incluirá.
-            // Si el CSRF token está en los headers (como lo hace getHeaders), también.
 
-            const response = await fetch(new URL(url, API_BASE_URL).toString(), {
+            // --- 4. Construcción de la URL y Petición (sin cambios, ya estaba bien) ---
+            const fullUrl = new URL(url, API_BASE_URL).toString();
+
+            const response = await fetch(fullUrl, {
                 method: 'POST',
-                headers: headers, // Los headers ya incluyen Auth y X-XSRF-Token
-                credentials: 'include', // Para enviar cookies (CSRF, sesión, etc.)
+                headers: headers,
+                credentials: 'include', // Necesario para que Laravel Sanctum funcione correctamente con cookies.
                 body: formData,
             });
 
+            // --- 5. Procesamiento de la Respuesta (CORRECCIÓN CLAVE) ---
+            // La lógica original era un poco compleja. Se simplifica y robustece.
             const responseText = await response.text();
-            let data;
+            let responseData;
+
+            // Intenta parsear la respuesta como JSON. Si está vacía o hay un error, maneja el caso.
             try {
-                data = responseText ? JSON.parse(responseText) : {};
-            } catch (e) {
-                if (response.status === 204 || responseText === '') {
-                    data = { message: 'No Content', status: response.status };
-                } else {
-                    console.error('Response is not valid JSON:', responseText);
-                    throw new SyntaxError('La respuesta del servidor no es JSON válido.');
+                responseData = responseText ? JSON.parse(responseText) : {};
+            } catch (parseError) {
+                // Si el parsing falla, no es un error fatal si la petición fue exitosa (ej. status 204).
+                // Pero si falló, es útil saber que la respuesta no fue JSON válido.
+                if (!response.ok) {
+                    console.error('La respuesta de error del servidor no es JSON válido:', responseText);
+                    // Lanzamos un error con el texto original para que el desarrollador pueda depurarlo.
+                    throw new HttpError(
+                        `Error del servidor. Respuesta no válida: ${responseText || 'Vacía'}`,
+                        response.status
+                    );
                 }
+                // Si la petición fue OK pero la respuesta JSON es inválida, se puede tratar como un éxito sin datos.
+                responseData = { message: 'Operación exitosa con respuesta no-JSON.', status: response.status };
             }
 
+            // Si la respuesta HTTP no fue exitosa (status 4xx o 5xx), lanzamos un error estructurado.
             if (!response.ok) {
-                const errorMessage = data.message || `Error del servidor al cargar el archivo: ${response.status}`;
-                console.error('Upload error response:', data);
-                throw new HttpError(errorMessage, response.status, data);
+                // El backend de Laravel devuelve { message: '...', errors: {...} }. Usamos ese `message`.
+                const errorMessage = responseData.message || `Error del servidor al cargar el archivo: ${response.status}`;
+                console.error('Error en la carga del archivo:', responseData);
+                throw new HttpError(errorMessage, response.status, responseData);
             }
 
-            return data.data || data.url || data; // Retorna los datos o la URL si el backend la proporciona
+            // --- 6. Retorno de Datos Exitosos (CORRECCIÓN CLAVE) ---
+            // El backend devuelve un objeto `{ message: '...', data: { url: '...', path: '...' } }`.
+            // Es mejor retornar el objeto completo `responseData` para que el código que llama a `upload`
+            // tenga acceso a todo (`message` y `data`).
+            return responseData;
+
         } catch (error) {
-            console.error('Error detallado en la carga del archivo:', {
-                message: error.message, stack: error.stack, originalError: error
-            });
-            throw new Error(`Error al cargar el archivo: ${error.message}`);
+            // Si el error ya es un HttpError, simplemente lo relanzamos.
+            if (error instanceof HttpError) {
+                throw error;
+            }
+            // Para otros errores (ej. de red), los envolvemos en un error genérico para consistencia.
+            console.error('Error detallado en la carga del archivo:', error);
+            throw new Error(`Error inesperado al cargar el archivo: ${error.message}`);
         }
     };
 

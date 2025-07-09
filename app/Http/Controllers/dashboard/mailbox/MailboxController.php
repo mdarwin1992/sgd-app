@@ -49,7 +49,7 @@ class MailboxController extends Controller
     public function getMailbox($id)
     {
         $user = Auth::user();
-        $roles = $user->getRoleNames(); // Devuelve una colección de roles
+        $roles = $user->getRoleNames(); // <--- CORRECTO (en plural)
 
 
         if ($roles[0] == 'EMPRESA') {
@@ -59,7 +59,6 @@ class MailboxController extends Controller
                 ->join('office', 'correspondence_transfer.office_id', '=', 'office.id')
                 ->join('document_status', 'document.id', '=', 'document_status.document_id')
                 ->where('document_status.status', '=', 'CONTESTADO')->get();
-
         } else {
             $officeId = $id;
             $requestResponses = DB::table('document')
@@ -97,10 +96,12 @@ class MailboxController extends Controller
             // Validar que todos los parámetros necesarios estén presentes
             if (!empty($request->response_email)) {
 
+                $response_file = 'respuesta_' . $request->directory . '.pdf';
+
                 // Generar una URL firmada para el documento
                 $documentLink = URL::signedRoute(
                     'dashboard.show-response',
-                    ['id' => $request->directory, 'item' => $request->response_file]
+                    ['id' => $request->directory, 'item' => $response_file]
                 );
 
                 // Registrar la URL generada
@@ -108,7 +109,6 @@ class MailboxController extends Controller
 
                 // Enviar el correo electrónico
                 Mail::to($request->response_email)->send(new DocumentResponseMail($documentLink, $request->directory, HelpersController::getLoggedUserEntityName()));
-
             }
 
             $documentLog = DocumentLog::create([
@@ -131,7 +131,6 @@ class MailboxController extends Controller
                 'data' => $mailbox,
                 'message' => 'Request Response Created'
             ], 200);
-
         } catch (QueryException $e) {
             // Revertir la transacción en caso de error en la consulta SQL
             DB::rollBack();
@@ -201,7 +200,9 @@ class MailboxController extends Controller
 
             // Actualizar el registro con los datos enviados en la solicitud
             $requestresponse->update($request->only([
-                'correspondence_transfer_id', 'response_content', 'response_email',
+                'correspondence_transfer_id',
+                'response_content',
+                'response_email',
                 'response_document_path'
             ]));
 
@@ -265,7 +266,6 @@ class MailboxController extends Controller
                 'data' => $requestresponse,
                 'message' => 'Request Response Deleted'
             ]);
-
         } catch (\Exception $e) {
             // Revertir la transacción en caso de cualquier otro error
             DB::rollBack();

@@ -41,14 +41,12 @@ class FilesController extends Controller
                 'message' => 'Se ha almacenado correctamente el archivo',
                 'data' => $agent
             ], Response::HTTP_OK);
-
         } catch (ValidationException $e) {
             // Manejo de errores de validación
             return response()->json([
                 'status' => 'error',
                 'message' => 'Error de validación: ' . $e->getMessage()
             ], Response::HTTP_BAD_REQUEST);
-
         } catch (Exception $e) {
             // Manejo de otros errores
             Log::error('Error al subir el archivo: ' . $e->getMessage());
@@ -87,14 +85,12 @@ class FilesController extends Controller
                 'message' => 'Se ha almacenado correctamente el archivo',
                 'data' => $agent
             ], Response::HTTP_OK);
-
         } catch (ValidationException $e) {
             // Manejo de errores de validación
             return response()->json([
                 'status' => 'error',
                 'message' => 'Error de validación: ' . $e->getMessage()
             ], Response::HTTP_BAD_REQUEST);
-
         } catch (Exception $e) {
             // Manejo de otros errores
             Log::error('Error al subir el archivo: ' . $e->getMessage());
@@ -117,15 +113,15 @@ class FilesController extends Controller
             // Preparación de la información del archivo
             $file = $request->file('filepath');
             $referenceCode = $request->input('directory');
-            $responseFile = $request->input('response_file');
-            $filename = $responseFile;
+            $extension = $file->getClientOriginalExtension();
+            $filename = 'respuesta_' . $referenceCode . '.' . $extension;
 
-            // Almacenamiento del archivo
+            // Almacenamiento del archivos
             $path = 'public/upload/' . $referenceCode . '/respuesta';
             $filePath = Storage::putFileAs($path, $file, $filename);
 
             Storage::putFileAs('/public/upload/' . $referenceCode . '/respuesta', $file, $filename);
-            $agent = 'storage/upload/' . $referenceCode . '/respuesta' . $filename;
+            $agent = 'storage/upload/' . $referenceCode . '/respuesta/' . $filename;
             $file->move('storage/upload/' . $referenceCode . '/respuesta', $filename);
 
             // Respuesta exitosa
@@ -133,14 +129,12 @@ class FilesController extends Controller
                 'message' => 'Se ha almacenado correctamente el archivo',
                 'data' => $agent
             ], Response::HTTP_OK);
-
         } catch (ValidationException $e) {
             // Manejo de errores de validación
             return response()->json([
                 'status' => 'error',
                 'message' => 'Error de validación: ' . $e->getMessage()
             ], Response::HTTP_BAD_REQUEST);
-
         } catch (Exception $e) {
             // Manejo de otros errores
             Log::error('Error al subir el archivo: ' . $e->getMessage());
@@ -177,14 +171,12 @@ class FilesController extends Controller
                 'message' => 'Se ha almacenado correctamente el archivo',
                 'data' => $agent
             ], Response::HTTP_OK);
-
         } catch (ValidationException $e) {
             // Manejo de errores de validación
             return response()->json([
                 'status' => 'error',
                 'message' => 'Error de validación: ' . $e->getMessage()
             ], Response::HTTP_BAD_REQUEST);
-
         } catch (Exception $e) {
             // Manejo de otros errores
             Log::error('Error al subir el archivo: ' . $e->getMessage());
@@ -221,14 +213,12 @@ class FilesController extends Controller
                 'message' => 'Se ha almacenado correctamente el archivo',
                 'data' => $agent
             ], Response::HTTP_OK);
-
         } catch (ValidationException $e) {
             // Manejo de errores de validación
             return response()->json([
                 'status' => 'error',
                 'message' => 'Error de validación: ' . $e->getMessage()
             ], Response::HTTP_BAD_REQUEST);
-
         } catch (Exception $e) {
             // Manejo de otros errores
             Log::error('Error al subir el archivo: ' . $e->getMessage());

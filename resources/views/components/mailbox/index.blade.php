@@ -45,7 +45,7 @@
                                                             <th>No Radicado</th>
                                                             <th>Asunto</th>
                                                             <th>Procedencia</th>
-                                                            <th>Remitente</th>
+                                                            <th>Remitente1</th>
                                                             <th></th>
                                                         </tr>
                                                     </thead>
@@ -64,7 +64,7 @@
                                                             <th>No Radicado</th>
                                                             <th>Asunto</th>
                                                             <th>Procedencia</th>
-                                                            <th>Remitente</th>
+                                                            <th>Remitente2</th>
                                                             <th></th>
                                                         </tr>
                                                     </thead>
@@ -102,9 +102,9 @@
 
             const fetchReceivedDocuments = async () => {
                 try {
-                    const office_id = localStorage.getItem('user_office_id');
+                    const entity = HTTPService.getUserData('user_office_id')
                     const response = await HTTPService.get(
-                        `/api/dashboard/correspondence-transfer/office/${office_id}`);
+                        `/api/dashboard/correspondence-transfer/office/${entity.user_office_id}`);
                     receivedDocuments = response.data || response;
                     initReceivedDataTable();
                 } catch (error) {
@@ -120,6 +120,7 @@
                     const office_id = localStorage.getItem('user_office_id');
 
                     const response = await HTTPService.get(`/api/dashboard/mailbox/office/${office_id}`);
+
                     answeredDocuments = response.data || response;
                     initAnsweredDataTable();
                 } catch (error) {
@@ -157,7 +158,7 @@
                             data: null,
                             render: (data) => `
                         <div class="table-action">
-                            <a href="javascript:void(0);" class="action-icon edit-icon" data-id="${data.id}"><i class="fas fa-envelope-open-text"></i></a>
+                            <a href="javascript:void(0);" class="action-icon edit-icon" data-id="${data.transfer_id}"><i class="fas fa-envelope-open-text"></i></a>
                         </div>`
                         }
                     ],

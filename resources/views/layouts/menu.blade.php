@@ -108,6 +108,11 @@
                     <i class="fas fa-folders"></i>
                     <span> Archivo Historico </span>
                 </a>
+                <a href="/dashboard/archivo-historico/consultas" class="side-nav-link"
+                    data-roles="ADMINISTRADOR,EMPRESA,USUARIO" data-permissions="historic.index">
+                    <i class="fas fa-folders"></i>
+                    <span> Consultas </span>
+                </a>
             </li>
             <li class="side-nav-title" data-roles="ADMINISTRADOR,EMPRESA" data-permissions="lending.index">Prestamos
                 Documentales</li>

@@ -112,7 +112,7 @@ class ReportsController extends Controller
         }
 
         // Generar el QR code
-        $qrCode = QrCode::create('http://127.0.0.1:8000/dashboard/dashboard/ticket/qr/' . $id . '/' . $id)
+        $qrCode = QrCode::create('https://sgd.gestiondocumentalgaleras.com.co/dashboard/ticket/qr/' . $id . '/' . $id)
             ->setSize(100)
             ->setMargin(0);
         $writer = new PngWriter();
@@ -296,7 +296,7 @@ class ReportsController extends Controller
             'archive' => $archive,
             'logo' => $archive->logo
         ]);
-        return $pdf->stream('Rotulo.pdf');
+        return $pdf->stream('Rotulo.pdf'); 
         //return $archive;
     }
 

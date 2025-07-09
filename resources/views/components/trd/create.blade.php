@@ -310,22 +310,18 @@
                 const newItem = document.createElement('div');
                 newItem.className = 'subseries-item row pt-3';
                 newItem.innerHTML = `
-            <div class="col-12 col-md-8">
-                <label for="name${index}" class="visually-hidden">Nombre de la Subserie</label>
-                <input type="text" class="form-control" name="subseries[${index}][name]"
-                       id="name${index}" placeholder="Nombre de la Subserie" maxlength="100"
-                       required>
-            </div>
-            <div class="col-12 col-md-2">
-                <label for="code${index}" class="visually-hidden">Código de la Subserie</label>
-                <input type="text" class="form-control" name="subseries[${index}][code]"
-                       id="code${index}" placeholder="Código de la Subserie" maxlength="10"
-                       required value="${cont}" readonly>
-            </div>
-            <div class="col-12 col-md-2">
-                <button type="button" class="btn btn-danger rounded-pill remove-subseries">Eliminar</button>
-            </div>
-        `;
+                        <div class="col-12 col-md-8">
+                            <label for="name${index}" class="visually-hidden">Nombre de la Subserie</label>
+                            <input type="text" class="form-control" name="subseries[${index}][name]" id="name${index}" placeholder="Nombre de la Subserie" maxlength="100" required>
+                        </div>
+                        <div class="col-12 col-md-2">
+                            <label for="code${index}" class="visually-hidden">Código de la Subserie</label>
+                            <input type="text" class="form-control" name="subseries[${index}][code]" id="code${index}" placeholder="Código de la Subserie" maxlength="10" required value="${cont}" readonly>
+                        </div>
+                        <div class="col-12 col-md-2">
+                            <button type="button" class="btn btn-danger rounded-pill remove-subseries">Eliminar</button>
+                        </div>
+            `;
                 container.appendChild(newItem);
                 const removeButton = newItem.querySelector('.remove-subseries');
                 removeButton.addEventListener('click', () => removeSubseries(newItem));
@@ -439,7 +435,7 @@
                     central_retention: document.querySelector(elements.central_retention).value,
                     disposal_procedure: document.querySelector(elements.observations).value,
                     documentary_types: documentaryTypes,
-                    entity_id: entityId,
+                    entity_id: entityId.entity_id,
                 };
             };
 
@@ -549,11 +545,11 @@
 
             const loadSeries = async () => {
                 try {
-                    const entityId = HTTPService.getEntityId();
-                    if (!entityId) {
+                    const userData = HTTPService.getUserData();
+                    if (!userData) {
                         return;
                     }
-                    const response = await HTTPService.get(`/api/dashboard/series/${entityId}`);
+                    const response = await HTTPService.get(`/api/dashboard/series/${userData.entity_id}`);
 
                     const seriesSelect = document.querySelector(elements.series_entity_id);
                     seriesSelect.innerHTML = '<option value="">Seleccione una serie</option>';
@@ -578,6 +574,7 @@
                 loadSeries();
 
                 const userData = HTTPService.getUserData();
+                console.log('User Data:', userData.entity_id);
 
                 // Set up event listeners
                 document.querySelector(elements.addSubseriesButton).addEventListener('click', addSubseries);

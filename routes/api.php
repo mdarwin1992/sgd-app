@@ -119,7 +119,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard/correspondence-transfer/office/{id}', [CorrespondenceTransferController::class, 'getCorrespondenceTransfer']);
     Route::get('/dashboard/mailbox/office/{id}', [MailboxController::class, 'getMailbox']);
 
-    // Mailbox routes 
+    // Mailbox routes
     Route::get('dashboard/mailbox', [MailboxController::class, 'index'])->name('api.mailbox.index');
     Route::post('dashboard/mailbox/store', [MailboxController::class, 'store'])->name('api.mailbox.store');
     Route::get('dashboard/mailbox/show/{id}', [MailboxController::class, 'show'])->name('api.mailbox.show');
@@ -170,7 +170,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('dashboard/historical-archive/update/{id}', [HistoricFileController::class, 'update'])->name('api.historical.archive.update');
     Route::delete('dashboard/historical-archive/destroy/{id}', [HistoricFileController::class, 'destroy'])->name('api.historical.archive.destroy');
 
-    //Prestamos Documentales archivo central 
+    //Prestamos Documentales archivo central
     Route::get('/dashboard/document-loan', [DocumentLoanController::class, 'index']);
     Route::post('/dashboard/document-loan', [DocumentLoanController::class, 'store']);
     Route::get('/dashboard/document-loan/{id}/central-archive', [DocumentLoanController::class, 'getLoanCentralArchive']);
@@ -195,8 +195,17 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     // Notification routes
-    Route::get('/notifications/unread/{userId}', [NotificationController::class, 'getUnreadNotifications']);
+    /*   Route::get('/notifications/unread/{userId}', [NotificationController::class, 'getUnreadNotifications']);
     Route::post('/notifications/{id}/mark-as-read', [NotificationController::class, 'markAsRead']);
+ */
+    Route::get('/notifications/unread/{userId}', [NotificationController::class, 'getUnread']);
+
+    // Ruta para marcar una como leída
+    Route::post('/notifications/{id}/mark-as-read', [NotificationController::class, 'markAsRead']);
+
+    // Ruta para limpiar todas las notificaciones de un usuario
+    Route::post('/notifications/clear-all/{userId}', [NotificationController::class, 'clearAll']);
+
 
     // Counter routes
     Route::get('/get-all-counters/{id}', [CounterController::class, 'getAllCounters']);
