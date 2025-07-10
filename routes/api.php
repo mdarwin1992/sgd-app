@@ -147,6 +147,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Central Archive routes
     Route::get('dashboard/central-archive', [CentralArchiveController::class, 'index'])->name('api.central.archive.index');
+    Route::get('dashboard/central-archive/loan', [CentralArchiveController::class, 'getCentralArchive'])->name('api.central.archive.getCentralArchive');
     Route::post('dashboard/central-archive/store', [CentralArchiveController::class, 'store'])->name('api.central.archive.store');
     Route::get('dashboard/central-archive/{id}', [CentralArchiveController::class, 'show'])->name('api.central.archive.show');
     Route::patch('dashboard/central-archive/update/{id}', [CentralArchiveController::class, 'update'])->name('api.central.archive.update');

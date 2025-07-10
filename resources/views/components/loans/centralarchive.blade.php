@@ -72,9 +72,9 @@
                                 <label for="address" class="form-label">Nor de identificación</label>
                                 <input type="text" class="form-control" id="identification" name="identification"
                                     autocomplete="off" required>
-                                <input type="hidden" class="form-control" id="central_archive_id" name="central_archive_id"
+                                <input type="text" class="form-control" id="central_archive_id" name="central_archive_id"
                                     autocomplete="off" required readonly>
-                                <input type="hidden" class="form-control" id="type_of_document_borrowed"
+                                <input type="text" class="form-control" id="type_of_document_borrowed"
                                     name="type_of_document_borrowed" value="1" autocomplete="off" required readonly>
                             </div>
                             <div class="col-md-9">
@@ -157,8 +157,8 @@
                 </div>
                 <div class="modal-footer bg-light">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    <button type="button" class="btn btn-success" data-bs-toggle="modal"
-                        data-bs-target="#info-alert-modal">Regresar Doc A.C.</button>
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" id="return_document"
+                        data-order-number="" data-bs-target="#info-alert-modal">Regresar Doc A.C.</button>
                 </div>
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
@@ -172,8 +172,18 @@
                     <div class="text-center">
                         <i class="ri-question-line h1 text-warning"></i>
                         <h4 class="mt-2">¿Está seguro?</h4>
-                        <p class="mt-3">¿Confirma que desea regresar el documento?</p>
-                        <button type="button" class="btn btn-danger my-2" id="confirm-return">Sí, devolver</button>
+                        <p class="mt-3">¿Confirma que desea regresar el documento? de Refencia <span
+                                id="reference_code"></span> </p>
+                        <div class="mb-3">
+                            <label for="document_conditions" class="form-label">Condiciones del documento</label>
+                            <textarea class="form-control" id="document_conditions" name="document_conditions"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="comments" class="form-label">Comentarios</label>
+                            <textarea class="form-control" id="comments" name="comments"></textarea>
+                        </div>
+                        <button type="button" class="btn btn-danger my-2" id="confirm-return-action">Sí,
+                            devolver</button>
                         <button type="button" class="btn btn-secondary my-2" data-bs-dismiss="modal">Cancelar</button>
                     </div>
                 </div>
@@ -189,15 +199,12 @@
 
 
         let dataTable; // Variable global para la DataTable
-
+        let currentLoanOrderNumber = null; // Variable global para almacenar el número de orden del préstamo actual
         async function fetchEntities() {
             try {
-                const response = await HTTPService.get('/api/dashboard/central-archive');
+                const response = await HTTPService.get('/api/dashboard/central-archive/loan');
                 const archives = response.data || [];
-
                 console.log(archives)
-
-
                 // Llamar a initDataTable con los datos obtenidos
                 initDataTable(archives)
             } catch (error) {
@@ -224,39 +231,37 @@
                         data: 'office.name'
                     },
                     {
-                        data: 'subseries.subseries_name'
+                        data: 'series.series_entity.series_name'
 
                     },
                     {
-                        data: null,
+                        data: 'state',
                         render: function(data, type, row) {
-                            if (!row.central_archive_loans || !row.central_archive_loans.document_loan) {
+                            if (data == null) {
                                 return `
+                                <div class="table-action">
+                                    <a href="javascript:void(0);" class="action-icon edit-icon" data-id="${row.id}" data-bs-toggle="modal" data-bs-target="#bs-example-modal-lg">
+                                        <h5><span class="badge badge-outline-success"><i class="far fa-file-pdf"></i> DISPONIBLE</span></h5>
+                                    </a>
+                                </div>
+                            `;
+                            } else {
+                                if (data == 0) {
+                                    return `
                                     <div class="table-action">
                                         <a href="javascript:void(0);" class="action-icon edit-icon" data-id="${row.id}" data-bs-toggle="modal" data-bs-target="#bs-example-modal-lg">
                                             <h5><span class="badge badge-outline-success"><i class="far fa-file-pdf"></i> DISPONIBLE</span></h5>
-                                        </a>                                   
+                                        </a>
                                     </div>
                                 `;
-                            } else {
-                                if (row.central_archive_loans.document_loan.state === 0) {
-                                    return `
-                                            <div class="table-action">
-                                                <a href="javascript:void(0);" class="action-icon edit-icon" data-id="${row.id}" data-bs-toggle="modal" data-bs-target="#bs-example-modal-lg">
-                                                    <h5><span class="badge badge-outline-success"><i class="far fa-file-pdf"></i> DISPONIBLE</span></h5>
-                                                </a>                                   
-                                            </div> 
-                                        `;
                                 } else {
-
                                     return `
-                                        <div class="table-action">                                    
-                                            <a href="javascript:void(0);" class="action-icon loan-icon" data-loan="${row.central_archive_loans.document_loans_order_number}" data-bs-toggle="modal" data-bs-target="#standard-modal">
-                                                <h5><span class="badge badge-outline-warning"><i class="far fa-file-pdf"></i> ${Helpers.verifyLoan(row.central_archive_loans.document_loan.state)}</span></h5>
-                                            </a>                                   
-                                        </div>
-                                    `;
-
+                                <div class="table-action">
+                                    <a href="javascript:void(0);" class="action-icon loan-icon" data-loan="${row.order_number}" data-bs-toggle="modal" data-bs-target="#standard-modal">
+                                        <h5><span class="badge badge-outline-warning"><i class="far fa-file-pdf"></i> ${Helpers.verifyLoan(data)}</span></h5>
+                                    </a>
+                                </div>
+                            `;
                                 }
 
                             }
@@ -320,7 +325,8 @@
             var loan = $(this).data('loan'); // Obtiene la cadena JSON del atributo data-loan
 
             try {
-                const response = await HTTPService.get(`/api/dashboard/document-loan/${loan}/central-archive`);
+                const response = await HTTPService.get(
+                    `/api/dashboard/document-loan/${loan}/central-archive`);
                 const loanData = response.data || {};
                 console.log(loanData);
 
@@ -335,11 +341,54 @@
                 $('#loan-central-archive-id').text(loanData.central_archive_loans.central_archive
                     .document_reference || 'N/A');
 
-                // Muestra el modal
-                $('#standard-modal').modal('show');
+                const numeroOrden = loanData.order_number; // Por ejemplo: "ORD2025XYZ"
+                const elemento = document.getElementById('return_document');
+                elemento.dataset.orderNumber = numeroOrden;
+                //elemento.textContent = `${numeroOrden}`;
+
+
+                //$('#standard-modal').modal('show');
             } catch (error) {
                 console.error("Error fetching loan data:", error);
             }
+        });
+
+        $(document).on('click', '#return_document', async function() {
+            // Accede al valor del atributo data-order-number del botón clickeado
+            const orderNumber = $(this).data('order-number');
+            currentLoanOrderNumber = orderNumber;
+
+            // Puedes usar orderNumber aquí para actualizar el modal o hacer tu llamada a la API
+            $('#reference_code').text(orderNumber || 'N/A');
+
+        });
+
+        $(document).on('click', '#confirm-return-action', async function() {
+
+            console.log("Regresar docuemnto")
+            console.log(currentLoanOrderNumber)
+            $('#reference_code').text(currentLoanOrderNumber || 'N/A');
+
+            let order_number = currentLoanOrderNumber;
+            let document_conditions = document.getElementById("document_conditions").value;
+            let comments = document.getElementById("comments").value;
+
+            try {
+                const response = await HTTPService.post('/api/document-loans/return', {
+                    order_number,
+                    document_conditions,
+                    comments,
+                });
+
+                Helpers.getMessage('La deboucion creada exitosamente', '/dashboard/prestamos-documental');
+
+            } catch (error) {
+                console.error('Error al almacenar ea deboucion', error);
+                alert("Hubo un error al registrar ea deboucion.");
+            }
+            s
+
+
         });
 
         // Guardar datos del cliente

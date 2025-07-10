@@ -41,14 +41,68 @@ class CentralArchiveController extends Controller
                 ],
                 'folio_number' => $archive->folio_number,
                 'third_parties' => $archive->third_parties,
+                'id' => $archive->id,
             ];
         });
 
         return response()->json([
             'data' => $archives,
+
             'message' => 'Archivos recuperados correctamente'
         ], 200);
     }
+
+    public function getCentralArchive()
+    {
+
+        $centralArchive = DB::table('central_archive')
+            ->select(
+                'central_archive.id as central_archive_id',
+                'central_archive.filed',
+                'central_archive.document_reference',
+                'central_archive.folio_number',
+                'central_archive.third_parties',
+                'office.id as office_id',
+                'office.name as office_name',
+                'series_entity.series_name',
+                'document_loans.order_number',
+                'document_loans.state'
+            )
+            ->leftJoin('office', 'central_archive.office_id', '=', 'office.id')
+            ->leftJoin('central_archive_loans', 'central_archive.id', '=', 'central_archive_loans.central_archive_id')
+            ->leftJoin('document_loans', 'central_archive_loans.document_loans_order_number', '=', 'document_loans.order_number')
+            ->leftJoin('series', 'central_archive.series_id', '=', 'series.id')
+            ->leftJoin('series_entity', 'series.series_entity_id', '=', 'series_entity.id')
+
+            ->get();
+
+        // Aplicamos el map para transformar la estructura de los datos
+        $mappedCentralArchive = $centralArchive->map(function ($item) {
+            return [
+                'id' => $item->central_archive_id,
+                'filed' => $item->filed,
+                'document_reference' => $item->document_reference,
+                'folio_number' => $item->folio_number,
+                'terceros' => $item->third_parties,
+                'office' => [
+                    'name' => $item->office_name,
+                ],
+                "series" => [
+                    "series_entity" => [
+                        "series_name" => $item->series_name,
+                    ]
+                ],
+                'state' => $item->state,
+                'order_number' => $item->order_number,
+            ];
+        });
+
+        return response()->json([
+            'data' => $mappedCentralArchive, // Ahora devolvemos los datos mapeados
+            'message' => 'Archivos recuperados correctamente'
+        ], 200);
+    }
+
     /**
      * Store a newly created resource in storage.
      *

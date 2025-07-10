@@ -16,7 +16,11 @@ class Office extends Model
     protected $table = "office";
 
     protected $fillable = [
-        'code', 'name', 'department_id', 'user_id', 'status'
+        'code',
+        'name',
+        'department_id',
+        'user_id',
+        'status'
     ];
 
     protected $casts = [
@@ -39,8 +43,8 @@ class Office extends Model
         return $this->belongsTo(User::class);
     }
 
-     public function user(): BelongsTo
+    public function Series(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Series::class);
     }
 }

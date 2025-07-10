@@ -296,7 +296,7 @@ class ReportsController extends Controller
             'archive' => $archive,
             'logo' => $archive->logo
         ]);
-        return $pdf->stream('Rotulo.pdf'); 
+        return $pdf->stream('Rotulo.pdf');
         //return $archive;
     }
 
@@ -315,15 +315,57 @@ class ReportsController extends Controller
     public function generateReceipt($orderNumber)
     {
         // Obtener los datos del préstamo de documento
-        $documentLoan = DocumentLoan::where('order_number', $orderNumber)->firstOrFail();
+        $documentLoan = DocumentLoan::where('order_number', $orderNumber)
+            ->select(
+                'entity.nit',
+                'entity.name as company_name',
+                'entity.verification_digit',
+                'entity.address',
+                'entity.phone',
+                'entity.email',
+                'registration_date',
+                'order_number',
+                'identification',
+                'names',
+                'return_date',
+                'state',
+                'type_of_document_borrowed',
+                'office.name as office_name',
+                'office.code',
+                'department.name as department_name',
+                'department.code',
+                'central_archive.filed',
+                'central_archive.document_reference',
+                'central_archive.series_id',
+                'central_archive.subseries_id',
+                'central_archive.folder_year',
+                'central_archive.tray',
+                'central_archive.box_number',
+                'central_archive.folio_number',
+                'central_archive.support',
+                'central_archive.main_conservation_medium',
+                'central_archive.preserved_in',
+                'central_archive.third_parties',
+                'central_archive.shelf_number',
+            )
+            ->leftJoin('entity', 'document_loans.entity_id', '=', 'entity.id')
+            ->leftJoin('office', 'document_loans.office_id', '=', 'office.id')
+            ->leftJoin('department', 'office.department_id', '=', 'department.id')
+            ->leftJoin('central_archive_loans', 'document_loans.order_number', '=', 'central_archive_loans.document_loans_order_number')
+            ->leftJoin('central_archive', 'central_archive_loans.central_archive_id', '=', 'central_archive.id')
+            ->firstOrFail();
 
         // Generar el HTML para el PDF
         $html = view('reports.ticket.receipt', compact('documentLoan'))->render();
 
         // Configurar el tamaño del papel para formato tirilla
-        $pdf = PDF::loadHTML($html)->setPaper([0, 0, 302, 567]);
+        //$pdf = PDF::loadHTML($html)->setPaper([0, 0, 350, 1000]);
+        $pdf = PDF::loadHTML($html)->setPaper([0, 0, 350, 760]);
+
+
 
         // Descargar el PDF
+        //return $documentLoan;
         return $pdf->stream('receipt_' . $orderNumber . '.pdf');
     }
 

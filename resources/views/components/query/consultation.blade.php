@@ -568,7 +568,8 @@
                         seriesSelect.empty().append('<option value="">Seleccione una serie</option>');
                         series.forEach(s => {
                             seriesSelect.append(
-                                `<option value="${s.series_id}">${s.code} - ${s.name}</option>`);
+                                `<option value="${s.series_id}">${s.code} - ${s.name} - ${s.office}</option>`
+                                );
                         });
                     } catch (error) {
                         console.error('Error fetching series:', error);

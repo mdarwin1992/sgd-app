@@ -129,7 +129,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cerrar</button>
-                    <a href="#" class="btn btn-primary" id="ticket" target="_blank">Regresar Doc</a>
+                    <a href="#" class="btn btn-primary" id="ticket" target="_blank">Imprimir comprovante</a>
                 </div>
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
@@ -141,7 +141,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="standard-modalLabel">Regresar documento prestado</h4>
+                    <h4 class="modal-title" id="standard-modalLabel">Devolución de Documento en Préstamo</h4>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
                 </div>
                 <div class="modal-body">
@@ -163,8 +163,10 @@
                         </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Save changes</button>
+                    <button type="button" class="btn btn-primary rounded-pill btn-tool"
+                        data-bs-dismiss="modal">Cerrar</button>
+                    <button type="submit" class="btn btn-success rounded-pill"> <i class="fas fa-check me-1"></i>
+                        Guardar</button>
                 </div>
                 </form>
             </div><!-- /.modal-content -->
@@ -402,7 +404,7 @@
                     comments,
                 });
 
-                // Helpers.getMessage('La deboucion creada exitosamente', '/dashboard/prestamos-documental');
+                Helpers.getMessage('La deboucion creada exitosamente', '/dashboard/prestamos-documental');
 
             } catch (error) {
                 console.error('Error al almacenar ea deboucion', error);

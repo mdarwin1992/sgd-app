@@ -328,10 +328,12 @@ class RetencionDocumentalController extends Controller
     public function getUsedSeries()
     {
         $usedSeries = Series::whereHas('centralArchives')
-            ->with('seriesEntity:id,series_name',
+            ->with(
+                'seriesEntity:id,series_name',
+                'office'
             )
-            ->select('series.id', 'series.series_entity_id', 'series.series_code')
-            //->addSelect(DB::raw('(SELECT series_id FROM central_archive WHERE central_archive.series_id = series.id LIMIT 1) as central_archive_series_id'))
+            ->select('series.id', 'series.series_entity_id', 'series.series_code', 'series.office_id')
+            ->addSelect(DB::raw('(SELECT series_id FROM central_archive WHERE central_archive.series_id = series.id LIMIT 1) as central_archive_series_id'))
             ->get()
             ->map(function ($series) {
                 return [
@@ -339,6 +341,7 @@ class RetencionDocumentalController extends Controller
                     'name' => $series->seriesEntity->series_name,
                     'code' => $series->series_code,
                     'series_id' => $series->central_archive_series_id,
+                    'office' => $series->office->name,
                 ];
             });
 
