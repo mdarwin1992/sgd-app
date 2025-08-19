@@ -116,7 +116,7 @@ class OfficeController extends Controller
     public function series($id)
     {
         //
-        $series = DB::table('office')->select('series.id', 'series_entity.series_name')
+        $series = DB::table('office')->select('series.id', 'series_entity.series_name', 'series.series_entity_id')
             ->join('series', 'office.id', '=', 'series.office_id')
             ->join('series_entity', 'series.series_entity_id', '=', 'series_entity.id')
             ->where('office.id', $id)->get();
@@ -132,9 +132,11 @@ class OfficeController extends Controller
     public function subseries($id)
     {
         //
-        $subseries = DB::table('subseries')->select('subseries.id', 'subseries.subseries_name')
-            ->join('series', 'subseries.series_id', '=', 'series.id')
-            ->where('series.id', $id)->get();
+
+        $subseries = DB::table('subseries')->select('subseries.id', 'subseries.subseries_name', 'subseries.subseries_code')
+            ->join('series_entity', 'subseries.series_id', '=', 'series_entity.id')
+            ->where('subseries.series_id', $id)->get();
+
         if (!$subseries) {
             return response()->json(['message' => 'Subseries not found'], 404);
         }

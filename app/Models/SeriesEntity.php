@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class SeriesEntity extends Model
 {
@@ -25,5 +26,11 @@ class SeriesEntity extends Model
     public function series()
     {
         return $this->hasMany(Series::class);
+    }
+
+    public function subseries(): HasMany
+    {
+        // Apunta al modelo Subseries y especifica la clave foránea 'series_id'.
+        return $this->hasMany(Subseries::class, 'series_id', 'id');
     }
 }

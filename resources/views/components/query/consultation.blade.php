@@ -293,6 +293,19 @@
                         }
                     }
                 });
+
+                $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+                    // Obtén el texto ingresado en el campo de búsqueda
+                    const input = $('.dataTables_filter input').val().replace(/-/g, '').toLowerCase();
+
+                    // Accede a la columna 'filed' (segunda columna = índice 1)
+                    const codigo = data[1] ? data[1].replace(/-/g, '').toLowerCase() : '';
+
+                    // Verifica si el texto normalizado coincide
+                    return codigo.includes(input);
+                });
+
+
             };
 
             const toggleDocument = (checkbox, filed) => {
@@ -569,7 +582,7 @@
                         series.forEach(s => {
                             seriesSelect.append(
                                 `<option value="${s.series_id}">${s.code} - ${s.name} - ${s.office}</option>`
-                                );
+                            );
                         });
                     } catch (error) {
                         console.error('Error fetching series:', error);

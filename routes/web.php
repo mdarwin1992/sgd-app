@@ -83,6 +83,14 @@ Route::get('dashboard/oficina/actualizar/{id}', function () {
 
 /** ########################################################################################## */
 
+/** Rutas del Configuracion - tabla de Series */
+Route::get('/dashboard/series', function () {
+    return view('components.series.index');
+})->name('trd.create');
+
+
+/** ########################################################################################## */
+
 /** Rutas del Configuracion - tabla de retencion documental */
 Route::get('/dashboard/tabla-de-retencion-documental', function () {
     return view('components.trd.create');

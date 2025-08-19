@@ -22,8 +22,8 @@
                                         <div class="col-sm-7">
                                             <div class="text-sm-end">
                                                 <a href="departamento/crear"
-                                                   class="btn btn-primary rounded-pill text-white me-0 btn-sm"><i
-                                                        class="icon-download "></i> Crear Departamento</a>
+                                                   class="btn btn-primary rounded-pill text-white me-0 btn-sm">
+                                                   <i class="icon-download "></i> Crear Departamento</a>
                                             </div>
                                         </div><!-- end col-->
                                     </div>

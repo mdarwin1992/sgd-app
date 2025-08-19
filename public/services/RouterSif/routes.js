@@ -175,6 +175,16 @@ export const routes = [
             permissions: ["offices.update"],
         },
     },
+    {
+        path: "/dashboard/series",
+        component: "dashboard",
+        name: "Crear Series",
+        meta: {
+            requiresAuth: true,
+            roles: ["ADMINISTRADOR", "EMPRESA"],
+            permissions: ["offices.update"],
+        },
+    },
 
     // Rutas de ventanilla única y gestión de correspondencia
     {

@@ -150,6 +150,10 @@
                                 href="/dashboard/oficinas">Oficinas</a>
                         </li>
                         <li id="rutas">
+                            <a data-roles="ADMINISTRADOR,EMPRESA,USUARIO" data-permissions="offices.index"
+                                href="/dashboard/series">Series</a>
+                        </li>
+                        <li id="rutas">
                             <a data-roles="ADMINISTRADOR,EMPRESA,USUARIO" data-permissions="trd.create"
                                 href="/dashboard/tabla-de-retencion-documental">TRD</a>
                         </li>

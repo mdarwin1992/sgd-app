@@ -252,7 +252,7 @@
                     officesResponse.data.forEach(office => {
                         const option = document.createElement('option');
                         option.value = office.id;
-                        option.textContent = office.name;
+                        option.textContent = office.id + ' - ' + office.name;
                         officeSelect.appendChild(option);
                     });
                 } catch (error) {
@@ -281,8 +281,8 @@
                     seriesSelect.innerHTML = '<option value="">Seleccione una serie</option>';
                     seriesResponse.data.forEach(serie => {
                         const option = document.createElement('option');
-                        option.value = serie.id;
-                        option.textContent = serie.id + ' - ' + serie.series_name;
+                        option.value = serie.series_entity_id;
+                        option.textContent = serie.series_entity_id + ' - ' + serie.series_name;
                         seriesSelect.appendChild(option);
                     });
                     seriesSelect.disabled = false;
@@ -295,12 +295,16 @@
                 try {
                     const subseriesResponse = await HTTPService.get(
                         `/api/dashboard/series/${seriesId}/subseries`);
+                    console.log(subseriesResponse);
                     const subseriesSelect = document.querySelector(elements.subseries_id);
+
                     subseriesSelect.innerHTML = '<option value="">Seleccione una subserie</option>';
+
                     subseriesResponse.data.forEach(subserie => {
                         const option = document.createElement('option');
                         option.value = subserie.id;
-                        option.textContent = subserie.id + ' - ' + subserie.subseries_name;
+                        option.textContent = subserie.id + ' - ' + subserie.subseries_code + ' - ' +
+                            subserie.subseries_name;
                         subseriesSelect.appendChild(option);
                     });
                     subseriesSelect.disabled = false;

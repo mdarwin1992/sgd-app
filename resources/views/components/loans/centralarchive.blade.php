@@ -386,7 +386,7 @@
                 console.error('Error al almacenar ea deboucion', error);
                 alert("Hubo un error al registrar ea deboucion.");
             }
-            s
+
 
 
         });

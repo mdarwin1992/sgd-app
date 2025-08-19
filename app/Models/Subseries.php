@@ -19,4 +19,11 @@ class Subseries extends Model
     {
         return $this->belongsTo(Series::class);
     }
+
+
+    public function seriesEntity(): BelongsTo
+    {
+        // Apunta al modelo SeriesEntity usando la clave foránea 'series_id'.
+        return $this->belongsTo(SeriesEntity::class, 'series_id', 'id');
+    }
 }

@@ -51,13 +51,9 @@ class RetencionDocumentalController extends Controller
                 'office_id' => 'required',
                 'series_entity_id' => 'required',
                 'series_code' => 'required|string',
-                'subseries' => 'array',
-                'subseries.*.name' => 'required|string|max:100',
-                'subseries.*.code' => 'required|string|max:10',
                 'administrative_retention' => 'required|integer',
                 'central_retention' => 'required|integer',
                 'disposition_type' => 'required|array',
-                'disposition_type.*' => 'required',
                 'disposal_procedure' => 'nullable|string',
                 'documentary_types' => 'required|array',
                 'documentary_types.*' => 'required',
@@ -66,23 +62,13 @@ class RetencionDocumentalController extends Controller
 
             DB::beginTransaction();
 
+
             // Crear la serie documental
             $series = Series::create([
                 'office_id' => $validatedData['office_id'],
                 'series_entity_id' => $validatedData['series_entity_id'],
                 'series_code' => $validatedData['series_code'],
             ]);
-
-            // Crear las subseries
-            if (!empty($validatedData['subseries'])) {
-                foreach ($validatedData['subseries'] as $subseries) {
-                    Subseries::create([
-                        'series_id' => $series->id,
-                        'subseries_name' => $subseries['name'],
-                        'subseries_code' => $subseries['code'],
-                    ]);
-                }
-            }
 
             // Crear la retención
             Retention::create([
@@ -109,61 +95,6 @@ class RetencionDocumentalController extends Controller
             }
 
 
-            $counter = Counter::where('series_entity_id', $validatedData['series_entity_id'])
-                ->latest()
-                ->first();
-
-            if ($counter) {
-                if (is_null($counter->parent_count) && is_null($counter->child_count)) {
-                    // Actualizar ambos parent_count y child_count si ambos son nulos
-                    $lastSeries = DB::table('series')->select('series_code')
-                        ->orderBy('id', 'desc')
-                        ->first();
-
-                    $lastconus = $lastSeries->series_code;
-
-                    // Si parent_count y child_count no son nulos, solo actualiza child_count
-                    $lastSubseries = DB::table('subseries')->select('subseries_code')
-                        ->join('series', 'subseries.series_id', '=', 'series.id')
-                        ->where('series_entity_id', '=', $validatedData['series_entity_id'])
-                        ->orderBy('subseries.id', 'desc')
-                        ->first();
-
-                    $conus = $lastSubseries->subseries_code + 1;
-
-                    DB::table('counters')
-                        ->where('series_entity_id', $validatedData['series_entity_id'])
-                        ->update([
-                            'parent_count' => $lastconus,
-                            'child_count' => $conus,
-                        ]);
-                } else {
-                    // Si parent_count y child_count no son nulos, solo actualiza child_count
-                    $lastSubseries = DB::table('subseries')->select('subseries_code')
-                        ->join('series', 'subseries.series_id', '=', 'series.id')
-                        ->where('series_entity_id', '=', $validatedData['series_entity_id'])
-                        ->orderBy('subseries.id', 'desc')
-                        ->first();
-
-                    $conus = $lastSubseries->subseries_code + 1;
-
-                    DB::table('counters')
-                        ->where('series_entity_id', $validatedData['series_entity_id'])
-                        ->update([
-                            'child_count' => $conus,
-                        ]);
-                }
-            } else {
-                // Manejar el caso en que no se encuentra ningún counter
-                DB::table('counters')
-                    ->insert([
-                        'series_entity_id' => $validatedData['series_entity_id'],
-                        'parent_count' => 1,
-                        'child_count' => 1,
-                    ]);
-            }
-
-
             DB::commit();
 
             // Cargar las relaciones para la respuesta
@@ -171,7 +102,7 @@ class RetencionDocumentalController extends Controller
 
             return response()->json([
                 'message' => 'Serie Documental creada exitosamente',
-                'series' => $counter
+                'series' => $series
             ], 201);
         } catch (ValidationException $e) {
             DB::rollBack();
@@ -196,13 +127,9 @@ class RetencionDocumentalController extends Controller
             'records' => 'required|array',
             'records.*.office_id' => 'required',
             'records.*.series_entity_id' => 'required',
-            'records.*.series_name' => 'required|string', // Agregué esta regla que faltaba en tu original
             'records.*.series_code' => 'required|string',
-            'records.*.subseries' => 'present|array',
-            'records.*.subseries.*.name' => 'required|string|max:100',
-            'records.*.subseries.*.code' => 'required|string|max:10',
-            'records.*.administrative_retention' => 'required|integer',
-            'records.*.central_retention' => 'required|integer',
+            'records.*.administrative_retention' => 'required',
+            'records.*.central_retention' => 'required',
             'records.*.disposition_type' => 'required|array',
             'records.*.documentary_types' => 'required|array',
             'records.*.entity_id' => 'required',
@@ -218,8 +145,7 @@ class RetencionDocumentalController extends Controller
             ], 422);
         }
 
-        $validatedData = $validator->validated();
-        $records = $validatedData['records'];
+        $records = $validator->validated()['records'];
 
         DB::beginTransaction();
 
@@ -230,26 +156,12 @@ class RetencionDocumentalController extends Controller
             // 2. Iterar sobre cada registro del lote
             foreach ($records as $recordData) {
 
-                // --- INICIO DE LA LÓGICA ADAPTADA DE TU MÉTODO 'store' ---
-
                 // Crear la serie documental
                 $series = Series::create([
                     'office_id' => $recordData['office_id'],
                     'series_entity_id' => $recordData['series_entity_id'],
-                    'series_name' => $recordData['series_name'], // Usando el campo 'series_name'
                     'series_code' => $recordData['series_code'],
                 ]);
-
-                // Crear las subseries
-                if (!empty($recordData['subseries'])) {
-                    foreach ($recordData['subseries'] as $subseries) {
-                        Subseries::create([
-                            'series_id' => $series->id,
-                            'subseries_name' => $subseries['name'],
-                            'subseries_code' => $subseries['code'],
-                        ]);
-                    }
-                }
 
                 // Crear la retención
                 Retention::create([
@@ -259,54 +171,23 @@ class RetencionDocumentalController extends Controller
                 ]);
 
                 // Crear la disposición final
-                if (!empty($recordData['disposition_type'])) {
-                    foreach ($recordData['disposition_type'] as $dispositionType) {
-                        FinalDisposition::create([
-                            'series_id' => $series->id,
-                            'disposition_type' => $dispositionType,
-                            'disposal_procedure' => $recordData['disposal_procedure'] ?? null,
-                        ]);
-                    }
+                foreach ($recordData['disposition_type'] as $dispositionType) {
+                    FinalDisposition::create([
+                        'series_id' => $series->id,
+                        'disposition_type' => $dispositionType,
+                        'disposal_procedure' => $recordData['disposal_procedure'] ?? null,
+                    ]);
                 }
 
                 // Crear los tipos documentales
-                if (!empty($recordData['documentary_types'])) {
-                    foreach ($recordData['documentary_types'] as $documentType) {
-                        DocumentaryType::create([
-                            'series_id' => $series->id,
-                            'document_name' => $documentType,
-                        ]);
-                    }
+                foreach ($recordData['documentary_types'] as $documentType) {
+                    DocumentaryType::create([
+                        'series_id' => $series->id,
+                        'document_name' => $documentType,
+                    ]);
                 }
 
-                $createdSeriesList[] = $series->load(['subseries', 'retention', 'finalDisposition', 'documentaryTypes']);
-
-                // --- FIN DE LA LÓGICA ADAPTADA ---
-            }
-
-            // 3. Lógica del contador (actualizada para lote)
-            // La lógica del contador original es compleja para un lote.
-            // Una aproximación más simple para un lote sería incrementar los contadores existentes
-            // con la cantidad de series y subseries creadas.
-            // **NOTA:** La lógica original del contador debe ser repensada para funcionar correctamente con lotes.
-            // La siguiente es una sugerencia simplificada.
-
-            $firstRecord = $records[0];
-            $totalSubseries = 0;
-            foreach ($records as $rec) {
-                $totalSubseries += count($rec['subseries']);
-            }
-
-            $counter = Counter::where('series_entity_id', $firstRecord['series_entity_id'])->first();
-            if ($counter) {
-                $counter->increment('parent_count', $recordCount);
-                $counter->increment('child_count', $totalSubseries);
-            } else {
-                Counter::create([
-                    'series_entity_id' => $firstRecord['series_entity_id'],
-                    'parent_count' => $recordCount,
-                    'child_count' => $totalSubseries,
-                ]);
+                $createdSeriesList[] = $series->load(['retention', 'finalDisposition', 'documentaryTypes']);
             }
 
             DB::commit();
@@ -315,11 +196,15 @@ class RetencionDocumentalController extends Controller
                 'message' => "{$recordCount} Series Documentales creadas exitosamente",
                 'data' => $createdSeriesList
             ], 201);
+
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error al crear lote de Series Documentales: ' . $e->getMessage() . ' en la línea ' . $e->getLine());
+            Log::error('Error al crear lote de Series Documentales: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return response()->json([
-                'message' => 'Ocurrió un error al crear el lote de Series Documentales',
+                'message' => 'Ocurrió un error al procesar el lote.',
                 'error' => $e->getMessage()
             ], 500);
         }

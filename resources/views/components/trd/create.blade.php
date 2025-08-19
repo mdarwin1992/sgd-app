@@ -1,7 +1,8 @@
 @extends('layouts.app')
-@section('title', 'Crear Series Documentales')
+@section('title', 'Crear Serie Documental')
 @section('content')
     <div class="dashboard">
+        {{-- El permiso se mantiene para controlar el acceso a esta vista --}}
         <div data-permissions="trd.create">
             <div class="row pt-3">
                 <div class="col-xxl-12">
@@ -11,152 +12,110 @@
                                 <div class="card-body">
                                     <h4 class="header-title">Crear Serie Documental</h4>
                                     <h5 class="text-muted fw-normal mt-0 mb-3 text-truncate">
-                                        Crear una nueva Serie Documental para una oficina específica
+                                        Asigne retención y disposición a una serie para una oficina específica.
                                     </h5>
+
+                                    {{-- Contenedor para mostrar errores de validación o del servidor --}}
                                     <div id="error-container" class="alert alert-danger" style="display: none;"></div>
+
                                     <form id="seriesForm" method="POST">
-                                        <div class="row mb-2">
-                                            <div class="col-md-4 mb-3">
-                                                <label for="office_id">Oficina</label>
+                                        {{-- Fila 1: Oficina, Serie y Código --}}
+                                        <div class="row mb-3">
+                                            <div class="col-md-4">
+                                                <label for="office_id" class="form-label">Oficina Productora</label>
                                                 <select name="office_id" id="office_id" class="form-control" required>
+                                                    <option value="">Cargando oficinas...</option>
                                                 </select>
                                             </div>
                                             <div class="col-md-4">
-                                                <label for="series_entity_id">Nombre de la Serie</label>
+                                                <label for="series_entity_id" class="form-label">Nombre de la Serie</label>
                                                 <select name="series_entity_id" id="series_entity_id" class="form-control"
                                                     required>
+                                                    <option value="">Seleccione una serie</option>
                                                 </select>
                                             </div>
-                                            <div class="col-md-2 mb-3">
-                                                <label for="series_code">Código de la Serie</label>
+                                            <div class="col-md-4">
+                                                <label for="administrative_retention" class="form-label">Retención
+                                                    en Archivo de Gestión (años)</label>
+                                                <input type="number" class="form-control" id="administrative_retention"
+                                                    name="administrative_retention" required min="0"
+                                                    autocomplete="off">
                                                 <input type="text" class="form-control" id="series_code"
-                                                    name="series_code" required maxlength="10" autocomplete="off" readonly>
-                                            </div>
-                                            <div class="col-md-2">
-                                                <button type="button" data-permissions="entityseries.create"
-                                                    class="btn btn-secondary rounded-pill btn-sm mt-3 ml"
-                                                    data-bs-toggle="modal" data-bs-target="#centermodal">Agregar Series
-                                                </button>
+                                                    name="series_code" required maxlength="10" autocomplete="off" readonly
+                                                    placeholder="Se genera al seleccionar la serie">
                                             </div>
                                         </div>
-                                        <h6>Subseries</h6>
-                                        <div class="row">
-                                            <div class="col-12 col-md-8">
-                                                <input type="text" class="form-control" name="subseries[0][name]"
-                                                    id="name" placeholder="Nombre de la Subserie" maxlength="100"
-                                                    required autocomplete="off">
-                                            </div>
-                                            <div class="col-12 col-md-2">
-                                                <input type="text" class="form-control" name="subseries[0][code]"
-                                                    id="code" placeholder="Código de la Subserie" maxlength="10"
-                                                    required autocomplete="off" readonly>
-                                            </div>
-                                            <div class="col-12 col-md-2">
-                                                <button type="button" id="add-subseries"
-                                                    class="btn btn-secondary rounded-pill btn-sm mt-0 ml">
-                                                    Agregar
-                                                    Subserie
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div id="subseries-container">
-                                            <div class="subseries-item">
 
-                                            </div>
-                                        </div>
+                                        {{-- Fila 2: Retención y Disposición Final --}}
                                         <div class="row mb-3">
-                                            <div class="col-12 col-md-6">
-                                                <h6>Retención</h6>
-                                                <div class="row">
-                                                    <div class="col-md-6 mb-6">
-                                                        <label for="administrative_retention">Retención Administrativa
-                                                            (en años)</label>
-                                                        <input type="text" class="form-control"
-                                                            id="administrative_retention" name="administrative_retention"
-                                                            required maxlength="10" autocomplete="off">
+                                            <div class="col-md-2">
+                                                <label for="central_retention" class="form-label">Tiempos de Retención
+                                                    (años)</label>
+                                                <input type="number" class="form-control" id="central_retention"
+                                                    name="central_retention" required min="0" autocomplete="off">
+                                            </div>
+                                            <div class="col-12 col-md-5">
+                                                <span>Disposición Final</span>
+                                                <div class="mt-0 pt-3">
+                                                    <div class="form-check form-check-inline">
+                                                        <input type="checkbox" class="form-check-input" id="disp_ct"
+                                                            name="disposition_type[]" value="CT">
+                                                        <label class="form-check-label" for="disp_ct">Conservación
+                                                            Total</label>
                                                     </div>
-                                                    <div class="col-md-6 mb-6">
-                                                        <label for="central_retention">Retención Central (en
-                                                            años</label>
-                                                        <input type="text" class="form-control" id="central_retention"
-                                                            name="central_retention" required maxlength="10"
-                                                            autocomplete="off">
+                                                    <div class="form-check form-check-inline">
+                                                        <input type="checkbox" class="form-check-input" id="disp_e"
+                                                            name="disposition_type[]" value="E">
+                                                        <label class="form-check-label" for="disp_e">Eliminación</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input type="checkbox" class="form-check-input" id="disp_s"
+                                                            name="disposition_type[]" value="S">
+                                                        <label class="form-check-label" for="disp_s">Selección</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input type="checkbox" class="form-check-input" id="disp_m"
+                                                            name="disposition_type[]" value="M">
+                                                        <label class="form-check-label"
+                                                            for="disp_m">Microfilmación</label>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="col-12 col-md-6">
-                                                <h6>Disposición Final</h6>
-                                                <div class="row">
-                                                    <div class="col-md-12 mb-3">
-                                                        <div class="mt-2">
-                                                            <div class="form-check form-check-inline">
-                                                                <input type="checkbox" class="form-check-input"
-                                                                    id="disposition_type" name="disposition_type"
-                                                                    value="CT">
-                                                                <label class="form-check-label"
-                                                                    for="disposition_type">Conservación
-                                                                    Total</label>
-                                                            </div>
-                                                            <div class="form-check form-check-inline">
-                                                                <input type="checkbox" class="form-check-input"
-                                                                    id="disposition_type" name="disposition_type"
-                                                                    value="E">
-                                                                <label class="form-check-label"
-                                                                    for="disposition_type">Eliminación</label>
-                                                            </div>
-                                                            <div class="form-check form-check-inline">
-                                                                <input type="checkbox" class="form-check-input"
-                                                                    id="disposition_type" name="disposition_type"
-                                                                    value="S">
-                                                                <label class="form-check-label"
-                                                                    for="disposition_type">Selección</label>
-                                                            </div>
-                                                            <div class="form-check form-check-inline">
-                                                                <input type="checkbox" class="form-check-input"
-                                                                    id="disposition_type" name="disposition_type"
-                                                                    value="M">
-                                                                <label class="form-check-label"
-                                                                    for="disposition_type">Microfilmacion</label>
-                                                            </div>
-                                                        </div>
+                                            <div class="col-md-5">
+                                                <span>Soporte del Documento</span>
+                                                <div class="mt-0 pt-3">
+                                                    <div class="form-check form-check-inline">
+                                                        <input type="checkbox" class="form-check-input" id="doc_p"
+                                                            name="documentary_types[]" value="P">
+                                                        <label class="form-check-label" for="doc_p">Papel</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input type="checkbox" class="form-check-input" id="doc_el"
+                                                            name="documentary_types[]" value="EL">
+                                                        <label class="form-check-label" for="doc_el">Electrónico</label>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
+
+                                        {{-- Fila 3: Soportes y Observaciones --}}
                                         <div class="row mb-3">
                                             <div class="col-md-12">
-                                                <label for="central_retention">Observaciones</label>
-                                                <textarea class="form-control" id="observations" rows="3" name="observations"></textarea>
+                                                <label for="observations" class="form-label">Procedimiento /
+                                                    Observaciones</label>
+                                                <textarea class="form-control" id="observations" rows="3" name="observations"
+                                                    placeholder="Describa el procedimiento de disposición final y otras observaciones."></textarea>
                                             </div>
                                         </div>
-                                        <h6>Tipos Documentales</h6>
-                                        <div class="row">
-                                            <div class="col-md-12 mb-3">
-                                                <div class="mt-2">
-                                                    <div class="form-check form-check-inline">
-                                                        <input type="checkbox" class="form-check-input"
-                                                            id="documentary_types" name="documentary_types"
-                                                            value="P">
-                                                        <label class="form-check-label"
-                                                            for="documentary_types">Papel</label>
-                                                    </div>
-                                                    <div class="form-check form-check-inline">
-                                                        <input type="checkbox" class="form-check-input"
-                                                            id="documentary_types" name="documentary_types"
-                                                            value="EL">
-                                                        <label class="form-check-label"
-                                                            for="documentary_types">Electrónico </label>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+
+                                        {{-- Botones de Acción --}}
                                         <div class="d-flex justify-content-end mt-4">
-                                            <a href="/dashboard" class="btn btn-primary rounded-pill btn-tool me-2">
+                                            <a href="{{ url()->previous() }}" class="btn btn-light rounded-pill me-2">
                                                 <i class="fas fa-times me-1"></i> Cancelar
                                             </a>
                                             <button type="submit" class="btn btn-success rounded-pill"
                                                 id="submitButton">
-                                                <i class="fas fa-check me-1"></i> Guardar
+                                                <i class="fas fa-check me-1"></i> Guardar Serie Documental
                                             </button>
                                         </div>
                                     </form>
@@ -168,437 +127,168 @@
             </div>
         </div>
     </div>
-    <!-- Bottom modal -->
-    <div id="centermodal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="topModalLabel">Crear Serie</h4>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
-                </div>
-                <form name="formSeries" id="formSeries" method="POST">
-                    <div class="modal-body">
-                        <div class="row mb-2">
-                            <div class="col-md-12">
-                                <label for="series_name">Nombre de la Serie</label>
-                                <input type="hidden" class="form-control" name="entity_id" id="entity_id" required
-                                    autocomplete="off" readonly>
-                                <input type="text" class="form-control" name="series_name" id="series_name" required
-                                    autocomplete="off">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-light rounded-pill" data-bs-dismiss="modal">Salir</button>
-                        <button type="button" id="BtnFormSeries" class="btn btn-primary rounded-pill">Guardar</button>
-                    </div>
-                </form>
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
-    <!-- Center modal -->
 @endsection
+
 @section('scripts')
     <script type="module">
         import HTTPService from '/services/httpService/HTTPService.js';
         import Helpers from '/services/httpService/Helpers.js';
 
-        const TrdCreate = (() => {
-            // Private variables
-            let isSubmitting = false;
-            let offices = [];
-            let counter = null;
-            let selectedOffice = null;
-
-            const elements = {
-                seriesForm: '#seriesForm',
-                formSeries: '#formSeries',
-                code: '#code',
-                office_id: '#office_id',
-                series_entity_id: '#series_entity_id',
-                series_code: '#series_code',
-                administrative_retention: '#administrative_retention',
-                central_retention: '#central_retention',
-                subseriesContainer: '#subseries-container',
-                observations: '#observations',
-                addSubseriesButton: '#add-subseries',
-                entityId: '#entity_id',
-                seriesName: '#series_name',
-                submitButton: '#submitButton',
-                BtnFormSeries: '#BtnFormSeries'
-            };
-
-            // Private methods
-            const loadCounter = async (id) => {
-                const seriesCodeElement = document.querySelector(elements.series_code);
-                const codeElement = document.querySelector(elements.code);
-
-                if (!seriesCodeElement || !codeElement) {
-                    console.error('No se encontraron los elementos series_code o code');
-                    return;
-                }
-
-                try {
-                    const counters = await HTTPService.get(`/api/get-all-counters/${id}`);
-
-
-                    /*  if (Array.isArray(counters.data) && counters.data.length === 0) {
-                        seriesCodeElement.value = '1';
-                        codeElement.value = '1';
-                    } else {
-                        const firstCounter = counters.data[0];
-                        if (firstCounter.parent_count === null && firstCounter.max_child === null) {
-                            seriesCodeElement.value = (counters.lastCounters.parent_count + 1).toString();
-                            codeElement.value = '1';
-                        } else {
-                            seriesCodeElement.value = firstCounter.parent_count?.toString() || '';
-                            codeElement.value = firstCounter.max_child?.toString() || '';
-                        }
-                     } */
-                    if (Array.isArray(counters.data) && counters.data.length === 0) {
-                        seriesCodeElement.value = '1';
-                        codeElement.value = '1';
-                    } else {
-                        const firstCounter = counters.data[0];
-
-                        if (firstCounter.parent_count === null && firstCounter.max_child === null) {
-                            // Verificar que lastCounters no sea null antes de acceder a parent_count
-                            seriesCodeElement.value = counters.lastCounters?.parent_count !== undefined ?
-                                (counters.lastCounters.parent_count + 1).toString() :
-                                '1';
-                            codeElement.value = '1';
-                        } else {
-                            seriesCodeElement.value = firstCounter.parent_count?.toString() || '1';
-                            codeElement.value = firstCounter.max_child?.toString() || '1';
-                        }
-                    }
-                } catch (error) {
-                    console.error('Error al cargar los contadores:', error);
-                }
-            };
-
-            const loadOffices = async () => {
-                try {
-                    const response = await HTTPService.get('/api/dashboard/offices');
-                    offices = response.data;
-                    populateOfficeSelect();
-                } catch (error) {
-                    console.error('Error al cargar las oficinas:', error);
-                }
-            };
-
-            const populateOfficeSelect = () => {
-                const officeSelect = document.querySelector(elements.office_id);
-                if (!officeSelect) return;
+        async function loadOffices(params) {
+            try {
+                const response = await HTTPService.get('/api/dashboard/offices');
+                const officeSelect = document.getElementById('office_id')
 
                 officeSelect.innerHTML = '<option value="">Seleccione una oficina</option>';
-                offices.forEach(office => {
-                    const option = document.createElement('option');
-                    option.value = office.id;
-                    option.textContent = office.name;
-                    officeSelect.appendChild(option);
+
+                response.data.forEach(office => {
+                    officeSelect.innerHTML +=
+                        `<option value="${office.id}">${office.name}</option>`;
                 });
-            };
 
-            const addSubseries = () => {
-                const container = document.querySelector(elements.subseriesContainer);
-                const codeCont = document.querySelector(elements.code);
-                const index = container.children.length;
-                const num = parseInt(codeCont.value);
-                const cont = index + num;
+            } catch (error) {
+                console.error('Error al cargar las oficinas:', error);
+                Helpers.showError('No se pudieron cargar las oficinas.');
+            }
+        }
 
-                const newItem = document.createElement('div');
-                newItem.className = 'subseries-item row pt-3';
-                newItem.innerHTML = `
-                        <div class="col-12 col-md-8">
-                            <label for="name${index}" class="visually-hidden">Nombre de la Subserie</label>
-                            <input type="text" class="form-control" name="subseries[${index}][name]" id="name${index}" placeholder="Nombre de la Subserie" maxlength="100" required>
-                        </div>
-                        <div class="col-12 col-md-2">
-                            <label for="code${index}" class="visually-hidden">Código de la Subserie</label>
-                            <input type="text" class="form-control" name="subseries[${index}][code]" id="code${index}" placeholder="Código de la Subserie" maxlength="10" required value="${cont}" readonly>
-                        </div>
-                        <div class="col-12 col-md-2">
-                            <button type="button" class="btn btn-danger rounded-pill remove-subseries">Eliminar</button>
-                        </div>
-            `;
-                container.appendChild(newItem);
-                const removeButton = newItem.querySelector('.remove-subseries');
-                removeButton.addEventListener('click', () => removeSubseries(newItem));
-            };
-
-            const removeSubseries = (item) => {
-                document.querySelector(elements.subseriesContainer).removeChild(item);
-                updateSubseriesIndexes();
-            };
-
-            const updateSubseriesIndexes = () => {
-                const items = document.querySelector(elements.subseriesContainer).children;
-                Array.from(items).forEach((item, index) => {
-                    const nameInput = item.querySelector('input[name^="subseries"][name$="[name]"]');
-                    const codeInput = item.querySelector('input[name^="subseries"][name$="[code]"]');
-
-                    if (nameInput) {
-                        nameInput.name = `subseries[${index}][name]` || '';
-                        nameInput.id = `name${index}` || '';
-                    }
-                    if (codeInput) {
-                        codeInput.name = `subseries[${index}][code]` || '';
-                        codeInput.id = `code${index}` || '';
-                    }
-                });
-            };
-
-            const createTrd = async (event) => {
-                event.preventDefault();
-                if (isSubmitting) return;
-
-                if ($(elements.seriesForm).valid()) {
-                    isSubmitting = true;
-                    const formData = collectFormData();
-                    try {
-                        const response = await HTTPService.post('/api/dashboard/retencion-documental/store',
-                            formData);
-                        Helpers.getMessage('TRD se creo exitosamente',
-                            '/dashboard/tabla-de-retencion-documental');
-                    } catch (error) {
-                        console.error('Error al guardar la serie:', error);
-                    } finally {
-                        isSubmitting = false;
-                    }
-                }
-            };
-
-            const createSeries = async (event) => {
-                event.preventDefault();
-
-                if (isSubmitting) {
+        async function loadSeries(params) {
+            try {
+                const userData = HTTPService.getUserData();
+                if (!userData.entity_id) {
                     return;
                 }
+                const response = await HTTPService.get(`/api/dashboard/series/${userData.entity_id}`);
 
-                const {
-                    entityId,
-                    seriesName
-                } = elements;
+                const seriesSelect = document.getElementById('series_entity_id');
+                seriesSelect.innerHTML = '<option value="">Seleccione una serie</option>';
 
-                if ($(elements.formSeries).valid()) {
-                    const form = document.querySelector(elements.formSeries);
-                    const formData = new FormData(form);
-                    const formDataObject = Object.fromEntries(formData);
-
-                    try {
-                        const response = await HTTPService.post('/api/dashboard/series/store',
-                            formDataObject);
-                        console.log('Respuesta del servidor:', response);
-
-                        loadSeries();
-                        $('#centermodal').modal('hide');
-                    } catch (error) {
-                        console.error('Error al crear la serie:', error);
-                    } finally {
-                        isSubmitting = false;
-                    }
+                if (Array.isArray(response.data)) {
+                    response.data.forEach(series => {
+                        seriesSelect.innerHTML +=
+                            `<option value="${series.id}">${series.series_name}</option>`;
+                    });
+                } else {
+                    console.error('La respuesta no es un array:', response.data);
                 }
-            };
+            } catch (error) {
+                console.error('Error al cargar las series:', error);
+            }
+        }
 
-            const collectFormData = () => {
+        document.getElementById('series_entity_id').addEventListener('change', e =>
+            document.getElementById('series_code').value = e.target.value
+        );
 
-                const subseriesInputs = document.querySelectorAll('input[name^="subseries"]');
-                const subseries = [];
-                subseriesInputs.forEach(input => {
-                    const match = input.name.match(/subseries\[(\d+)\]\[(\w+)\]/);
-                    if (match) {
-                        const index = parseInt(match[1]);
-                        const property = match[2];
-                        if (!subseries[index]) subseries[index] = {};
-                        subseries[index][property] = input.value;
-                    }
-                });
+        async function save() {
 
-                const dispositionTypes = Array.from(document.querySelectorAll(
-                        'input[name="disposition_type"]:checked'))
-                    .map(input => input.value);
-
-                const documentaryTypes = Array.from(document.querySelectorAll(
-                        'input[name="documentary_types"]:checked'))
-                    .map(input => input.value);
-
-                const entityId = HTTPService.getEntityId();
-
-                return {
-                    office_id: document.querySelector(elements.office_id).value,
-                    series_entity_id: document.querySelector(elements.series_entity_id).value,
-                    series_code: document.querySelector(elements.series_code).value,
-                    subseries: subseries.filter(Boolean),
-                    disposition_type: dispositionTypes,
-                    administrative_retention: document.querySelector(elements.administrative_retention).value,
-                    central_retention: document.querySelector(elements.central_retention).value,
-                    disposal_procedure: document.querySelector(elements.observations).value,
-                    documentary_types: documentaryTypes,
-                    entity_id: entityId.entity_id,
-                };
-            };
-
-            const setupValidation = () => {
-                $.validator.setDefaults({
-                    errorClass: 'is-invalid',
-                    validClass: 'is-valid',
-                    errorElement: 'div',
-                    errorPlacement: function(error, element) {
-                        error.addClass('invalid-feedback');
-                        element.closest('.form-group').append(error);
-                    },
-                    highlight: function(element, errorClass, validClass) {
-                        $(element).addClass(errorClass).removeClass(validClass);
-                    },
-                    unhighlight: function(element, errorClass, validClass) {
-                        $(element).removeClass(errorClass).addClass(validClass);
-                    }
-                });
-
-                $(elements.seriesForm).validate({
-                    rules: {
-                        office_id: 'required',
-                        series_entity_id: 'required',
-                        series_code: {
-                            required: true,
-                            maxlength: 10
-                        },
-                        'subseries[0][name]': {
-                            required: true,
-                            maxlength: 100
-                        },
-                        'subseries[0][code]': {
-                            required: true,
-                            maxlength: 10
-                        },
-                        administrative_retention: {
-                            required: true,
-                            number: true
-                        },
-                        central_retention: {
-                            required: true,
-                            number: true
-                        },
-                        'disposition_type[]': 'required',
-                        'documentary_types[]': 'required'
-                    },
-                    messages: {
-                        office_id: 'Por favor, seleccione una oficina',
-                        series_entity_id: 'Por favor, seleccione una serie',
-                        series_code: {
-                            required: 'Por favor, ingrese el código de la serie',
-                            maxlength: 'El código de la serie no debe exceder los 10 caracteres'
-                        },
-                        'subseries[0][name]': {
-                            required: 'Por favor, ingrese el nombre de la subserie',
-                            maxlength: 'El nombre de la subserie no debe exceder los 100 caracteres'
-                        },
-                        'subseries[0][code]': {
-                            required: 'Por favor, ingrese el código de la subserie',
-                            maxlength: 'El código de la subserie no debe exceder los 10 caracteres'
-                        },
-                        administrative_retention: {
-                            required: 'Por favor, ingrese la retención administrativa',
-                            number: 'Por favor, ingrese un número válido'
-                        },
-                        central_retention: {
-                            required: 'Por favor, ingrese la retención central',
-                            number: 'Por favor, ingrese un número válido'
-                        },
-                        'disposition_type[]': 'Por favor, seleccione al menos un tipo de disposición',
-                        'documentary_types[]': 'Por favor, seleccione al menos un tipo documental'
-                    },
-                    submitHandler: (form, event) => {
-                        event.preventDefault();
-                        createTrd(event);
-                    }
-                });
-
-                $(elements.formSeries).validate({
-                    rules: {
-                        series_name: {
-                            required: true,
-                            maxlength: 100
-                        }
-                    },
-                    messages: {
-                        series_name: {
-                            required: 'Por favor, ingrese el nombre de la serie',
-                            maxlength: 'El nombre de la serie no debe exceder los 100 caracteres'
-                        }
-                    },
-                    submitHandler: (form, event) => {
-                        event.preventDefault();
-                        createSeries(event);
-                    }
-                });
-            };
-
-            const handleOfficeChange = (event) => {
-                const series_entity_id = event.target.value;
-                console.log(series_entity_id)
-                if (series_entity_id) {
-                    loadCounter(series_entity_id);
-                }
-            };
-
-            const loadSeries = async () => {
-                try {
-                    const userData = HTTPService.getUserData();
-                    if (!userData) {
-                        return;
-                    }
-                    const response = await HTTPService.get(`/api/dashboard/series/${userData.entity_id}`);
-
-                    const seriesSelect = document.querySelector(elements.series_entity_id);
-                    seriesSelect.innerHTML = '<option value="">Seleccione una serie</option>';
-
-                    if (Array.isArray(response.data)) {
-                        response.data.forEach(series => {
-                            seriesSelect.innerHTML +=
-                                `<option value="${series.id}">${series.series_name}</option>`;
-                        });
-                    } else {
-                        console.error('La respuesta no es un array:', response.data);
-                    }
-                } catch (error) {
-                    console.error('Error al cargar las series:', error);
-                }
-            };
-
-            // Initialize when DOM is ready
-            $(document).ready(() => {
-                setupValidation();
-                loadOffices();
-                loadSeries();
-
+            try {
                 const userData = HTTPService.getUserData();
-                console.log('User Data:', userData.entity_id);
+                let office_id = document.getElementById("office_id").value;
+                let series_entity_id = document.getElementById("series_entity_id").value;
+                let administrative_retention = document.getElementById("administrative_retention").value;
+                let series_code = document.getElementById("series_code").value;
+                let central_retention = document.getElementById("central_retention").value;
+                let disposal_procedure = document.getElementById("observations").value;
+                let entity_id = userData.entity_id
+                const disposition_type = Array.from(document.querySelectorAll(
+                        'input[name="disposition_type[]"]:checked'))
+                    .map(checkbox => checkbox.value);
 
-                // Set up event listeners
-                document.querySelector(elements.addSubseriesButton).addEventListener('click', addSubseries);
-                document.querySelector(elements.series_entity_id).addEventListener('change',
-                    handleOfficeChange);
-                document.querySelector(elements.entityId).value = userData.entity_id || '';
-                document.querySelector(elements.BtnFormSeries).addEventListener('click', createSeries);
+                const documentary_types = Array.from(document.querySelectorAll(
+                        'input[name="documentary_types[]"]:checked'))
+                    .map(checkbox => checkbox.value);
+
+                /* const response = await HTTPService.post('/api/dashboard/retencion-documental/store', {
+                    office_id,
+                    series_entity_id,
+                    administrative_retention,
+                    series_code,
+                    central_retention,
+                    disposition_type,
+                    documentary_types,
+                    disposal_procedure,
+                    entity_id
+                }); */
+
+                let data = {
+                    office_id,
+                    series_entity_id,
+                    administrative_retention,
+                    series_code,
+                    central_retention,
+                    disposition_type,
+                    documentary_types,
+                    disposal_procedure,
+                    entity_id
+                }
+
+                console.log(data)
+
+                // Helpers.getMessage('TRD se creo exitosamente', '/dashboard/tabla-de-retencion-documental');
+
+            } catch (error) {
+                console.error('Error al almacenar el TRD', error);
+                alert("Hubo un error al registrar el TRD.");
+            }
+        }
+
+        $(document).ready(function() {
+            $("#seriesForm").validate({ // Changed to seriesForm as per HTML ID
+                rules: {
+                    office_id: 'required',
+                    series_entity_id: 'required',
+                    series_code: {
+                        required: true,
+                        maxlength: 10
+                    },
+                    administrative_retention: {
+                        required: true,
+                        number: true,
+                        min: 0
+                    },
+                    central_retention: {
+                        required: true,
+                        number: true,
+                        min: 0
+                    },
+                    'disposition_type[]': {
+                        required: true,
+                        minlength: 1
+                    },
+                    'documentary_types[]': {
+                        required: true,
+                        minlength: 1
+                    }
+                },
+                messages: {
+                    office_id: 'Por favor, seleccione una oficina.',
+                    series_entity_id: 'Por favor, seleccione un nombre de serie.',
+                    administrative_retention: 'Ingrese un número válido para la retención (ej: 5).',
+                    central_retention: 'Ingrese un número válido para la retención (ej: 20).',
+                    'disposition_type[]': 'Debe seleccionar al menos un tipo de disposición final.',
+                    'documentary_types[]': 'Debe seleccionar al menos un soporte.'
+                },
+                errorElement: 'div',
+                errorPlacement: (error, element) => {
+                    error.addClass('invalid-feedback');
+                    if (element.is(':checkbox')) {
+                        element.closest('.col-12').append(error);
+                    } else {
+                        element.closest('.col-md-4, .col-md-6').append(error);
+                    }
+                },
+                highlight: (element) => $(element).addClass('is-invalid'),
+                unhighlight: (element) => $(element).removeClass('is-invalid'),
+                submitHandler: function(form) {
+                    save();
+                }
             });
 
-            // Create public API
-            const publicApi = {
-                loadCounter,
-                loadOffices,
-                createTrd,
-                createSeries,
-                setupValidation,
-                loadSeries,
-            };
+        });
 
-            // Expose to window object for inline event handlers
-            window.TrdCreate = publicApi;
 
-            // Return public API for module imports
-            return publicApi;
-        })();
+        loadOffices();
+        loadSeries();
     </script>
 @endsection

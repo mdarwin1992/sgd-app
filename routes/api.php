@@ -136,6 +136,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Retention Documental routes
     Route::get('dashboard/retencion-documental', [RetencionDocumentalController::class, 'index'])->name('api.retencion-documental.index');
     Route::post('dashboard/retencion-documental/store', [RetencionDocumentalController::class, 'store'])->name('api.retencion-documental.store');
+    Route::post('dashboard/retencion-documental/store/storeBatch', [RetencionDocumentalController::class, 'storeBatch'])->name('api.retencion-documental.storeBatch');
     Route::get('dashboard/retencion-documental/{id}', [RetencionDocumentalController::class, 'show'])->name('api.retencion-documental.show');
     Route::patch('dashboard/retencion-documental/update/{id}', [RetencionDocumentalController::class, 'update'])->name('api.retencion-documental.update');
     Route::delete('dashboard/retencion-documental/destroy/{id}', [RetencionDocumentalController::class, 'destroy'])->name('api.retencion-documental.destroy');
@@ -143,7 +144,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Series routes
     Route::post('dashboard/series/store', [SeriesController::class, 'store'])->name('api.series.store');
+    Route::post('dashboard/subseries/store-multiple', [SeriesController::class, 'storeMultiple'])->name('api.series.storeMultiple');
     Route::get('dashboard/series/{id}', [SeriesController::class, 'show'])->name('api.series.show');
+    Route::get('dashboard/series/with-subseries/{entityId}', [SeriesController::class, 'getWithSubseries']);
+    Route::put('/dashboard/subseries/{id}', [SeriesController::class, 'update']);
 
     // Central Archive routes
     Route::get('dashboard/central-archive', [CentralArchiveController::class, 'index'])->name('api.central.archive.index');
